@@ -1,0 +1,11 @@
+!*.log
+!*.txt
+!more-local-language-cases.md
+!test.log
+!*.log
+!references
+!references/*
+!references/**/*
+
+!.windsurf
+!references
