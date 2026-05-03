@@ -1,48 +1,33 @@
-# User Project Workspace
+# 用户项目工作区
 
-This directory is used for storing in-progress projects.
+存放进行中的项目。
 
-## Create a New Project
+## 新建项目
 
 ```bash
 python3 skills/ppt-master/scripts/project_manager.py init my_project --format ppt169
 ```
 
-## Directory Structure
-
-A typical project usually contains the following:
+## 目录结构
 
 ```
 project_name_format_YYYYMMDD/
 ├── README.md
 ├── design_spec.md
-├── sources/
-│   ├── Raw files / URL archives / Converted Markdown
-│   └── *_files/                  # Markdown companion resource directory (e.g., images)
-├── images/                       # Image assets used by the project
-├── notes/
-│   ├── 01_xxx.md
-│   ├── 02_xxx.md
-│   └── total.md
-├── svg_output/
-│   ├── 01_xxx.svg
-│   └── ...
-├── svg_final/
-│   ├── 01_xxx.svg
-│   └── ...
-├── templates/                    # Project-level templates (if any)
-├── *.pptx
-└── image_analysis.csv            # Optional, image scan analysis results
+├── sources/          # 原始文件 / URL 存档 / 转换后的 Markdown 及其附件
+├── images/           # 项目图片素材
+├── notes/            # 工作笔记 (01_xxx.md, total.md 等)
+├── svg_output/       # Executor 生成的 SVG
+├── svg_final/        # 后处理后的最终 SVG
+├── templates/        # 项目级模板（可选）
+├── *.pptx            # 导出的演示文稿
+└── image_analysis.csv  # 图片扫描结果（可选）
 ```
 
-Projects can remain at different stages and do not necessarily have all artifacts at once. For example:
+项目可处于不同阶段，不必包含全部目录。
 
-- Only `sources/` archiving and the Design Specification & Content Outline (design_spec) are complete
-- `svg_output/` has been generated, but post-processing has not yet been executed
-- `svg_final/`, `notes/`, and `*.pptx` are all complete
+## 注意事项
 
-## Notes
-
-- Contents under this directory are excluded by `.gitignore`
-- Completed projects can be moved to the `examples/` directory for sharing
-- Files outside the workspace are copied by default; files within the workspace are moved directly to the project's `sources/`
+- 本目录内容已被 `.gitignore` 排除
+- 完成的项目可移至 `examples/` 分享
+- 工作区外文件默认复制，工作区内文件直接移入 `sources/`
