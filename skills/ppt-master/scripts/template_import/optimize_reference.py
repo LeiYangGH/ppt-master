@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Internal helper: optimize reference SVG files generated from PPTX/PDF exports.
 
 This helper targets reference-quality SVGs used during template reconstruction.

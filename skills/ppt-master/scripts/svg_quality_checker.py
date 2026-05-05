@@ -1,13 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - SVG Quality Check Tool
 
 Checks whether SVG files comply with project technical specifications.
 
 Usage:
-    python3 scripts/svg_quality_checker.py <svg_file>
-    python3 scripts/svg_quality_checker.py <directory>
-    python3 scripts/svg_quality_checker.py --all examples
+    python scripts/svg_quality_checker.py <svg_file>
+    python scripts/svg_quality_checker.py <directory>
+    python scripts/svg_quality_checker.py --all examples
 """
 
 import sys
@@ -780,13 +780,13 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("PPT Master - SVG Quality Check Tool\n")
         print("Usage:")
-        print("  python3 scripts/svg_quality_checker.py <svg_file>")
-        print("  python3 scripts/svg_quality_checker.py <directory>")
-        print("  python3 scripts/svg_quality_checker.py --all examples")
+        print("  python scripts/svg_quality_checker.py <svg_file>")
+        print("  python scripts/svg_quality_checker.py <directory>")
+        print("  python scripts/svg_quality_checker.py --all examples")
         print("\nExamples:")
-        print("  python3 scripts/svg_quality_checker.py examples/project/svg_output/slide_01.svg")
-        print("  python3 scripts/svg_quality_checker.py examples/project/svg_output")
-        print("  python3 scripts/svg_quality_checker.py examples/project")
+        print("  python scripts/svg_quality_checker.py examples/project/svg_output/slide_01.svg")
+        print("  python scripts/svg_quality_checker.py examples/project/svg_output")
+        print("  python scripts/svg_quality_checker.py examples/project")
         sys.exit(0)
 
     checker = SVGQualityChecker()

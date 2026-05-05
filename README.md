@@ -114,38 +114,18 @@ Quick version: download Python from [python.org](https://www.python.org/download
 <details>
 <summary><strong>macOS / Linux</strong> — install and go</summary>
 
-```bash
+```powershell
 # macOS
 brew install python
 pip install -r requirements.txt
 
 # Ubuntu / Debian
-sudo apt install python3 python3-pip
+sudo apt install python python3-pip
 pip install -r requirements.txt
 ```
 </details>
 
 <details>
-<summary><strong>Edge-case fallbacks</strong> — 99% of users don't need these</summary>
-
-Two external tools exist as fallbacks for edge cases. **Most users will never need them** — install only if you hit one of the specific scenarios below.
-
-| Fallback | Install only if… |
-|----------|-----------------|
-| [Node.js](https://nodejs.org/) 18+ | You need to import WeChat Official Account articles **and** `curl_cffi` (part of `requirements.txt`) has no prebuilt wheel for your Python + OS + CPU combination. In normal setups `web_to_md.py` handles WeChat directly through `curl_cffi`. |
-| [Pandoc](https://pandoc.org/) | You need to convert legacy formats: `.doc`, `.odt`, `.rtf`, `.tex`, `.rst`, `.org`, or `.typ`. `.docx`, `.html`, `.epub`, `.ipynb` are handled natively by Python — no pandoc required. |
-
-```bash
-# macOS (only if the above conditions apply)
-brew install node
-brew install pandoc
-
-# Ubuntu / Debian
-sudo apt install nodejs npm
-sudo apt install pandoc
-```
-</details>
-
 ### 2. Pick an Agent
 
 PPT Master runs in **any tool with agent capability** — read/write files, execute commands, and sustain multi-turn conversation.
@@ -177,7 +157,7 @@ Then install dependencies:
 pip install -r requirements.txt
 ```
 
-To update later (Option B only): `python3 skills/ppt-master/scripts/update_repo.py`
+To update later (Option B only): `python skills/ppt-master/scripts/update_repo.py`
 
 ### 4. Create
 
@@ -213,8 +193,8 @@ The AI handles everything — content analysis, visual design, SVG generation, a
 
 ### 5. AI Image Generation (Optional)
 
-```bash
-cp .env.example .env    # then edit with your API key
+```powershell
+Copy-Item .env.example .env    # then edit with your API key
 ```
 
 ```env
@@ -223,7 +203,7 @@ OPENAI_API_KEY=sk-xxx
 OPENAI_MODEL=gpt-image-2
 ```
 
-Multiple backends are supported across Core / Extended / Experimental tiers. Run `python3 skills/ppt-master/scripts/image_gen.py --list-backends` to see the full list. Environment variables override `.env`. Use provider-specific keys (`OPENAI_API_KEY`, `GEMINI_API_KEY`, etc.) — global `IMAGE_API_KEY` is not supported.
+Multiple backends are supported across Core / Extended / Experimental tiers. Run `python skills/ppt-master/scripts/image_gen.py --list-backends` to see the full list. Environment variables override `.env`. Use provider-specific keys (`OPENAI_API_KEY`, `GEMINI_API_KEY`, etc.) — global `IMAGE_API_KEY` is not supported.
 
 > **Tip:** `gpt-image-2` currently delivers the best overall quality. Gemini is also supported — download full size and remove the watermark with `scripts/gemini_watermark_remover.py`.
 

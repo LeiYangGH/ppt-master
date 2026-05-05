@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Internal helper: extract inline SVG images into external asset files.
 
 This tool is the inverse of svg_finalize/embed_images.py. It is useful when

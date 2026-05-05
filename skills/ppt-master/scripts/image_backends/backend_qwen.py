@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Alibaba Cloud Qwen image generation backend.
 

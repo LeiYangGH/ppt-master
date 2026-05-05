@@ -197,15 +197,15 @@ Templates use `{{PLACEHOLDER}}` format to mark replaceable content:
 
 ### Copy from Template Library to Project
 
-```bash
+```powershell
 # Copy exhibit style template to project
-cp templates/layouts/exhibit/* projects/<project>/templates/
+Copy-Item "templates/layouts/exhibit/*" -Destination "projects/<project>/templates/"
 
 # Copy Google style template to project
-cp templates/layouts/google_style/* projects/<project>/templates/
+Copy-Item "templates/layouts/google_style/*" -Destination "projects/<project>/templates/"
 
 # Copy government style template to project (e.g., government red)
-cp templates/layouts/government_red/* projects/<project>/templates/
+Copy-Item "templates/layouts/government_red/*" -Destination "projects/<project>/templates/"
 ```
 
 ### After Copying
@@ -226,7 +226,7 @@ cp templates/layouts/government_red/* projects/<project>/templates/
 3. Ensure `design_spec.md` follows the standard chapter structure
 4. All SVGs use `viewBox="0 0 1280 720"`
 5. Follow SVG technical constraints (see below)
-6. Validate the template directory with `python3 scripts/svg_quality_checker.py templates/layouts/<template_name> --format ppt169`
+6. Validate the template directory with `python scripts/svg_quality_checker.py templates/layouts/<template_name> --format ppt169`
 7. Register the new template in `templates/layouts/layouts_index.json` with three fields: `label`, `summary`, `keywords`
 
 `layouts_index.json` is the lightweight lookup used when a user explicitly opts into the template flow. A template folder without an index entry will not be discoverable by that flow.

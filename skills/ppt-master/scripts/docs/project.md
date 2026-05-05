@@ -7,10 +7,10 @@ Project tools create, validate, and inspect the standard PPT Master workspace.
 Main entry point for project setup and validation.
 
 ```bash
-python3 scripts/project_manager.py init <project_name> --format ppt169
-python3 scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...]
-python3 scripts/project_manager.py validate <project_path>
-python3 scripts/project_manager.py info <project_path>
+python scripts/project_manager.py init <project_name> --format ppt169
+python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...]
+python scripts/project_manager.py validate <project_path>
+python scripts/project_manager.py info <project_path>
 ```
 
 Notes:
@@ -33,9 +33,9 @@ Common formats:
 Examples:
 
 ```bash
-python3 scripts/project_manager.py init my_presentation --format ppt169
-python3 scripts/project_manager.py validate projects/my_presentation_ppt169_20251116
-python3 scripts/project_manager.py info projects/my_presentation_ppt169_20251116
+python scripts/project_manager.py init my_presentation --format ppt169
+python scripts/project_manager.py validate projects/my_presentation_ppt169_20251116
+python scripts/project_manager.py info projects/my_presentation_ppt169_20251116
 ```
 
 ## `project_utils.py`
@@ -51,7 +51,7 @@ from project_utils import get_project_info, validate_project_structure
 You can also run it directly for quick checks:
 
 ```bash
-python3 scripts/project_utils.py <project_path>
+python scripts/project_utils.py <project_path>
 ```
 
 ## `batch_validate.py`
@@ -59,10 +59,10 @@ python3 scripts/project_utils.py <project_path>
 Batch-check project structure and compliance.
 
 ```bash
-python3 scripts/batch_validate.py examples
-python3 scripts/batch_validate.py examples projects
-python3 scripts/batch_validate.py --all
-python3 scripts/batch_validate.py examples --export
+python scripts/batch_validate.py examples
+python scripts/batch_validate.py examples projects
+python scripts/batch_validate.py --all
+python scripts/batch_validate.py examples --export
 ```
 
 Use this for repository-wide health checks before release or cleanup.
@@ -72,8 +72,8 @@ Use this for repository-wide health checks before release or cleanup.
 Rebuild `examples/README.md` automatically.
 
 ```bash
-python3 scripts/generate_examples_index.py
-python3 scripts/generate_examples_index.py examples
+python scripts/generate_examples_index.py
+python scripts/generate_examples_index.py examples
 ```
 
 ## `pptx_template_import.py`
@@ -81,11 +81,11 @@ python3 scripts/generate_examples_index.py examples
 Unified PPTX preparation entry point for `/create-template`.
 
 ```bash
-python3 scripts/pptx_template_import.py <template.pptx>
-python3 scripts/pptx_template_import.py <template.pptx> -o <output_dir>
-python3 scripts/pptx_template_import.py <template.pptx> --manifest-only
-python3 scripts/pptx_template_import.py <template.pptx> --keep-raw
-python3 scripts/pptx_template_import.py <template.pptx> --skip-manifest
+python scripts/pptx_template_import.py <template.pptx>
+python scripts/pptx_template_import.py <template.pptx> -o <output_dir>
+python scripts/pptx_template_import.py <template.pptx> --manifest-only
+python scripts/pptx_template_import.py <template.pptx> --keep-raw
+python scripts/pptx_template_import.py <template.pptx> --skip-manifest
 ```
 
 Notes:
@@ -109,7 +109,7 @@ Implementation note:
 Show standardized fixes for common project errors.
 
 ```bash
-python3 scripts/error_helper.py
-python3 scripts/error_helper.py missing_readme
-python3 scripts/error_helper.py missing_readme project_path=my_project
+python scripts/error_helper.py
+python scripts/error_helper.py missing_readme
+python scripts/error_helper.py missing_readme project_path=my_project
 ```

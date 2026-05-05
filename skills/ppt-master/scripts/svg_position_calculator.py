@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - SVG Position Calculation and Validation Tool
 

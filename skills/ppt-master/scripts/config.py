@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - Unified Configuration Management Module
 
@@ -585,11 +585,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("PPT Master - Configuration Management Tool\n")
         print("Usage:")
-        print("  python3 scripts/config.py list-formats     # List all canvas formats")
-        print("  python3 scripts/config.py list-colors      # List all color schemes")
-        print("  python3 scripts/config.py list-industries  # List all industry colors")
-        print("  python3 scripts/config.py export           # Export configuration to JSON")
-        print("  python3 scripts/config.py format <key>     # View a specific canvas format")
+        print("  python scripts/config.py list-formats     # List all canvas formats")
+        print("  python scripts/config.py list-colors      # List all color schemes")
+        print("  python scripts/config.py list-industries  # List all industry colors")
+        print("  python scripts/config.py export           # Export configuration to JSON")
+        print("  python scripts/config.py format <key>     # View a specific canvas format")
         return
 
     command = sys.argv[1]

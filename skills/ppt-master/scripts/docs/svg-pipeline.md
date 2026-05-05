@@ -7,9 +7,9 @@ These tools cover post-processing, SVG validation, speaker notes, and PPTX expor
 Run these steps in order:
 
 ```bash
-python3 scripts/total_md_split.py <project_path>
-python3 scripts/finalize_svg.py <project_path>
-python3 scripts/svg_to_pptx.py <project_path> -s final
+python scripts/total_md_split.py <project_path>
+python scripts/finalize_svg.py <project_path>
+python scripts/svg_to_pptx.py <project_path> -s final
 ```
 
 ## `finalize_svg.py`
@@ -29,13 +29,13 @@ It aggregates:
 Convert project SVGs into PPTX.
 
 ```bash
-python3 scripts/svg_to_pptx.py <project_path> -s final
-python3 scripts/svg_to_pptx.py <project_path> -s final --only native
-python3 scripts/svg_to_pptx.py <project_path> -s final --only legacy
-python3 scripts/svg_to_pptx.py <project_path> -s final --no-notes
-python3 scripts/svg_to_pptx.py <project_path> -t none
-python3 scripts/svg_to_pptx.py <project_path> -s final --auto-advance 3
-python3 scripts/svg_to_pptx.py <project_path> -s final --animation mixed --animation-duration 0.8
+python scripts/svg_to_pptx.py <project_path> -s final
+python scripts/svg_to_pptx.py <project_path> -s final --only native
+python scripts/svg_to_pptx.py <project_path> -s final --only legacy
+python scripts/svg_to_pptx.py <project_path> -s final --no-notes
+python scripts/svg_to_pptx.py <project_path> -t none
+python scripts/svg_to_pptx.py <project_path> -s final --auto-advance 3
+python scripts/svg_to_pptx.py <project_path> -s final --animation mixed --animation-duration 0.8
 ```
 
 Behavior:
@@ -64,9 +64,9 @@ pip install python-pptx
 Split `total.md` into per-slide note files.
 
 ```bash
-python3 scripts/total_md_split.py <project_path>
-python3 scripts/total_md_split.py <project_path> -o <output_directory>
-python3 scripts/total_md_split.py <project_path> -q
+python scripts/total_md_split.py <project_path>
+python scripts/total_md_split.py <project_path> -o <output_directory>
+python scripts/total_md_split.py <project_path> -q
 ```
 
 Requirements:
@@ -79,12 +79,12 @@ Requirements:
 Validate SVG technical compliance.
 
 ```bash
-python3 scripts/svg_quality_checker.py examples/project/svg_output/01_cover.svg
-python3 scripts/svg_quality_checker.py examples/project/svg_output
-python3 scripts/svg_quality_checker.py examples/project
-python3 scripts/svg_quality_checker.py examples/project --format ppt169
-python3 scripts/svg_quality_checker.py --all examples
-python3 scripts/svg_quality_checker.py examples/project --export
+python scripts/svg_quality_checker.py examples/project/svg_output/01_cover.svg
+python scripts/svg_quality_checker.py examples/project/svg_output
+python scripts/svg_quality_checker.py examples/project
+python scripts/svg_quality_checker.py examples/project --format ppt169
+python scripts/svg_quality_checker.py --all examples
+python scripts/svg_quality_checker.py examples/project --export
 ```
 
 Checks include:
@@ -102,10 +102,10 @@ Use this after `svg_quality_checker.py` passes, and only for chart types support
 ### Calculate expected coordinates
 
 ```bash
-python3 scripts/svg_position_calculator.py calc bar --data "A:185,B:142" --area "130,155,1200,480" --bar-width 120
-python3 scripts/svg_position_calculator.py calc line --data "0:50,10:80,20:120" --area "120,120,1200,600" --y-range "0,150"
-python3 scripts/svg_position_calculator.py calc pie --data "A:35,B:25,C:20" --center "420,400" --radius 200
-python3 scripts/svg_position_calculator.py calc grid --rows 2 --cols 3 --area "50,150,1230,670"
+python scripts/svg_position_calculator.py calc bar --data "A:185,B:142" --area "130,155,1200,480" --bar-width 120
+python scripts/svg_position_calculator.py calc line --data "0:50,10:80,20:120" --area "120,120,1200,600" --y-range "0,150"
+python scripts/svg_position_calculator.py calc pie --data "A:35,B:25,C:20" --center "420,400" --radius 200
+python scripts/svg_position_calculator.py calc grid --rows 2 --cols 3 --area "50,150,1230,670"
 ```
 
 For an area chart, use the line output as the top boundary:
@@ -119,7 +119,7 @@ Manually compare the calculator output with the coordinates already present in t
 ### Analyze (inspect existing SVG)
 
 ```bash
-python3 scripts/svg_position_calculator.py analyze <svg_file>
+python scripts/svg_position_calculator.py analyze <svg_file>
 ```
 
 Use this after SVG generation to inspect existing SVG geometry when manual comparison needs more context.
@@ -129,16 +129,16 @@ Use this after SVG generation to inspect existing SVG geometry when manual compa
 ### `flatten_tspan.py`
 
 ```bash
-python3 scripts/svg_finalize/flatten_tspan.py examples/<project>/svg_output
-python3 scripts/svg_finalize/flatten_tspan.py path/to/input.svg path/to/output.svg
+python scripts/svg_finalize/flatten_tspan.py examples/<project>/svg_output
+python scripts/svg_finalize/flatten_tspan.py path/to/input.svg path/to/output.svg
 ```
 
 ### `svg_rect_to_path.py`
 
 ```bash
-python3 scripts/svg_finalize/svg_rect_to_path.py <project_path>
-python3 scripts/svg_finalize/svg_rect_to_path.py <project_path> -s final
-python3 scripts/svg_finalize/svg_rect_to_path.py path/to/file.svg
+python scripts/svg_finalize/svg_rect_to_path.py <project_path>
+python scripts/svg_finalize/svg_rect_to_path.py <project_path> -s final
+python scripts/svg_finalize/svg_rect_to_path.py path/to/file.svg
 ```
 
 Use when rounded corners must survive PowerPoint shape conversion.
@@ -146,9 +146,9 @@ Use when rounded corners must survive PowerPoint shape conversion.
 ### `fix_image_aspect.py`
 
 ```bash
-python3 scripts/svg_finalize/fix_image_aspect.py path/to/slide.svg
-python3 scripts/svg_finalize/fix_image_aspect.py 01_cover.svg 02_toc.svg
-python3 scripts/svg_finalize/fix_image_aspect.py --dry-run path/to/slide.svg
+python scripts/svg_finalize/fix_image_aspect.py path/to/slide.svg
+python scripts/svg_finalize/fix_image_aspect.py 01_cover.svg 02_toc.svg
+python scripts/svg_finalize/fix_image_aspect.py --dry-run path/to/slide.svg
 ```
 
 Use when embedded images stretch after PowerPoint shape conversion.
@@ -156,9 +156,9 @@ Use when embedded images stretch after PowerPoint shape conversion.
 ### `embed_icons.py`
 
 ```bash
-python3 scripts/svg_finalize/embed_icons.py output.svg
-python3 scripts/svg_finalize/embed_icons.py svg_output/*.svg
-python3 scripts/svg_finalize/embed_icons.py --dry-run svg_output/*.svg
+python scripts/svg_finalize/embed_icons.py output.svg
+python scripts/svg_finalize/embed_icons.py svg_output/*.svg
+python scripts/svg_finalize/embed_icons.py --dry-run svg_output/*.svg
 ```
 
 Replaces `<use data-icon="chunk-filled/name" .../>`, `<use data-icon="tabler-filled/name" .../>` and `<use data-icon="tabler-outline/name" .../>` placeholders with actual SVG path elements. Use for manual icon embedding checks outside `finalize_svg.py`.

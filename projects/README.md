@@ -5,7 +5,7 @@
 ## 新建项目
 
 ```bash
-python3 skills/ppt-master/scripts/project_manager.py init my_project --format ppt169
+python skills/ppt-master/scripts/project_manager.py init my_project --format ppt169
 ```
 
 ## 目录结构

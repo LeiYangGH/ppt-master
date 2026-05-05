@@ -44,7 +44,7 @@ Use placeholder syntax **during SVG generation**:
 `finalize_svg.py` auto-embeds all placeholders during post-processing. To run manually:
 
 ```bash
-python3 scripts/svg_finalize/embed_icons.py svg_output/*.svg
+python scripts/svg_finalize/embed_icons.py svg_output/*.svg
 ```
 
 ---
@@ -54,9 +54,9 @@ python3 scripts/svg_finalize/embed_icons.py svg_output/*.svg
 Use `ls | grep` — zero token cost:
 
 ```bash
-ls skills/ppt-master/templates/icons/chunk-filled/ | grep home
-ls skills/ppt-master/templates/icons/tabler-filled/ | grep home
-ls skills/ppt-master/templates/icons/tabler-outline/ | grep chart
+Get-ChildItem skills\ppt-master	emplates\icons\chunk-filled\*home*
+Get-ChildItem skills\ppt-master	emplates\icons	abler-filled\*home*
+Get-ChildItem skills\ppt-master	emplates\icons	abler-outline\*chart*
 ls skills/ppt-master/templates/icons/phosphor-duotone/ | grep house
 ls skills/ppt-master/templates/icons/simple-icons/ | grep github
 ```

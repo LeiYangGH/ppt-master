@@ -221,7 +221,7 @@ page_rhythm:
 `finalize_svg.py` 是统一入口，按顺序执行以下步骤：
 
 ```bash
-python3 scripts/finalize_svg.py <project_path>
+python scripts/finalize_svg.py <project_path>
 ```
 
 **处理步骤**：

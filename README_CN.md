@@ -114,38 +114,18 @@ Windows 需要一些额外步骤（PATH 设置、执行策略等）。我们为 
 <details>
 <summary><strong>macOS / Linux</strong> — 安装即用</summary>
 
-```bash
+```powershell
 # macOS
 brew install python
 pip install -r requirements.txt
 
 # Ubuntu / Debian
-sudo apt install python3 python3-pip
+sudo apt install python python3-pip
 pip install -r requirements.txt
 ```
 </details>
 
 <details>
-<summary><strong>边缘场景备用方案</strong> — 99% 的用户用不到</summary>
-
-下面两个外部程序只作为极端场景的兜底。**绝大多数用户根本不需要装**，只有遇到以下具体场景才装：
-
-| 备用方案 | 只在以下情况才装 |
-|---------|-----------------|
-| [Node.js](https://nodejs.org/) 18+ | 你需要抓取微信公众号文章，**且**你的 Python + 系统 + CPU 组合下 `curl_cffi`（`requirements.txt` 里已默认安装）没有预编译 wheel。正常安装下 `web_to_md.py` 已能通过 `curl_cffi` 直接抓微信。 |
-| [Pandoc](https://pandoc.org/) | 你需要转 `.doc`、`.odt`、`.rtf`、`.tex`、`.rst`、`.org`、`.typ` 这些小众格式。`.docx`、`.html`、`.epub`、`.ipynb` 已由 Python 原生处理，不需要 pandoc。 |
-
-```bash
-# macOS（仅在上述条件成立时才装）
-brew install node
-brew install pandoc
-
-# Ubuntu / Debian
-sudo apt install nodejs npm
-sudo apt install pandoc
-```
-</details>
-
 ### 2. 选择一个 Agent
 
 PPT Master 在**任何具备 agent 能力**（可读写文件、执行命令、持续多轮对话）的工具里都能跑。
@@ -181,7 +161,7 @@ cd ppt-master
 pip install -r requirements.txt
 ```
 
-日常更新（仅方式 B）：`python3 skills/ppt-master/scripts/update_repo.py`
+日常更新（仅方式 B）：`python skills/ppt-master/scripts/update_repo.py`
 
 ### 4. 开始创作
 
@@ -217,8 +197,8 @@ AI 全程处理——内容分析、视觉设计、SVG 生成、PPTX 导出。
 
 ### 5. AI 生图配置（可选）
 
-```bash
-cp .env.example .env    # 然后填入你的 API Key
+```powershell
+Copy-Item .env.example .env    # 然后填入你的 API Key
 ```
 
 ```env
@@ -227,7 +207,7 @@ OPENAI_API_KEY=sk-xxx
 OPENAI_MODEL=gpt-image-2
 ```
 
-支持多家后端，按 Core / Extended / Experimental 分级。运行 `python3 skills/ppt-master/scripts/image_gen.py --list-backends` 查看完整清单。环境变量优先于 `.env`。使用各家独立的 Key（`OPENAI_API_KEY`、`GEMINI_API_KEY` 等）——不支持全局 `IMAGE_API_KEY`。
+支持多家后端，按 Core / Extended / Experimental 分级。运行 `python skills/ppt-master/scripts/image_gen.py --list-backends` 查看完整清单。环境变量优先于 `.env`。使用各家独立的 Key（`OPENAI_API_KEY`、`GEMINI_API_KEY` 等）——不支持全局 `IMAGE_API_KEY`。
 
 > **建议：** `gpt-image-2` 目前综合质量最佳。Gemini 同样支持——下载 full size 后可用 `scripts/gemini_watermark_remover.py` 去水印。
 

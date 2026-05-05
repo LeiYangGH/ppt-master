@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Unified PPTX preparation entry point for the /create-template workflow.
 
 This command prepares a reusable reference workspace from a PPTX source. It can:

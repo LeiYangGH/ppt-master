@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - Project Utilities Module
 
@@ -472,4 +472,4 @@ if __name__ == '__main__':
         if is_valid and not warnings:
             print("[OK] Project structure is complete, no issues found")
     else:
-        print("Usage: python3 project_utils.py <project_path>")
+        print("Usage: python project_utils.py <project_path>")

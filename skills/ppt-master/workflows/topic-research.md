@@ -147,9 +147,9 @@ Search for **publicly available, freely usable** images in this priority order:
 
 ### 3.3 Download Process
 
-```bash
+```powershell
 # Create image folder under projects/ (same name as the document)
-mkdir -p "projects/<topic_name>"
+New-Item -ItemType Directory -Force -Path "projects/<topic_name>"
 
 # Download images with descriptive filenames
 curl -L -o "projects/<topic_name>/descriptive_name.jpg" "<image_url>"

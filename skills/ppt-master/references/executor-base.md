@@ -1,100 +1,100 @@
-# Executor Common Guidelines
+# Executor 通用指南
 
-> Style-specific content is in the corresponding `executor-{style}.md`. Technical constraints are in shared-standards.md.
+> 风格专属内容见对应的 `executor-{style}.md`。技术约束见 `shared-standards.md`。
 
 ---
 
-## 1. Template Adherence Rules
+## 1. 模板遵循规则
 
-If `templates/` exists in the project, follow the template structure:
+如果项目中存在 `templates/`，则按模板结构执行：
 
-| Page Type | Corresponding Template | Adherence Rules |
+| 页面类型 | 对应模板 | 遵循规则 |
 |-----------|----------------------|-----------------|
-| Cover | `01_cover.svg` | Inherit background, decorative elements, layout structure; replace placeholder content |
-| Chapter | `02_chapter.svg` | Inherit numbering style, title position, decorative elements |
-| Content | `03_content.svg` | Inherit header/footer styles; **content area may be freely laid out** |
-| Ending | `04_ending.svg` | Inherit background, thank-you message position, contact info layout |
-| TOC | `02_toc.svg` | **Optional**: Inherit TOC title, list styles |
+| 封面 | `01_cover.svg` | 继承背景、装饰元素和版式结构；替换占位内容 |
+| 章节页 | `02_chapter.svg` | 继承编号样式、标题位置和装饰元素 |
+| 内容页 | `03_content.svg` | 继承页眉/页脚样式；**内容区可自由布局** |
+| 结束页 | `04_ending.svg` | 继承背景、感谢语位置和联系方式布局 |
+| 目录页 | `02_toc.svg` | **可选**：继承目录标题和列表样式 |
 
-### Page-Template Mapping Declaration (Required Output)
+### 页面-模板映射声明（必填输出）
 
-Before generating each page, output which template is used:
+每生成一页前，都要输出该页使用的模板：
 
 ```
-📝 **Template mapping**: `templates/01_cover.svg` (or "None (free design)")
-🎯 **Adherence rules / layout strategy**: [specific description]
+📝 **Template mapping**: `templates/01_cover.svg`（或 "None (free design)"）
+🎯 **Adherence rules / layout strategy**: [具体说明]
 ```
 
-- **Content pages**: template defines only header/footer; content area is free
-- **No template**: generate entirely per the Design Spec
+- **内容页**：模板只定义页眉/页脚，内容区自由
+- **无模板**：完全按 Design Spec 生成
 
 ---
 
-## 2. Design Parameter Confirmation (Mandatory Step)
+## 2. 设计参数确认（必做）
 
-Before the first SVG page, output a confirmation listing: canvas dimensions, body font size, color scheme (primary/secondary/accent HEX), font plan. Prevents spec/execution drift.
+在生成第一张 SVG 页面前，先输出一份确认清单：画布尺寸、正文字号、配色方案（primary/secondary/accent HEX）、字体方案。这样可防止规范与执行漂移。
 
-### 2.1 Per-page spec_lock re-read (Mandatory)
+### 2.1 每页重读 `spec_lock.md`（强制）
 
-> Long decks drift off the declared palette/icons mid-deck due to context compression. `spec_lock.md` is the canonical execution reference — re-read it per page to bypass model memory.
+> 长文档在中后段容易因上下文压缩而偏离已声明的配色和图标。`spec_lock.md` 是执行时的唯一基准，每页都要重读。
 
-**Hard rule**: Before generating **each** SVG page, `read_file <project_path>/spec_lock.md`. Use only values from this file, not from memory. If context was auto-compacted, also `read_file <project_path>/design_spec.md` for the current page's §IX brief.
+**硬规则**：生成**每一页** SVG 前，都必须执行 `read_file <project_path>/spec_lock.md`。只能使用文件中的值，不能凭记忆。如果上下文被自动压缩，也要再读一次 `read_file <project_path>/design_spec.md`，查看当前页的 §IX 摘要。
 
-**If `spec_lock.md` is missing**: emit `warning: spec_lock.md missing — generating without execution lock` once, then proceed using `design_spec.md` values. Expected only for legacy projects; new projects MUST have it (see [strategist.md](strategist.md) §6 step 4).
+**如果 `spec_lock.md` 缺失**：输出一次 `warning: spec_lock.md missing — generating without execution lock`，然后改用 `design_spec.md` 中的值继续。理论上只会发生在旧项目；新项目**必须**有这个文件（见 [strategist.md](strategist.md) §6 step 4）。
 
-**Forbidden — values outside the lock**:
+**禁止使用 lock 外的值**：
 
-- Colors (fill / stroke / stop-color) MUST come from `colors`
-- Icons MUST come from `icons.inventory`; library MUST equal `icons.library`
-- Font family from `typography`: use role override (`title_family` / `body_family` / `emphasis_family` / `code_family`) if declared, else fall back to `font_family`
-- Font sizes follow a **ramp anchored on `typography.body`**, not a closed menu. Use the declared slots when they fit. Intermediate sizes (e.g., 40px hero number, 13px annotation) are allowed if the ratio to `body` falls within the role's band (see `design_spec.md §IV ramp table`). Sizes outside every band require extending the lock first.
-- Images MUST reference files listed under `images`; no invented filenames
+- 颜色（`fill` / `stroke` / `stop-color`）必须来自 `colors`
+- 图标必须来自 `icons.inventory`，且图标库必须等于 `icons.library`
+- 字体来自 `typography`：若声明了 `title_family` / `body_family` / `emphasis_family` / `code_family`，则优先使用；否则回退到 `font_family`
+- 字号遵循以 `typography.body` 为锚点的**比例梯度**，不是固定菜单。允许中间值（如 40px 大数字、13px 注释），前提是其与 `body` 的比例落在该角色允许区间内（见 `design_spec.md §IV ramp table`）。超出所有区间时，必须先扩展 lock。
+- 图片只能引用 `images` 中列出的文件，禁止自造文件名
 
-If a page needs a value not in `spec_lock.md`, surface it — do not silently invent one.
+如果某页需要的值不在 `spec_lock.md` 中，必须明确提出，不能默默编造。
 
-**Per-page layout rhythm — `page_rhythm` section**:
+**逐页布局节奏：`page_rhythm` 段**
 
-Before drawing each page, look up its entry in `page_rhythm` (key format `P<NN>` matching the page index in §IX of `design_spec.md`) and apply the corresponding layout discipline:
+每页绘制前，先查 `page_rhythm` 中该页对应的项（key 格式为 `P<NN>`，与 `design_spec.md §IX` 页码一致），并套用对应布局纪律：
 
-| Tag | Layout discipline |
+| 标签 | 布局纪律 |
 |-----|-------------------|
-| `anchor` | Structural page (cover / chapter / TOC / ending). Follow the matching template verbatim. |
-| `dense` | Information-heavy. Card grids, multi-column layouts, KPI dashboards, tables, and charts are all permitted. This is the baseline behavior. |
-| `breathing` | Low-density impact page. Avoid **multi-card grid layouts** — do not organize content as multiple parallel rounded containers (3-card row, 4-card KPI grid, 2×2 matrix rendered as cards). Use naked text blocks, dividers, whitespace, or full-bleed imagery as the content structure. Single rounded visual elements (hero image corners, callouts, tags, one emphasis block) are fine — the rule is about grid structure, not about the `rx` attribute. Proportions follow information weight (not a preset ratio). Typical forms: hero quote, single large number with one-line interpretation, full-bleed image with floating caption, section transition. |
+| `anchor` | 结构页（封面 / 章节 / 目录 / 结束页）。严格按对应模板执行 |
+| `dense` | 信息密集页。允许卡片网格、多列布局、KPI 仪表盘、表格和图表。这是默认模式 |
+| `breathing` | 低密度冲击页。避免**多卡片网格布局**，不要把内容做成多个并列圆角容器（如三卡、四卡 KPI、2×2 卡片矩阵）。应改用裸文本块、分隔线、留白或全幅图片。单个圆角元素（如主图圆角、标签、强调块）可以保留；限制的是网格结构，不是 `rx` 属性。比例由信息权重决定，不套固定比例。典型形式：大引语、单个大数字 + 一句解释、全幅图片 + 浮动说明、章节过渡页 |
 
-> Without rhythm variation, every page defaults to card grids (the "AI-generated" look). `page_rhythm` is the only narrative lever that survives context compression.
+> 如果没有节奏变化，页面很容易全部退化为卡片网格，产生“AI 生成感”。`page_rhythm` 是少数能穿越上下文压缩保留下来的叙事杠杆。
 
-**Missing `page_rhythm` section** → emit `warning: spec_lock.md missing page_rhythm — defaulting all pages to dense` once, fall back to `dense` for all pages.
+**缺少 `page_rhythm` 段** → 输出一次 `warning: spec_lock.md missing page_rhythm — defaulting all pages to dense`，并将所有页面回退为 `dense`。
 
-**Tag not found for current page** → fall back to `dense` silently. Do not invent a tag.
+**当前页找不到标签** → 静默回退为 `dense`，不要自造标签。
 
 ---
 
-## 3. Execution Guidelines
+## 3. 执行规范
 
-- **Proximity**: group related elements with tight spacing; separate unrelated groups
-- **Spec adherence**: follow color, layout, canvas format, and typography in the spec
-- **Template structure**: if templates exist, inherit the visual framework
-- **Main-agent ownership**: SVG generation must run in the main agent (not sub-agents) — pages share upstream context for cross-page visual continuity
-- **Generation rhythm**: lock global design context first, then generate pages sequentially in one continuous context. No batched groups (e.g., 5 at a time).
-- **Phased batch generation** (recommended):
-  1. **Visual Construction Phase**: generate all SVG pages sequentially for visual consistency. Use layout judgment for chart marks during the draft. **MUST embed plot-area markers** per §3.1 below on every chart page — coordinate calibration is a post-generation step (see [`workflows/verify-charts.md`](../workflows/verify-charts.md)) that depends on these markers.
-  2. **Quality Check Gate**: run `python3 scripts/svg_quality_checker.py <project_path>` on `svg_output/`. Any `error` (banned features, viewBox mismatch, spec_lock drift, non-PPT-safe font, etc.) MUST be fixed on the offending page before proceeding — regenerate and re-check. Address `warning`s when straightforward. Do NOT defer to after `finalize_svg.py` — finalize rewrites SVG and masks some violations.
-  3. **Logic Construction Phase**: after SVGs pass the quality check, batch-generate speaker notes for narrative continuity.
+- **接近原则**：相关元素紧凑摆放；无关元素拉开距离
+- **遵循规范**：严格按 spec 中的颜色、布局、画布格式和字体执行
+- **模板继承**：若模板存在，则继承其视觉框架
+- **主代理负责**：SVG 生成必须由主代理执行，不能交给子代理；这样才能保持跨页视觉连续性
+- **生成节奏**：先锁定全局设计上下文，再在同一连续上下文中按页顺序生成；不要分批次（例如每次 5 页）
+- **分阶段批处理**（推荐）：
+  1. **视觉构建阶段**：按顺序生成全部 SVG 页面，以保证视觉一致性。图表初稿阶段可先按布局判断绘制，但**每个图表页都必须嵌入 plot-area marker**（见下文 §3.1）；坐标校准是生成后的独立步骤，依赖这些标记。
+  2. **质量检查关卡**：对 `svg_output/` 运行 `python scripts/svg_quality_checker.py <project_path>`。任何 `error`（禁用特性、viewBox 不匹配、spec_lock 漂移、PPT 不安全字体等）都必须在继续前修复并复检。`warning` 在容易修时也应处理。不要推迟到 `finalize_svg.py` 之后，因为后处理会重写 SVG，掩盖部分问题。
+  3. **逻辑构建阶段**：SVG 全部通过质量检查后，再批量生成演讲备注，以保持叙事连续性。
 
-### 3.1 Chart Plot-Area Marker (MANDATORY on every chart page)
+### 3.1 图表绘图区标记（每个图表页强制）
 
-> The [`verify-charts`](../workflows/verify-charts.md) workflow enumerates chart pages from `design_spec.md §VII`, then reads each page's plot-area marker to feed `svg_position_calculator.py`. Missing marker → verify-charts has to re-derive the plot area from axis lines, paying the cost on every run.
+> [`verify-charts`](../workflows/verify-charts.md) 工作流会根据 `design_spec.md §VII` 找出图表页，再读取各页的 plot-area marker，并把它交给 `svg_position_calculator.py`。如果缺少标记，就只能每次重新从坐标轴反推绘图区。
 
-Every SVG page that contains a data visualization chart MUST include a plot-area marker inside `<g id="chartArea">`, placed **after axis lines** and **before the first data element** (bar, line, area, point).
+每个包含数据图表的 SVG 页面，都必须在 `<g id="chartArea">` 中加入绘图区标记，位置应放在**坐标轴之后**、**第一个数据元素之前**。
 
-**Rectangular plot area** (bar / horizontal_bar / grouped_bar / stacked_bar / line / area / stacked_area / scatter / waterfall / pareto / butterfly):
+**矩形绘图区**（bar / horizontal_bar / grouped_bar / stacked_bar / line / area / stacked_area / scatter / waterfall / pareto / butterfly）：
 
 ```xml
 <!-- chart-plot-area: x_min,y_min,x_max,y_max -->
 ```
 
-**Radial charts** (pie / donut / radar):
+**径向图表**（pie / donut / radar）：
 
 ```xml
 <!-- chart-plot-area: pie | center: cx,cy | radius: r -->
@@ -102,178 +102,180 @@ Every SVG page that contains a data visualization chart MUST include a plot-area
 <!-- chart-plot-area: radar | center: cx,cy | radius: r -->
 ```
 
-**How to determine coordinate values**:
+**坐标值确定方法**：
 
-| Value | Derivation |
+| 值 | 来源 |
 |-------|------------|
-| `x_min` | X coordinate of the Y-axis line (leftmost data boundary) |
-| `y_min` | Y coordinate of the topmost grid line (highest data boundary) |
-| `x_max` | X coordinate of the rightmost axis endpoint or grid line |
-| `y_max` | Y coordinate of the X-axis baseline |
-| `cx, cy` | Center point of pie/donut/radar (accounting for `transform="translate()"`) |
-| `r` | Outer radius of the chart |
+| `x_min` | Y 轴线的 X 坐标（数据区左边界） |
+| `y_min` | 最上方网格线的 Y 坐标（数据区上边界） |
+| `x_max` | 最右侧坐标轴端点或网格线的 X 坐标 |
+| `y_max` | X 轴基线的 Y 坐标 |
+| `cx, cy` | 饼图 / 环图 / 雷达图中心点（需考虑 `transform="translate()"`） |
+| `r` | 图表外半径 |
 
-**Per-page verification** — after writing each chart SVG, confirm the marker exists:
+**逐页验证**：每次写完图表 SVG 后，确认标记存在：
 
 ```bash
 grep "chart-plot-area" <project_path>/svg_output/<current_page>.svg
 ```
 
-> All chart templates in `templates/charts/` include this marker as a reference. If you are drawing a chart and the marker is absent, you have a bug.
-- **Technical specs**: see [shared-standards.md](shared-standards.md) for SVG/PPT constraints
-- **Visual depth — through restraint**: layered depth comes from rhythm (flat vs lifted, dense vs spacious), not from shadows everywhere. Apply shadow to at most 2-3 genuinely floating elements per page (cards on photos, primary CTA, overlays); keep peer-grid cards, dividers, body containers flat. Reach for typography weight, spacing, accent bars, subtle tints **before** shadow. Full rules in shared-standards.md §6.
+> `templates/charts/` 中所有图表模板都带这个标记作为参考。你在画图表却没有它，就说明有 bug。
+- **技术规范**：SVG / PPT 约束见 [shared-standards.md](shared-standards.md)
+- **视觉层次要克制**：层次主要来自节奏（平 vs 浮、密 vs 疏），不是到处加阴影。每页最多只给 2-3 个真正浮起的元素加阴影（如照片上的卡片、主 CTA、覆盖层）；同级卡片网格、分隔线、正文容器应保持平面。优先用字重、留白、强调条和轻底色，而不是阴影。完整规则见 `shared-standards.md §6`。
 
-### SVG File Naming Convention
+### SVG 文件命名规范
 
-Format: `<NN>_<page_name>.svg` (two-digit number from 01; name matches the deck's language and the page title in the Design Spec).
+格式：`<NN>_<page_name>.svg`（两位序号，从 01 开始；文件名语言需与整套 deck 一致，并与 Design Spec 中的页标题匹配）。
 
-Examples: `01_封面.svg` / `02_目录.svg` / `03_核心优势.svg`; `01_cover.svg` / `02_agenda.svg` / `03_key_benefits.svg`.
+示例：`01_封面.svg` / `02_目录.svg` / `03_核心优势.svg`；`01_cover.svg` / `02_agenda.svg` / `03_key_benefits.svg`。
 
 ---
 
-## 4. Icon Usage
+## 4. 图标使用
 
-Strategist chooses the library and inventory; Executor only implements. Library details and one-library rule: [`../templates/icons/README.md`](../templates/icons/README.md). This section defines placeholder syntax.
+Strategist 负责选择图标库和清单；Executor 只负责实现。图标库细节与“单 deck 单图标库”规则见 [`../templates/icons/README.md`](../templates/icons/README.md)。本节只定义占位语法。
 
-**Built-in icons — Placeholder method (recommended)**:
+**内置图标——占位符方式（推荐）**：
 
 ```xml
-<!-- chunk-filled (straight-line geometry, sharp corners, structured) -->
+<!-- chunk-filled（直线几何、锐角、结构感强） -->
 <use data-icon="chunk-filled/home" x="100" y="200" width="48" height="48" fill="#005587"/>
 
-<!-- tabler-filled (bezier-curve forms, smooth & rounded contours) -->
+<!-- tabler-filled（曲线造型，更圆润） -->
 <use data-icon="tabler-filled/home" x="100" y="200" width="48" height="48" fill="#005587"/>
 
-<!-- tabler-outline (light, line-art style — screen-only decks) -->
+<!-- tabler-outline（轻量线稿风，仅适合屏幕型 deck） -->
 <use data-icon="tabler-outline/home" x="100" y="200" width="48" height="48" fill="#005587"/>
 
-<!-- phosphor-duotone (single color + 20% backplate — soft depth without solid weight) -->
+<!-- phosphor-duotone（单色 + 20% 背板，柔和但不厚重） -->
 <use data-icon="phosphor-duotone/house" x="100" y="200" width="48" height="48" fill="#005587"/>
 
-<!-- simple-icons (brand logos — used alongside the deck's primary library, only for real company/product marks) -->
+<!-- simple-icons（品牌 logo，仅用于真实公司/产品标识） -->
 <use data-icon="simple-icons/github" x="100" y="200" width="48" height="48" fill="#181717"/>
 
-<!-- tabler-outline with thin / bold stroke (stroke-style libraries only) -->
+<!-- tabler-outline 可设置细/粗描边（仅线稿库） -->
 <use data-icon="tabler-outline/home" x="100" y="200" width="48" height="48" fill="#005587" stroke-width="1.5"/>
 <use data-icon="tabler-outline/home" x="100" y="200" width="48" height="48" fill="#005587" stroke-width="3"/>
 ```
 
-> ⚠️ **Color**: ALWAYS use `fill="#HEX"` on `<use data-icon="...">`. NEVER use `stroke` or `fill="none"`, even for stroke-style libraries.
+> ⚠️ **颜色**：`<use data-icon="...">` 一律使用 `fill="#HEX"`。即使是线稿库，也**不要**用 `stroke` 或 `fill="none"`。
 >
-> **stroke-width** (stroke-style libraries only, currently `tabler-outline`): allowed values `{1.5, 2, 3}`. If `spec_lock.md icons.stroke_width` is declared, all placeholders MUST use that value deck-wide. Default `2` if absent (legacy). Ignored on non-stroke libraries.
+> **stroke-width**（仅线稿库，目前为 `tabler-outline`）：允许值 `{1.5, 2, 3}`。如果 `spec_lock.md icons.stroke_width` 已声明，则整套 deck 必须统一使用该值；未声明时默认 `2`（兼容旧项目）。非线稿库忽略该属性。
 >
-> Icons are auto-embedded by `finalize_svg.py` — no need to run `embed_icons.py` manually.
+> 图标会由 `finalize_svg.py` 自动嵌入，无需手动运行 `embed_icons.py`。
 
-**Searching for icons** — use terminal, zero token cost:
+**查找图标**——建议用终端，零 token 成本：
 ```bash
-ls skills/ppt-master/templates/icons/chunk-filled/ | grep home
-ls skills/ppt-master/templates/icons/tabler-filled/ | grep home
-ls skills/ppt-master/templates/icons/tabler-outline/ | grep chart
+Get-ChildItem skills\ppt-master	emplates\icons\chunk-filled\*home*
+Get-ChildItem skills\ppt-master	emplates\icons	abler-filled\*home*
+Get-ChildItem skills\ppt-master	emplates\icons	abler-outline\*chart*
 ls skills/ppt-master/templates/icons/phosphor-duotone/ | grep house
 ls skills/ppt-master/templates/icons/simple-icons/ | grep github
 ```
 
-**Abstract concept → icon name** (names for `chunk-filled`; tabler libraries use their own equivalents — verify with `ls | grep`):
+**抽象概念 → 图标名**（`chunk-filled` 命名；tabler 系列请用其对应名并自行 `ls | grep` 验证）：
 
-| Concept | chunk-filled | tabler-filled / tabler-outline |
+| 概念 | chunk-filled | tabler-filled / tabler-outline |
 |---------|-------|-------------------------------|
-| Growth / Increase | `arrow-trend-up` | same |
-| Decline / Decrease | `arrow-trend-down` | same |
-| Success / Complete | `circle-checkmark` | `circle-check` |
-| Warning / Risk | `triangle-exclamation` | `alert-triangle` |
-| Innovation / Idea | `lightbulb` | `bulb` |
-| Strategy / Goal | `target` | same |
-| Efficiency / Speed | `bolt` | same |
-| Collaboration / Team | `users` | same |
-| Settings / Config | `cog` | `settings` |
-| Security / Trust | `shield` | same |
-| Money / Finance | `dollar` | `currency-dollar` |
-| Time / Deadline | `clock` | same |
-| Location / Region | `map-pin` | same |
-| Communication | `comment` | `message` |
-| Analysis / Data | `chart-bar` | same |
-| Process / Flow | `arrows-rotate-clockwise` | `refresh` |
-| Global / World | `globe` | `world` |
-| Excellence / Award | `star` | same |
-| Expand / Scale | `maximize` | same |
-| Problem / Issue | `bug` | same |
+| 增长 / 上升 | `arrow-trend-up` | same |
+| 下滑 / 下降 | `arrow-trend-down` | same |
+| 成功 / 完成 | `circle-checkmark` | `circle-check` |
+| 警告 / 风险 | `triangle-exclamation` | `alert-triangle` |
+| 创新 / 想法 | `lightbulb` | `bulb` |
+| 战略 / 目标 | `target` | same |
+| 效率 / 速度 | `bolt` | same |
+| 协作 / 团队 | `users` | same |
+| 设置 / 配置 | `cog` | `settings` |
+| 安全 / 信任 | `shield` | same |
+| 金钱 / 财务 | `dollar` | `currency-dollar` |
+| 时间 / 截止 | `clock` | same |
+| 地点 / 区域 | `map-pin` | same |
+| 沟通 | `comment` | `message` |
+| 分析 / 数据 | `chart-bar` | same |
+| 流程 / 流转 | `arrows-rotate-clockwise` | `refresh` |
+| 全球 / 世界 | `globe` | `world` |
+| 卓越 / 奖项 | `star` | same |
+| 扩张 / 扩展 | `maximize` | same |
+| 问题 / 缺陷 | `bug` | same |
 
-> For self-evident names (home, user, file, search, arrow, etc.) — just `grep chunk-filled/` directly without consulting the table.
+> 对于 `home`、`user`、`file`、`search`、`arrow` 这类直观名称，直接 `grep` 图标目录即可，不必查表。
 
-> ⚠️ **Icon validation**: only use icons from the Design Spec's approved inventory. Verify each via `ls | grep` before use. Mixing libraries within one deck is FORBIDDEN.
-
----
-
-## 5. Visualization Reference
-
-When the Design Spec includes **VII. Visualization Reference List**, read the referenced templates from `templates/charts/` before drawing those pages.
-
-**Reading is mandatory; copying is not.** On first use of each visualization type listed in §VII, read `templates/charts/<chart_name>.svg`. Use as reference for layout, structure, spacing, visual logic — apply the project's colors, typography, content. Do not improvise from memory; do not replicate verbatim.
-
-> Re-read only when the visualization type changes; reuse for subsequent pages of the same type.
-
-**Adaptation rules**:
-- **Preserve**: visualization type (bar/line/pie/timeline/process/framework…) as specified
-- **Adapt**: data, labels, colors (project scheme), dimensions
-- **Freely adjust**: composition, axis ranges, grid, legend, spacing, decoration — as long as the chart stays accurate and readable
-- **Forbidden**: changing visualization type without spec justification; omitting data points or structural elements from the outline
-
-> Templates: `templates/charts/` (70 types). Index: `templates/charts/charts_index.json`
-
-### 5.1 Chart Coordinate Calibration
-
-Coordinate calibration runs as a **standalone post-generation workflow**, not inside the executor pipeline. After SVG generation completes, if the deck contains data charts, run [`workflows/verify-charts.md`](../workflows/verify-charts.md) before post-processing.
-
-The executor's only obligation here is upstream: embed the `<!-- chart-plot-area ... -->` marker on every chart page during initial draft (§3.1). Verify-charts enumerates chart pages from `design_spec.md §VII` (authoritative deck plan) and uses the marker to feed `svg_position_calculator.py`.
-
-> Do NOT run `svg_position_calculator.py` during the initial draft. The calculator calibrates already-generated SVGs against their declared plot areas; running it before the SVG exists has nothing to compare against.
+> ⚠️ **图标校验**：只能使用 Design Spec 批准清单中的图标。每个图标使用前都要通过 `ls | grep` 验证。**同一 deck 混用多个图标库是禁止的。**
 
 ---
 
-## 6. Image Handling
+## 5. 可视化参考
 
-Handle images by their status in the Design Spec's Image Resource List. Status enum and lifecycle: [`svg-image-embedding.md`](svg-image-embedding.md).
+如果 Design Spec 中包含 **VII. Visualization Reference List**，则在绘制对应页面前，先读取 `templates/charts/` 中指定的模板。
 
-| Status | Source | Handling |
+**必须读取，但不能照抄。** 每种在 §VII 中首次出现的图表类型，第一次使用前都要读取 `templates/charts/<chart_name>.svg`。它只用于参考布局、结构、间距和视觉逻辑；实际绘制时要替换为项目自己的配色、字体和内容。不要凭记忆发挥，也不要逐字复制。
+
+> 只有在图表类型变化时才需要重新读取；同类型后续页面可复用理解。
+
+**适配规则**：
+- **必须保留**：图表类型（柱图 / 折线 / 饼图 / 时间线 / 流程 / 框架等）
+- **需要适配**：数据、标签、颜色（项目配色）、尺寸
+- **可自由调整**：构图、坐标范围、网格、图例、间距、装饰，只要图表仍准确且可读
+- **禁止**：没有规范依据就更换图表类型；删除提纲中的数据点或结构元素
+
+> 模板目录：`templates/charts/`（70 种）。索引：`templates/charts/charts_index.json`
+
+### 5.1 图表坐标校准
+
+坐标校准是**独立的生成后工作流**，不属于 executor 主流程。SVG 全部生成后，如果 deck 中含数据图表，应在后处理前运行 [`workflows/verify-charts.md`](../workflows/verify-charts.md)。
+
+Executor 在这里唯一的上游义务，是在初稿阶段就为每个图表页嵌入 `<!-- chart-plot-area ... -->` 标记（见 §3.1）。`verify-charts` 会根据 `design_spec.md §VII` 找到图表页，并用该标记驱动 `svg_position_calculator.py`。
+
+> 不要在初稿阶段运行 `svg_position_calculator.py`。该工具用于校准**已生成好的** SVG，如果 SVG 还不存在，就无从比较。
+
+---
+
+## 6. 图片处理
+
+按 Design Spec 中图片资源清单的状态处理图片。状态定义及生命周期见 [`svg-image-embedding.md`](svg-image-embedding.md)。
+
+| 状态 | 来源 | 处理方式 |
 |--------|--------|----------|
-| **Existing** | User-provided | Reference images directly from `../images/` directory |
-| **Generated** | Generated by Image_Generator | Reference images directly from `../images/` directory |
-| **Needs-Manual** | Generation failed and file is absent | Use dashed border placeholder unless the expected file exists |
-| **Placeholder** | Not yet prepared | Use dashed border placeholder |
+| **Existing** | 用户提供 | 直接从 `../images/` 引用 |
+| **Generated** | Image_Generator 生成 | 直接从 `../images/` 引用 |
+| **Needs-Manual** | 生成失败且文件不存在 | 若预期文件不存在，则使用虚线占位框 |
+| **Placeholder** | 暂未准备 | 使用虚线占位框 |
 
-**Reference syntax**: see [`svg-image-embedding.md`](svg-image-embedding.md).
+**引用语法**：见 [`svg-image-embedding.md`](svg-image-embedding.md)
 
-**Placeholder**: Dashed border `<rect stroke-dasharray="8,4" .../>` + description text
-
----
-
-## 7. Font Usage
-
-Source of truth: `spec_lock.md typography`. Use `font_family` as default; override per role with `title_family` / `body_family` / `emphasis_family` / `code_family` if declared.
-
-If `spec_lock.md` is absent, consult [`strategist.md`](strategist.md) §g — do not invent a stack.
-
-**Hard rule**: every SVG `font-family` stack MUST end with a pre-installed family (Microsoft YaHei / SimHei / SimSun / Arial / Calibri / Segoe UI / Times New Roman / Georgia / Consolas / Courier New / Impact / Arial Black). PPTX has no runtime fallback — missing fonts degrade to Calibri.
+**占位方式**：虚线边框 `<rect stroke-dasharray="8,4" .../>` + 描述文本
 
 ---
 
-## 8. Speaker Notes Generation Framework
+## 7. 字体使用
 
-### Task 1. Generate Complete Speaker Notes Document
+唯一依据：`spec_lock.md typography`。默认使用 `font_family`；如果声明了 `title_family` / `body_family` / `emphasis_family` / `code_family`，则按角色覆盖。
 
-After all SVG pages are finalized, enter Logic Construction Phase and write the full notes to `notes/total.md`. Batch-writing (not per-page) lets transitions plan coherently.
+如果 `spec_lock.md` 缺失，请参考 [`strategist.md`](strategist.md) §g，**不要自己编造字体栈**。
 
-**Language rule (read first)**: all structural labels and stage direction markers MUST match the deck's content language. Never mix English labels with non-English body text. Pick the matching example block below; do not copy across languages.
+**硬规则**：每个 SVG 的 `font-family` 栈都必须以一个系统已预装字体结尾，例如：`Microsoft YaHei / SimHei / SimSun / Arial / Calibri / Segoe UI / Times New Roman / Georgia / Consolas / Courier New / Impact / Arial Black`。PPTX 没有运行时字体回退；缺字时通常会退化成 Calibri。
 
-**Per-page structure**: `# <number>_<page_title>` heading, pages separated by `---`. Each page contains:
-- A 2–5 sentence script (conversational tone, highlights the page's core info).
-- A `Key points` line listing 1–3 concrete points numbered ①②③ — fill in real content, do not leave the circled numbers as placeholders.
-- A `Duration` line with a single concrete number (e.g. `2分钟` / `2 minutes`), not a range and not the literal `X`.
-- Every page after the first opens with a `[Transition]` (or its localized form) standalone phrase that bridges from the previous page.
+---
 
-**Concrete examples — copy the one matching your deck language.**
+## 8. 演讲备注生成框架
 
-中文 deck（标签必须本地化）：
+### 任务 1：生成完整备注文档
+
+所有 SVG 页面完成后，进入逻辑构建阶段，把完整备注写入 `notes/total.md`。备注应**整批生成**，不要逐页零散写，这样过渡语才会连贯。
+
+**语言规则（先看）**：当前场景只使用中文。所有结构标签和舞台提示标记都必须使用中文，不要混入英文标签。
+
+**每页结构**：
+
+- 标题格式：`# <number>_<page_title>`
+- 页面之间用 `---` 分隔
+- 每页包含：
+  - 2–5 句讲稿，语气自然，聚焦本页核心信息
+  - 一行 `要点：`，列出 1–3 个具体要点，使用 ①②③ 编号；必须填真实内容，不能只留圈号
+  - 一行 `时长：`，写一个明确数字（如 `2分钟`），不能写区间，也不能写 `X`
+  - 第一页之外的每页，都必须以独立的 `[过渡]` 开头，承接上一页
+
+**示例**
 
 ```
 # 02_市场格局
@@ -285,66 +287,36 @@ After all SVG pages are finalized, enter Logic Construction Phase and write the 
 时长：2分钟
 ```
 
-英文 deck（labels stay English）：
+**常见错误**：
+- 直接写 `① ② ③`，却不填真实内容
+- 写成 `时长：1-2分钟` 这种区间，而不是一个明确数值
+- 正文是中文，却把 `[过渡]`、`要点：`、`时长：` 写成英文
 
-```
-# 02_market_landscape
+### 任务 2：拆分为逐页备注文件
 
-[Transition] Having framed the industry backdrop, let's look at the actual market landscape.
-Online retail concentration keeps rising — the top three platforms now hold 68% combined share. Mid-tier players are being squeezed fast, and the window for new entrants is under 18 months. This means our strategy has to focus, not spread.
+把 `notes/total.md` 自动拆分为 `notes/` 目录下的逐页文件。
 
-Key points: ① The 68% concentration fact ② The 18-month window ③ Focus beats breadth
-Duration: 2 minutes
-```
-
-> 日本語 / 한국어 / 其他语言：照搬上方结构，但所有标签换成对应语言的自然表达。**不要把英文标签留在非英文正文里。**
-
-**Marker reference table** (for translation; not a format template):
-
-| Marker | Purpose | 中文 | 日本語 | 한국어 |
-|--------|---------|------|--------|--------|
-| `[Transition]` | Standalone bridge phrase opening each page after the first | `[过渡]` | `[つなぎ]` | `[전환]` |
-| `[Pause]` | Whitespace after key content, letting the audience absorb | `[停顿]` | `[間]` | `[멈춤]` |
-| `[Interactive]` | Prompt audience interaction | `[互动]` | `[問いかけ]` | `[상호작용]` |
-| `[Data]` | Call out a data point | `[数据]` | `[データ]` | `[데이터]` |
-| `[Scan Room]` | Observe room/audience | `[观察]` | `[観察]` | `[관찰]` |
-| `[Benchmark]` | Reference a benchmark | `[对标]` | `[ベンチマーク]` | `[벤치마크]` |
-| `Key points:` | Numbered key points line | `要点：` | `要点：` | `핵심 포인트:` |
-| `Duration:` | Concrete time spent on the page | `时长：` | `所要時間：` | `소요 시간:` |
-| `Flex:` | Optional flex/adjust note | `弹性：` | `調整：` | `조정:` |
-
-> Each style may extend with additional markers — see `executor-{style}.md`. For languages not listed, translate each label to the natural term in that language.
-
-**Common mistakes to avoid**:
-- Copying `① ② ③` verbatim without filling in real points.
-- Writing `Duration: X minutes` or a range like `1-2 minutes` instead of one concrete number.
-- Leaving `[Transition]` / `Key points:` / `Duration:` in English while the body is Chinese (or any other language mismatch).
-
-### Task 2. Split Into Per-Page Note Files
-
-Auto-split `notes/total.md` into per-page files in `notes/`.
-
-**Naming**: match SVG names (`01_cover.svg` → `notes/01_cover.md`); `slide01.md` also supported (legacy).
+**命名规则**：与 SVG 文件名对应，如：`01_cover.svg` → `notes/01_cover.md`；也兼容旧格式 `slide01.md`。
 
 ---
 
-## 9. Next Steps After Completion
+## 9. 完成后的下一步
 
-> **Auto-continuation**: After Visual Construction Phase (all SVG pages) and Logic Construction Phase (all notes) are complete, the Executor proceeds directly to the post-processing pipeline.
+> **自动续跑**：当视觉构建阶段（全部 SVG）和逻辑构建阶段（全部备注）完成后，Executor 直接进入后处理流程。
 
-**Post-processing & Export** (same canonical pipeline as [shared-standards.md §5](shared-standards.md)):
+**后处理与导出**（与 [shared-standards.md §5](shared-standards.md) 相同）：
 
 ```bash
-# 1. Split speaker notes
-python3 scripts/total_md_split.py <project_path>
+# 1. 拆分备注
+python scripts/total_md_split.py <project_path>
 
-# 2. SVG post-processing (auto-embed icons, images, etc.)
-python3 scripts/finalize_svg.py <project_path>
+# 2. SVG 后处理（自动嵌入图标、图片等）
+python scripts/finalize_svg.py <project_path>
 
-# 3. Export PPTX
-python3 scripts/svg_to_pptx.py <project_path> -s final
-# Output:
-#   exports/<project_name>_<timestamp>.pptx           ← main native pptx
-#   backup/<timestamp>/<project_name>_svg.pptx        ← SVG snapshot
-#   backup/<timestamp>/svg_output/                    ← Executor SVG source backup
+# 3. 导出 PPTX
+python scripts/svg_to_pptx.py <project_path> -s final
+# 输出：
+#   exports/<project_name>_<timestamp>.pptx           ← 主原生 pptx
+#   backup/<timestamp>/<project_name>_svg.pptx        ← SVG 快照备份
+#   backup/<timestamp>/svg_output/                    ← Executor SVG 源文件备份
 ```

@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """PPT Master project management helpers.
 
 Usage:
-    python3 scripts/project_manager.py init <project_name> [--format ppt169] [--dir projects]
-    python3 scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...] [--move | --copy]
-    python3 scripts/project_manager.py validate <project_path>
-    python3 scripts/project_manager.py info <project_path>
+    python scripts/project_manager.py init <project_name> [--format ppt169] [--dir projects]
+    python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...] [--move | --copy]
+    python scripts/project_manager.py validate <project_path>
+    python scripts/project_manager.py info <project_path>
 """
 
 from __future__ import annotations
@@ -16,7 +16,6 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urlparse
 
 try:
     from project_utils import (
@@ -43,34 +42,6 @@ SKILL_DIR = TOOLS_DIR.parent
 REPO_ROOT = SKILL_DIR.parent.parent
 SOURCE_DIRNAME = "sources"
 TEXT_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
-TABLE_TEXT_SUFFIXES = {".csv", ".tsv"}
-PDF_SUFFIXES = {".pdf"}
-PRESENTATION_SUFFIXES = {".pptx", ".pptm", ".ppsx", ".ppsm", ".potx", ".potm"}
-EXCEL_SUFFIXES = {".xlsx", ".xlsm"}
-LEGACY_EXCEL_SUFFIXES = {".xls"}
-DOC_SUFFIXES = {
-    ".docx", ".doc", ".odt", ".rtf",          # Office documents
-    ".epub",                                    # eBooks
-    ".html", ".htm",                            # Web pages
-    ".tex", ".latex", ".rst", ".org",           # Academic / technical
-    ".ipynb", ".typ",                           # Notebooks / Typst
-}
-WECHAT_HOST_KEYWORDS = ("mp.weixin.qq.com", "weixin.qq.com")
-
-
-def _curl_cffi_available() -> bool:
-    """Return whether curl_cffi is importable (enables Python TLS impersonation)."""
-    try:
-        import curl_cffi  # noqa: F401
-        return True
-    except ImportError:
-        return False
-
-
-def is_url(value: str) -> bool:
-    """Return whether a string looks like an HTTP(S) URL."""
-    parsed = urlparse(value)
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
 def sanitize_name(value: str) -> str:
@@ -80,17 +51,6 @@ def sanitize_name(value: str) -> str:
     while "__" in safe:
         safe = safe.replace("__", "_")
     return safe[:120] or "source"
-
-
-def derive_url_basename(url: str) -> str:
-    """Derive a stable base filename from a URL."""
-    parsed = urlparse(url)
-    parts = [sanitize_name(parsed.netloc)]
-    if parsed.path and parsed.path != "/":
-        path_part = sanitize_name(parsed.path.strip("/").replace("/", "_"))
-        if path_part:
-            parts.append(path_part)
-    return "_".join(part for part in parts if part) or "web_source"
 
 
 def is_within_path(path: Path, parent: Path) -> bool:
@@ -234,79 +194,6 @@ class ProjectManager:
         if result.stdout.strip():
             print(result.stdout.strip())
 
-    def _import_pdf(self, pdf_path: Path, markdown_path: Path) -> None:
-        self._run_tool(
-            [
-                sys.executable,
-                str(TOOLS_DIR / "source_to_md" / "pdf_to_md.py"),
-                str(pdf_path),
-                "-o",
-                str(markdown_path),
-            ]
-        )
-
-    def _import_doc(self, doc_path: Path, markdown_path: Path) -> None:
-        self._run_tool(
-            [
-                sys.executable,
-                str(TOOLS_DIR / "source_to_md" / "doc_to_md.py"),
-                str(doc_path),
-                "-o",
-                str(markdown_path),
-            ]
-        )
-
-    def _import_presentation(self, presentation_path: Path, markdown_path: Path) -> None:
-        self._run_tool(
-            [
-                sys.executable,
-                str(TOOLS_DIR / "source_to_md" / "ppt_to_md.py"),
-                str(presentation_path),
-                "-o",
-                str(markdown_path),
-            ]
-        )
-
-    def _import_excel(self, excel_path: Path, markdown_path: Path) -> None:
-        self._run_tool(
-            [
-                sys.executable,
-                str(TOOLS_DIR / "source_to_md" / "excel_to_md.py"),
-                str(excel_path),
-                "-o",
-                str(markdown_path),
-            ]
-        )
-
-    def _import_url(self, url: str, markdown_path: Path) -> None:
-        # Prefer web_to_md.py: it uses curl_cffi internally when available,
-        # which handles WeChat and other TLS-fingerprint-blocked sites.
-        # Fall back to the Node.js version only when the URL is known to
-        # require TLS impersonation AND curl_cffi isn't installed.
-        host = urlparse(url).netloc.lower()
-        is_tls_sensitive = any(keyword in host for keyword in WECHAT_HOST_KEYWORDS)
-
-        if is_tls_sensitive and not _curl_cffi_available() and shutil.which("node"):
-            command = ["node", str(TOOLS_DIR / "source_to_md" / "web_to_md.cjs"),
-                       url, "-o", str(markdown_path)]
-        else:
-            command = [
-                sys.executable,
-                str(TOOLS_DIR / "source_to_md" / "web_to_md.py"),
-                url,
-                "-o",
-                str(markdown_path),
-            ]
-        self._run_tool(command)
-
-    def _archive_url_record(self, sources_dir: Path, url: str) -> Path:
-        file_path = self._ensure_unique_path(sources_dir / f"{derive_url_basename(url)}.url.txt")
-        file_path.write_text(
-            f"URL: {url}\nImported: {datetime.now().isoformat(timespec='seconds')}\n",
-            encoding="utf-8",
-        )
-        return file_path
-
     def _normalize_text_source(self, source_path: Path, sources_dir: Path) -> Path:
         target = self._ensure_unique_path(sources_dir / f"{source_path.stem}.md")
         content = source_path.read_text(encoding="utf-8", errors="replace")
@@ -407,7 +294,7 @@ class ProjectManager:
         if not project_dir.exists() or not project_dir.is_dir():
             raise FileNotFoundError(f"Project directory not found: {project_dir}")
         if not source_items:
-            raise ValueError("At least one source path or URL is required")
+            raise ValueError("At least one source path is required")
 
         sources_dir = self._source_dir(project_dir)
         summary: dict[str, list[str]] = {
@@ -417,31 +304,8 @@ class ProjectManager:
             "notes": [],
             "skipped": [],
         }
-        explicit_markdown_stems = {
-            Path(item).stem
-            for item in source_items
-            if not is_url(item)
-            and Path(item).exists()
-            and Path(item).is_file()
-            and Path(item).suffix.lower() in {".md", ".markdown"}
-        }
 
         for item in source_items:
-            if is_url(item):
-                archived = self._archive_url_record(sources_dir, item)
-                markdown_path = self._ensure_unique_path(
-                    sources_dir / f"{derive_url_basename(item)}.md"
-                )
-                try:
-                    self._import_url(item, markdown_path)
-                except Exception as exc:  # pragma: no cover - summary path
-                    summary["skipped"].append(f"{item}: {exc}")
-                    continue
-
-                summary["archived"].append(str(archived))
-                summary["markdown"].append(str(markdown_path))
-                continue
-
             source_path = Path(item)
             if not source_path.exists():
                 summary["skipped"].append(f"{item}: path not found")
@@ -494,96 +358,11 @@ class ProjectManager:
             )
             summary["archived"].append(str(archived_path))
 
-            if suffix in PDF_SUFFIXES:
-                canonical_markdown_path = sources_dir / f"{archived_path.stem}.md"
-                if archived_path.stem in explicit_markdown_stems:
-                    summary["notes"].append(
-                        f"{item}: skipped PDF auto-conversion because a same-stem Markdown source was provided"
-                    )
-                    continue
-                if canonical_markdown_path.exists():
-                    summary["markdown"].append(str(canonical_markdown_path))
-                    summary["notes"].append(
-                        f"{item}: skipped PDF auto-conversion because {canonical_markdown_path.name} already exists"
-                    )
-                    continue
-                markdown_path = canonical_markdown_path
-                try:
-                    self._import_pdf(archived_path, markdown_path)
-                    summary["markdown"].append(str(markdown_path))
-                except Exception as exc:  # pragma: no cover - summary path
-                    summary["skipped"].append(f"{item}: PDF conversion failed ({exc})")
-            elif suffix in PRESENTATION_SUFFIXES:
-                canonical_markdown_path = sources_dir / f"{archived_path.stem}.md"
-                if archived_path.stem in explicit_markdown_stems:
-                    summary["notes"].append(
-                        f"{item}: skipped presentation auto-conversion because a same-stem Markdown source was provided"
-                    )
-                    continue
-                if canonical_markdown_path.exists():
-                    summary["markdown"].append(str(canonical_markdown_path))
-                    summary["notes"].append(
-                        f"{item}: skipped presentation auto-conversion because {canonical_markdown_path.name} already exists"
-                    )
-                    continue
-                markdown_path = canonical_markdown_path
-                try:
-                    self._import_presentation(archived_path, markdown_path)
-                    summary["markdown"].append(str(markdown_path))
-                except Exception as exc:  # pragma: no cover - summary path
-                    summary["skipped"].append(f"{item}: presentation conversion failed ({exc})")
-            elif suffix in EXCEL_SUFFIXES:
-                canonical_markdown_path = sources_dir / f"{archived_path.stem}.md"
-                if archived_path.stem in explicit_markdown_stems:
-                    summary["notes"].append(
-                        f"{item}: skipped Excel auto-conversion because a same-stem Markdown source was provided"
-                    )
-                    continue
-                if canonical_markdown_path.exists():
-                    summary["markdown"].append(str(canonical_markdown_path))
-                    summary["notes"].append(
-                        f"{item}: skipped Excel auto-conversion because {canonical_markdown_path.name} already exists"
-                    )
-                    continue
-                markdown_path = canonical_markdown_path
-                try:
-                    self._import_excel(archived_path, markdown_path)
-                    summary["markdown"].append(str(markdown_path))
-                except Exception as exc:  # pragma: no cover - summary path
-                    summary["skipped"].append(f"{item}: Excel conversion failed ({exc})")
-            elif suffix in LEGACY_EXCEL_SUFFIXES:
-                summary["notes"].append(
-                    f"{item}: archived only; legacy .xls is not converted automatically. "
-                    "Resave as .xlsx to generate Markdown."
-                )
-            elif suffix in TABLE_TEXT_SUFFIXES:
-                summary["notes"].append(
-                    f"{item}: archived as a plain-text table source; no Markdown conversion needed"
-                )
-            elif suffix in DOC_SUFFIXES:
-                canonical_markdown_path = sources_dir / f"{archived_path.stem}.md"
-                if archived_path.stem in explicit_markdown_stems:
-                    summary["notes"].append(
-                        f"{item}: skipped document auto-conversion because a same-stem Markdown source was provided"
-                    )
-                    continue
-                if canonical_markdown_path.exists():
-                    summary["markdown"].append(str(canonical_markdown_path))
-                    summary["notes"].append(
-                        f"{item}: skipped document auto-conversion because {canonical_markdown_path.name} already exists"
-                    )
-                    continue
-                markdown_path = canonical_markdown_path
-                try:
-                    self._import_doc(archived_path, markdown_path)
-                    summary["markdown"].append(str(markdown_path))
-                except Exception as exc:  # pragma: no cover - summary path
-                    summary["skipped"].append(f"{item}: document conversion failed ({exc})")
-            elif suffix == ".txt":
+            if suffix == ".txt":
                 markdown_path = self._normalize_text_source(archived_path, sources_dir)
                 summary["markdown"].append(str(markdown_path))
             else:
-                summary["notes"].append(f"{item}: archived only, no automatic conversion")
+                summary["notes"].append(f"{item}: archived only")
 
         return summary
 

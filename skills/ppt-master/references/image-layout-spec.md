@@ -1,203 +1,203 @@
-> See shared-standards.md for common technical constraints.
+> 通用技术约束见 `shared-standards.md`。
 
-# Image Layout Specification
+# 图片布局规范
 
-Layout rules for pages where the image is placed **side-by-side with body text** as a container block. Strategist and Executor both follow these rules when the image's narrative intent is *side-by-side*.
+本规范用于图片与**正文并排**放置、共同组成内容容器的页面。只要图片的叙事意图是 *side-by-side*，Strategist 和 Executor 都应遵循这里的规则。
 
-**Core principle (side-by-side)**: compute container layout from the image's original aspect ratio so the image displays completely — no excess whitespace, no cropping.
+**核心原则（并排布局）**：根据图片原始宽高比计算容器布局，保证图片完整显示——不留多余空白，不裁切。
 
-> **Scope**: this spec applies to *side-by-side* intent only. Other intents (hero / full-bleed, atmosphere / background, accent / inline) use full-bleed placement where ratio alignment is not a constraint and cropping is expected — the ratio→split table below does NOT apply. See `references/strategist.md` §h for intent selection.
-
----
-
-## Layout Decision Flow
-
-```
-1. Decide narrative intent (hero / atmosphere / side-by-side / accent) — see strategist.md §h
-2. If intent = side-by-side: continue below. Otherwise: compose per narrative; this spec does not apply.
-3. Get image original dimensions → Calculate ratio (width/height)
-4. Select layout type based on ratio
-5. Calculate maximum display size for the image
-6. Allocate remaining space for text area
-7. Fill results into the Design Specification's image resource list
-```
-
-**When to run**: if image approach includes "B) User-provided", run the scan and populate the image resource list after the Strategist's Eight Confirmations and before content analysis / outlining.
+> **适用范围**：本规范只适用于 *side-by-side* 意图。其他意图（hero / full-bleed、atmosphere / background、accent / inline）使用全幅式摆放，不要求宽高比严格对齐，且通常允许裁切——下方的“比例→分栏”表**不适用**。意图选择见 `references/strategist.md` §h。
 
 ---
 
-## Layout Type Selection (side-by-side intent)
+## 布局决策流程
 
-| Image Ratio | Layout Type | Image Position | Description |
+```
+1. 先确定叙事意图（hero / atmosphere / side-by-side / accent）——见 strategist.md §h
+2. 若意图 = side-by-side，则继续。否则按叙事需要自由构图，本规范不适用。
+3. 获取图片原始尺寸 → 计算比例（width/height）
+4. 根据比例选择布局类型
+5. 计算图片最大显示尺寸
+6. 分配剩余空间给文本区
+7. 将结果写入《设计规范》的图片资源清单
+```
+
+**何时执行**：若图片方案包含 “B) User-provided”，则应在 Strategist 完成八项确认之后、进入内容分析 / 大纲阶段之前，先扫描并填充图片资源清单。
+
+---
+
+## 布局类型选择（side-by-side 意图）
+
+| 图片比例 | 布局类型 | 图片位置 | 说明 |
 |-------------|-------------|----------------|-------------|
-| > 2.0 (ultra-wide) | Top-bottom split | Top full-width | Image spans canvas width, height proportional |
-| 1.5-2.0 (wide) | Top-bottom split | Top | Image width = content area width, height proportional |
-| 1.2-1.5 (standard) | Left-right split | Left | Image height-first fit, width proportional |
-| 0.8-1.2 (square) | Left-right split | Left | Image takes content area height, width proportional |
-| < 0.8 (portrait) | Left-right split | Left | Image height = content area height, width proportional |
+| > 2.0（超宽） | 上下分区 | 顶部全宽 | 图片铺满内容区宽度，高度按比例计算 |
+| 1.5-2.0（宽图） | 上下分区 | 顶部 | 图片宽度 = 内容区宽度，高度按比例计算 |
+| 1.2-1.5（标准横图） | 左右分栏 | 左侧 | 优先贴合高度，宽度按比例计算 |
+| 0.8-1.2（方图） | 左右分栏 | 左侧 | 图片占满内容区高度，宽度按比例计算 |
+| < 0.8（竖图） | 左右分栏 | 左侧 | 图片高度 = 内容区高度，宽度按比例计算 |
 
-> Boundary ratio (e.g., 1.5): decide by text volume — more text → left-right; less text → top-bottom.
+> 边界比例（如 1.5）可根据文字量决定：文字多 → 左右分栏；文字少 → 上下分区。
 
 ---
 
-## Dimension Calculation Formulas
+## 尺寸计算公式
 
-### Canvas Parameters (All Formats)
+### 画布参数（所有格式）
 
-| Format | Canvas | Margins (L/R, T/B) | Content Area (W x H) | Title Height | Content Start Y |
+| 格式 | 画布 | 边距（左/右，上/下） | 内容区（W x H） | 标题高度 | 内容起始 Y |
 |--------|--------|--------------------|-----------------------|-------------|----------------|
 | PPT 16:9 | 1280x720 | 60, 60 | 1160 x 600 | 60px | 80px |
 | PPT 4:3 | 1024x768 | 50, 50 | 924 x 608 | 60px | 70px |
-| Xiaohongshu | 1242x1660 | 60, 80 | 1122 x 1500 | 80px | 100px |
-| WeChat Moments | 1080x1080 | 60, 60 | 960 x 960 | 60px | 80px |
+| 小红书 | 1242x1660 | 60, 80 | 1122 x 1500 | 80px | 100px |
+| 微信朋友圈 | 1080x1080 | 60, 60 | 960 x 960 | 60px | 80px |
 | Story | 1080x1920 | 60, 120/180 | 960 x 1620 | 80px | 140px |
-| WeChat Article | 900x383 | 40, 40 | 820 x 303 | 40px | 50px |
+| 微信文章 | 900x383 | 40, 40 | 820 x 303 | 40px | 50px |
 
-> Below, **W** = content area width, **H** = content area height (excludes title). PPT 16:9 example: W=1160, H=600.
+> 下文中，**W** = 内容区宽度，**H** = 内容区高度（不含标题）。以 PPT 16:9 为例：W=1160，H=600。
 
-### Top-Bottom Layout Calculation
+### 上下分区计算
 
 ```
-Image width = W = 1160 px
-Image height = W / R = 1160 / R px
-Text area height = H - image height - gap(20px)
+图片宽度 = W = 1160 px
+图片高度 = W / R = 1160 / R px
+文本区高度 = H - 图片高度 - 间距(20px)
 
-Validation: Text area height >= 150px (at least 3-4 lines of text)
-If not satisfied → Switch to left-right layout
+校验：文本区高度 >= 150px（至少容纳 3-4 行文字）
+若不满足 → 改为左右分栏
 ```
 
-### Left-Right Layout Calculation
+### 左右分栏计算
 
-**Method 1 (height-first, suitable for portrait images)**:
+**方法 1（优先贴合高度，适合竖图）**：
 ```
-Image height = H = 600 px
-Image width = H x R = 600 x R px
-Text area width = W - image width - gap(20px)
-```
-
-**Method 2 (width-constrained, for wide images converted to left-right)**:
-```
-Image width = W x 0.7 = 812 px
-Image height = image width / R
-Text area width = W - image width - gap(20px)
+图片高度 = H = 600 px
+图片宽度 = H x R = 600 x R px
+文本区宽度 = W - 图片宽度 - 间距(20px)
 ```
 
-**Validation**: Text area width >= 280px; otherwise reduce image area width.
+**方法 2（限制宽度，适合由宽图改成左右分栏）**：
+```
+图片宽度 = W x 0.7 = 812 px
+图片高度 = 图片宽度 / R
+文本区宽度 = W - 图片宽度 - 间距(20px)
+```
+
+**校验**：文本区宽度 >= 280px；否则应缩小图片区宽度。
 
 ---
 
-## Layout Examples
+## 布局示例
 
-### Ultra-wide Image (ratio 2.45)
-
-```
-Original: 1960x800, R=2.45 → Top-bottom split
-Image: 1160x473, Text area: 1160x147 → 7:3 top-bottom
-```
-
-### Standard Landscape (ratio 1.38)
+### 超宽图（比例 2.45）
 
 ```
-Original: 1614x1171, R=1.38 → Left-right split
-Image: 773x560 (left), Text area: 367x560 (right) → 7:3 left-right
+原图：1960x800，R=2.45 → 上下分区
+图片：1160x473，文本区：1160x147 → 上下 7:3
 ```
 
-### Wide Image Edge Case (ratio 1.75)
+### 标准横图（比例 1.38）
 
 ```
-Original: 1820x1040, R=1.75
-Try top-bottom: image height=663, text area=-43 ❌
-Switch to left-right: image 780x446 (left), text area 360x600 (right) → 7:3 left-right
+原图：1614x1171，R=1.38 → 左右分栏
+图片：773x560（左），文本区：367x560（右） → 左右 7:3
+```
+
+### 宽图边界情况（比例 1.75）
+
+```
+原图：1820x1040，R=1.75
+尝试上下分区：图片高度=663，文本区=-43 ❌
+改为左右分栏：图片 780x446（左），文本区 360x600（右） → 左右 7:3
 ```
 
 ---
 
-## Portrait Canvas Override
+## 竖版画布覆盖规则
 
-Default selection table assumes **landscape or square canvas**. For portrait canvases (height > width), left-right splits leave both columns too narrow — use the override below.
+默认选择表假设画布是**横版或方版**。对于竖版画布（height > width），左右分栏会让两列都过窄，因此应使用以下覆盖规则。
 
-| Canvas Orientation | Image Ratio | Recommended Layout | Reason |
+| 画布方向 | 图片比例 | 推荐布局 | 原因 |
 |-------------------|-------------|-------------------|--------|
-| Portrait (Xiaohongshu, Story) | > 1.5 (wide) | Top-bottom | Same as landscape canvas |
-| Portrait (Xiaohongshu, Story) | 1.2-1.5 (standard) | Top-bottom | Left-right too narrow on tall canvas |
-| Portrait (Xiaohongshu, Story) | 0.8-1.2 (square) | Top-bottom | Image fits well in top half |
-| Portrait (Xiaohongshu, Story) | 0.5-0.8 (portrait) | Left-right | Portrait image on tall canvas works |
-| Portrait (Xiaohongshu, Story) | < 0.5 (extreme portrait) | Left-right | Image takes one side, text the other |
+| 竖版（小红书、Story） | > 1.5（宽图） | 上下分区 | 与横版画布一致 |
+| 竖版（小红书、Story） | 1.2-1.5（标准） | 上下分区 | 在高画布上，左右分栏太窄 |
+| 竖版（小红书、Story） | 0.8-1.2（方图） | 上下分区 | 图片适合放在上半区 |
+| 竖版（小红书、Story） | 0.5-0.8（竖图） | 左右分栏 | 竖图在高画布上仍可用 |
+| 竖版（小红书、Story） | < 0.5（极窄竖图） | 左右分栏 | 图片占一侧，文字占另一侧 |
 
-> Square canvases (WeChat Moments 1:1): use the standard landscape rules.
+> 方版画布（如微信朋友圈 1:1）仍按默认横版规则处理。
 
 ---
 
-## Multi-Image Layout
+## 多图布局
 
-For slides with multiple images, divide the content area evenly using the formulas below.
+对于一页中包含多张图片的情况，应按以下公式把内容区均分。
 
-### Grid Formulas
+### 网格公式
 
 ```
-columns = number of columns
-rows = number of rows
-gap = 20px (PPT formats) or 30px (social formats)
+columns = 列数
+rows = 行数
+gap = 20px（PPT 格式）或 30px（社交格式）
 
 cell_width  = (W - (columns - 1) * gap) / columns
 cell_height = (H - (rows - 1) * gap) / rows
 ```
 
-### Common Patterns
+### 常见模式
 
-| Image Count | Layout | Grid | Description |
+| 图片数量 | 布局 | 网格 | 说明 |
 |-------------|--------|------|-------------|
-| 2 (both landscape) | Side-by-side | 2x1 | Two equal columns |
-| 2 (both portrait) | Stacked | 1x2 | Two equal rows |
-| 2 (mixed) | 1 large + 1 small | Custom | Landscape top (full-width), portrait right-bottom |
-| 3 | 1 large + 2 small | 1+2 | Left large (50% width), right column with 2 stacked |
-| 4 | Grid | 2x2 | Equal-sized cells |
+| 2（两张都是横图） | 并排 | 2x1 | 两列等宽 |
+| 2（两张都是竖图） | 竖向堆叠 | 1x2 | 两行等高 |
+| 2（混合） | 1 大 + 1 小 | 自定义 | 横图在上方全宽，竖图在右下 |
+| 3 | 1 大 + 2 小 | 1+2 | 左侧大图（50% 宽），右侧上下两张小图 |
+| 4 | 网格 | 2x2 | 四格等大 |
 
-### Example: 2x2 Grid on PPT 16:9
+### 示例：PPT 16:9 上的 2x2 网格
 
 ```
 W=1160, H=600, gap=20
 cell_width  = (1160 - 20) / 2 = 570
 cell_height = (600 - 20) / 2 = 290
 
-Image positions:
+图片位置：
   (60, 80)   570x290    (650, 80)  570x290
   (60, 390)  570x290    (650, 390) 570x290
 ```
 
-> Multi-image slides: use `preserveAspectRatio="xMidYMid meet"` on all images for consistent in-cell display.
+> 多图页面中，所有图片都应使用 `preserveAspectRatio="xMidYMid meet"`，以保证格子内显示一致且不裁切。
 
 ---
 
-## Prohibited Practices
+## 禁止做法
 
-| Prohibited | Correct Approach |
+| 禁止项 | 正确做法 |
 |-----------|-----------------|
-| Fixed 50:50 or arbitrary ratios | Dynamic calculation based on image ratio |
-| Forcing wide image into square container | Use top-bottom layout or increase image area width |
-| Placing portrait image in narrow horizontal strip | Use left-right layout, image on left |
-| Image whitespace exceeding 10% | Recalculate layout or choose alternative approach |
-| Cropping key image content | Use `preserveAspectRatio="xMidYMid meet"` |
-| Text area too small to read | Ensure text area >= 150px (top-bottom) or >= 280px (left-right) |
+| 固定 50:50 或任意拍脑袋比例 | 按图片比例动态计算 |
+| 把宽图硬塞进方形容器 | 改用上下分区，或扩大图片区宽度 |
+| 把竖图塞进狭长横条 | 改用左右分栏，图片放左侧 |
+| 图片空白超过 10% | 重新计算布局或改用其他方案 |
+| 裁掉关键图片内容 | 使用 `preserveAspectRatio="xMidYMid meet"` |
+| 文本区小到难以阅读 | 确保文本区 >= 150px（上下分区）或 >= 280px（左右分栏） |
 
 ---
 
-## Handoff Fields
+## 交接字段
 
-This spec only defines layout calculation. Write computed fields into the Image Resource List defined in [`svg-image-embedding.md`](svg-image-embedding.md):
+本规范只定义布局计算。请把计算结果写入 [`svg-image-embedding.md`](svg-image-embedding.md) 中定义的图片资源清单：
 
-| Field | Meaning |
+| 字段 | 含义 |
 |-------|---------|
-| `Ratio` | Original image width / height |
-| `Layout plan` | Top-bottom / left-right / grid, including split ratio when relevant |
-| `Image area` | Computed display rectangle size |
-| `Text area` | Computed remaining text area size |
+| `Ratio` | 原始图片宽 / 高 |
+| `Layout plan` | 上下分区 / 左右分栏 / 网格；必要时附带分栏比例 |
+| `Image area` | 计算得到的图片显示区域 |
+| `Text area` | 计算得到的剩余文字区域 |
 
-For SVG `<image>` syntax, path rules, `preserveAspectRatio`, external refs, and Base64 embedding: see [`svg-image-embedding.md`](svg-image-embedding.md).
+关于 SVG `<image>` 语法、路径规则、`preserveAspectRatio`、外部引用和 Base64 嵌入，见 [`svg-image-embedding.md`](svg-image-embedding.md)。
 
-### SVG Image Embedding Examples
+### SVG 图片嵌入示例
 
-Complete display (data charts, side-by-side — must not crop):
+完整显示（数据图、并排布局——不得裁切）：
 
 ```xml
 <image href="../images/xxx.png"
@@ -205,7 +205,7 @@ Complete display (data charts, side-by-side — must not crop):
        preserveAspectRatio="xMidYMid meet"/>
 ```
 
-Crop-to-fill (backgrounds and hero images only):
+裁切铺满（仅用于背景图和 hero 图）：
 
 ```xml
 <image href="../images/bg.png"
@@ -215,21 +215,21 @@ Crop-to-fill (backgrounds and hero images only):
 
 ---
 
-## Automation Tool
+## 自动化工具
 
 ```bash
-python3 scripts/analyze_images.py <project_path>/images                    # Default: PPT 16:9
-python3 scripts/analyze_images.py <project_path>/images --canvas ppt43     # PPT 4:3
-python3 scripts/analyze_images.py <project_path>/images --canvas xiaohongshu  # Xiaohongshu
+python scripts/analyze_images.py <project_path>/images                       # 默认：PPT 16:9
+python scripts/analyze_images.py <project_path>/images --canvas ppt43        # PPT 4:3
+python scripts/analyze_images.py <project_path>/images --canvas xiaohongshu  # 小红书
 ```
 
-`--canvas` selects target format (default `ppt169`). The tool computes layout type (top-bottom / left-right), image display area, and text area per the formulas above. Output is a Markdown table — paste directly into the image resource list.
+`--canvas` 用于选择目标格式（默认 `ppt169`）。该工具会按上面的公式计算布局类型（上下分区 / 左右分栏）、图片显示区域和文本区域。输出是 Markdown 表格，可直接粘贴进图片资源清单。
 
 ---
 
-## Role Responsibilities
+## 角色职责
 
-| Role | Responsibility |
+| 角色 | 职责 |
 |------|---------------|
-| **Strategist** | Run analyze_images.py, calculate layout per this spec, populate image resource list |
-| **Executor** | Strictly follow the layout plan and dimensions in the image resource list when generating SVGs |
+| **Strategist** | 运行 `analyze_images.py`，按本规范计算布局，并填充图片资源清单 |
+| **Executor** | 生成 SVG 时，严格遵循图片资源清单中的布局方案和尺寸 |

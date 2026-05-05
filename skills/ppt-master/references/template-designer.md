@@ -1,71 +1,67 @@
 > See shared-standards.md for common technical constraints.
 
-# Template Designer — Template Design Role
+# 模板设计器 — 模板设计角色
 
-## Core Mission
+## 核心使命
 
-Generate reusable page templates for the **global template library** based on a finalized template brief.
+基于最终模板 brief，生成可复用的页面模板，用于 **全局模板库**。
 
-> This is a standalone role: only triggered via the `/create-template` workflow. It is **not** the project-level template selection/customization step in the main PPT generation pipeline.
+> 这是一个独立角色：只在 `/create-template` 工作流中触发。**不是**主 PPT 生成流程里的项目级模板选择或定制步骤。
 
-## Usage
+## 用法
 
-- **Trigger**: `/create-template` workflow
-- **Output location**: `templates/layouts/<template_name>/`
-- **Input**: finalized template brief (template ID, display name, category, applicable scenarios, tone, theme mode, canvas format, optional reference assets)
+- **触发方式**：`/create-template` 工作流
+- **输出位置**：`templates/layouts/<template_name>/`
+- **输入内容**：最终模板 brief（模板 ID、显示名、类别、适用场景、语气、主题模式、画布格式，以及可选参考资源）
 
-When the workflow provides a PPTX reference source, the effective input package comes from the unified `pptx_template_import.py` preparation workspace and becomes:
+若工作流提供 PPTX 参考源，则实际输入包来自统一的 `pptx_template_import.py` 预处理工作区，包括：
 
-- finalized template brief
+- 最终模板 brief
 - `manifest.json`
 - `master_layout_refs.json`
 - `master_layout_analysis.md`
 - `analysis.md`
 - `normalized_assets.json`
-- exported `assets/`
-- cleaned slide SVG references from `svg/`
+- 导出的 `assets/`
+- `svg/` 中清洗后的参考页面 SVG
 - `reference_svg_selection.json`
-- optional screenshots for visual cross-checking
+- 可选截图（用于视觉交叉核对）
 
-Input priority for PPTX-backed template creation:
+基于 PPTX 参考创建模板时，读取优先级如下：
 
-1. `manifest.json` for factual metadata
-2. `master_layout_refs.json` for unique layout/master structure and inheritance
-3. `master_layout_analysis.md` for fast structural review
-4. `normalized_assets.json` for canonical asset decisions
-5. exported `assets/` for reusable visual resources
-6. `analysis.md` for page-type guidance
-7. `reference_svg_selection.json` for deciding which exported SVG pages to inspect first
-8. cleaned slide SVG references for composition, spacing, and fixed decorative cues
-9. screenshots / original PPTX only for style verification
+1. `manifest.json`：事实元数据
+2. `master_layout_refs.json`：母版/版式结构与继承关系
+3. `master_layout_analysis.md`：快速结构分析
+4. `normalized_assets.json`：规范化资源决策
+5. 导出的 `assets/`：可复用视觉资源
+6. `analysis.md`：页面类型参考
+7. `reference_svg_selection.json`：决定优先查看哪些导出 SVG
+8. 清洗后的参考 SVG：查看构图、间距、层级和固定装饰
+9. 截图 / 原始 PPTX：仅用于风格核验
 
 ---
 
-## Core Template Inventory
+## 核心模板库存
 
 | # | Filename | Purpose | Description |
 |---|----------|---------|-------------|
-| 01 | `01_cover.svg` | Cover | Fixed structure: title, subtitle, date, organization |
-| 02 | `02_chapter.svg` | Chapter page | Fixed structure: chapter number, chapter title |
-| 03 | `03_content.svg` | Content page | Flexible structure: only defines header/footer; content area freely laid out by AI |
-| 04 | `04_ending.svg` | Ending page | Fixed structure: thank-you message, contact info |
-| -- | `02_toc.svg` | Table of contents | Optional: TOC title, chapter list (number + title) |
+| 01 | `01_cover.svg` | Cover | 固定结构：标题、副标题、日期、组织 |
+| 02 | `02_chapter.svg` | Chapter page | 固定结构：章节号、章节标题 |
+| 03 | `03_content.svg` | Content page | 灵活结构：仅定义页眉/页脚；内容区域由 AI 自由布局 |
+| 04 | `04_ending.svg` | Ending page | 固定结构：感谢信息、联系方式 |
+| -- | `02_toc.svg` | Table of contents | 可选：目录标题、章节列表（章节号 + 标题） |
 
-**Design philosophy**: Templates define visual consistency and structural pages; content pages maintain maximum flexibility.
+**设计理念**：模板负责视觉统一和结构页；内容页尽量保持最高灵活性。
 
-**Naming note**: TOC page keeps `02_toc.svg` naming for template library compatibility and sort order.
+**命名说明**：目录页保留 `02_toc.svg` 命名，以兼容模板库排序和历史约定。
 
-### Optional Extension Pages (As Needed)
+### 可选扩展页
 
-- Transition / sub-section page (e.g., `05_section_break.svg`)
-- Appendix page (e.g., `06_appendix.svg`)
-- Disclaimer / confidentiality page (e.g., `07_disclaimer.svg`)
+- 过渡页 / 子章节页（如 `05_section_break.svg`）
+- 附录页（如 `06_appendix.svg`）
+- 免责声明 / 保密页（如 `07_disclaimer.svg`）
 
 ---
-
-## Template Design Specifications
-
-### 1. Must Generate design_spec.md
 
 When creating a global template, a `design_spec.md` must be generated, containing:
 

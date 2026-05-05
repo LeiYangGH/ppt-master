@@ -45,14 +45,14 @@ Confirm the following with the user:
 
 **If a reference source is provided**, analyze its structure first:
 
-```bash
-ls -la "<reference_source_path>"
+```powershell
+Get-ChildItem -Force "<reference_source_path>"
 ```
 
 If the reference source is a `.pptx` template file, use the unified preparation helper:
 
-```bash
-python3 skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pptx>"
+```powershell
+python skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pptx>"
 ```
 
 This helper performs the full PPTX reference preparation in one workspace:
@@ -134,8 +134,8 @@ If no `.pptx` source is involved, this step can be skipped.
 
 ## Step 3: Create Template Directory
 
-```bash
-mkdir -p "skills/ppt-master/templates/layouts/<template_id>"
+```powershell
+New-Item -ItemType Directory -Force -Path "skills/ppt-master/templates/layouts/<template_id>"
 ```
 
 > **Output location**: Global templates go to `skills/ppt-master/templates/layouts/`; project templates go to `projects/<project>/templates/`
@@ -184,14 +184,14 @@ The role should use the import output to anchor objective facts such as theme co
 
 ## Step 5: Validate Template Assets
 
-```bash
-ls -la "skills/ppt-master/templates/layouts/<template_id>"
+```powershell
+Get-ChildItem -Force "skills/ppt-master/templates/layouts/<template_id>"
 ```
 
 Run SVG validation on the template directory:
 
-```bash
-python3 skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templates/layouts/<template_id>" --format <canvas_format>
+```powershell
+python skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templates/layouts/<template_id>" --format <canvas_format>
 ```
 
 **Checklist**:

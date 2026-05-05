@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - SVG Post-processing Tool (Unified Entry Point)
 
@@ -8,14 +8,14 @@ individual steps via arguments.
 
 Usage:
     # Execute all processing steps (recommended)
-    python3 scripts/finalize_svg.py <project_directory>
+    python scripts/finalize_svg.py <project_directory>
 
     # Execute only specific steps
-    python3 scripts/finalize_svg.py <project_directory> --only embed-icons fix-rounded
+    python scripts/finalize_svg.py <project_directory> --only embed-icons fix-rounded
 
 Examples:
-    python3 scripts/finalize_svg.py projects/my_project
-    python3 scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
+    python scripts/finalize_svg.py projects/my_project
+    python scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
 
 Processing options:
     embed-icons   - Replace <use data-icon="..."/> with actual icon SVG

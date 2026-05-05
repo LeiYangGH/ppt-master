@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Unified Image Generation Tool
 
@@ -36,8 +36,8 @@ Supported keys:
     ZHIPU_API_KEY / ZHIPU_MODEL / ZHIPU_BASE_URL
 
 Usage:
-  python3 image_gen.py "prompt" --aspect_ratio 16:9 --image_size 1K -o images/
-  python3 image_gen.py --list-backends
+  python image_gen.py "prompt" --aspect_ratio 16:9 --image_size 1K -o images/
+  python image_gen.py --list-backends
 """
 
 import os

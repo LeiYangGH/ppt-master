@@ -65,27 +65,27 @@ For each page in the Step 1 list:
 4. **Read axis tick labels (bar charts only).** Locate the `<text>` elements along the value axis — these are the X-axis labels for horizontal bars, or Y-axis labels for vertical bars. Extract the first and last tick values to determine the axis range (e.g. `0%` to `120%` → range `0,120`). Pass this range as `--value-range "0,120"` to the calculator. If the SVG has no explicit tick labels (data labels only, no grid), omit `--value-range` and let the calculator auto-normalize — but flag the receipt as `scale=auto (no ticks)`.
 5. Run the matching calculator command:
 
-   ```bash
+   ```powershell
    # bar_chart / horizontal_bar_chart (add --horizontal for the latter)
    # IMPORTANT: always pass --value-range from axis tick labels (step 4)
-   python3 skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+   python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
      --data "Label1:Value1,Label2:Value2" --area "x_min,y_min,x_max,y_max" \
      --bar-width 120 --value-range "0,axis_max"
 
    # line_chart / area_chart / scatter_chart — area uses line output as the top boundary, then closes to y_max
-   python3 skills/ppt-master/scripts/svg_position_calculator.py calc line \
+   python skills/ppt-master/scripts/svg_position_calculator.py calc line \
      --data "x1:y1,x2:y2,..." --area "x_min,y_min,x_max,y_max" --y-range "0,max"
 
    # pie_chart
-   python3 skills/ppt-master/scripts/svg_position_calculator.py calc pie \
+   python skills/ppt-master/scripts/svg_position_calculator.py calc pie \
      --data "Slice1:Value1,Slice2:Value2" --center "cx,cy" --radius 200
 
    # donut_chart (pie with inner-radius)
-   python3 skills/ppt-master/scripts/svg_position_calculator.py calc pie \
+   python skills/ppt-master/scripts/svg_position_calculator.py calc pie \
      --data "Slice1:Value1,Slice2:Value2" --center "cx,cy" --radius 200 --inner-radius 120
 
    # radar_chart (separate subcommand)
-   python3 skills/ppt-master/scripts/svg_position_calculator.py calc radar \
+   python skills/ppt-master/scripts/svg_position_calculator.py calc radar \
      --data "Dim1:Value1,Dim2:Value2,Dim3:Value3" --center "cx,cy" --radius 200
    ```
 
@@ -99,8 +99,8 @@ For each page in the Step 1 list:
 
 After updating any page, re-run the quality checker on the project to confirm nothing broke:
 
-```bash
-python3 skills/ppt-master/scripts/svg_quality_checker.py <project_path>
+```powershell
+python skills/ppt-master/scripts/svg_quality_checker.py <project_path>
 ```
 
 ---
@@ -111,14 +111,14 @@ python3 skills/ppt-master/scripts/svg_quality_checker.py <project_path>
 
 **Stacked bar** — for N stacked series on the same x categories, run `calc bar` N times. Pass each segment's **height** as the data value, and shift `--area`'s `y_max` down by the sum of all lower segments for that category. Compare each segment's `(x, y, width, height)` against the SVG.
 
-```bash
+```powershell
 # Example: two-series stack at category "Q1" with bottom=30, top=20, plot area y from 100 to 500
 # Run 1 — bottom segment (origin = baseline)
-python3 skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
   --data "Q1:30,Q2:..." --area "x_min,100,x_max,500" \
   --bar-width 80 --value-range "0,axis_max"
 # Run 2 — top segment (origin shifted up by bottom segment's height in pixels)
-python3 skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
   --data "Q1:20,Q2:..." --area "x_min,100,x_max,<500 - bottom_height_px>" \
   --bar-width 80 --value-range "0,axis_max"
 ```
@@ -147,8 +147,8 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 
 Continue with post-processing & export ([SKILL.md Step 7](../SKILL.md)):
 
-```bash
-python3 skills/ppt-master/scripts/total_md_split.py <project_path>
-python3 skills/ppt-master/scripts/finalize_svg.py <project_path>
-python3 skills/ppt-master/scripts/svg_to_pptx.py <project_path> -s final
+```powershell
+python skills/ppt-master/scripts/total_md_split.py <project_path>
+python skills/ppt-master/scripts/finalize_svg.py <project_path>
+python skills/ppt-master/scripts/svg_to_pptx.py <project_path> -s final
 ```

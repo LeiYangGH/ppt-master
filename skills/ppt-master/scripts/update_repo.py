@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Update the repository and sync Python dependencies when needed.
 
 Usage:
-    python3 skills/ppt-master/scripts/update_repo.py
-    python3 skills/ppt-master/scripts/update_repo.py --skip-pip
+    python skills/ppt-master/scripts/update_repo.py
+    python skills/ppt-master/scripts/update_repo.py --skip-pip
 """
 
 from __future__ import annotations

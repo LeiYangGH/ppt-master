@@ -1,14 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 PPT Master - Batch Project Validation Tool
 
 Checks the structural integrity and compliance of multiple projects at once.
 
 Usage:
-    python3 scripts/batch_validate.py examples
-    python3 scripts/batch_validate.py projects
-    python3 scripts/batch_validate.py --all
-    python3 scripts/batch_validate.py examples projects
+    python scripts/batch_validate.py examples
+    python scripts/batch_validate.py projects
+    python scripts/batch_validate.py --all
+    python scripts/batch_validate.py examples projects
 """
 
 import sys
@@ -259,14 +259,14 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("PPT Master - Batch Project Validation Tool\n")
         print("Usage:")
-        print("  python3 scripts/batch_validate.py <directory>")
-        print("  python3 scripts/batch_validate.py <dir1> <dir2> ...")
-        print("  python3 scripts/batch_validate.py --all")
+        print("  python scripts/batch_validate.py <directory>")
+        print("  python scripts/batch_validate.py <dir1> <dir2> ...")
+        print("  python scripts/batch_validate.py --all")
         print("\nExamples:")
-        print("  python3 scripts/batch_validate.py examples")
-        print("  python3 scripts/batch_validate.py projects")
-        print("  python3 scripts/batch_validate.py examples projects")
-        print("  python3 scripts/batch_validate.py --all")
+        print("  python scripts/batch_validate.py examples")
+        print("  python scripts/batch_validate.py projects")
+        print("  python scripts/batch_validate.py examples projects")
+        print("  python scripts/batch_validate.py --all")
         sys.exit(0)
 
     validator = BatchValidator()

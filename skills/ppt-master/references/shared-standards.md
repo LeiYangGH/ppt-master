@@ -1,81 +1,81 @@
-# Shared Technical Standards
+# 通用技术规范
 
-Common technical constraints for PPT Master, eliminating cross-role file duplication.
+PPT Master 的通用技术约束，用于消除各角色文件中的重复内容。
 
 ---
 
-## 1. SVG Banned Features Blacklist
+## 1. SVG 禁用特性黑名单
 
-The following are **forbidden** in generated SVGs — PPT export breaks otherwise:
+以下内容在生成的 SVG 中**禁止使用**，否则 PPT 导出会出问题：
 
-### 1.0 Text characters: must be well-formed XML
+### 1.0 文本字符：必须是合法 XML
 
-SVG is strict XML. Two rules for all text and attribute values:
+SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则：
 
-| Character category | Required form | Forbidden form |
+| 字符类别 | 必须写法 | 禁止写法 |
 |---|---|---|
-| Typography & symbols (em dash, en dash, ©, ®, →, ·, NBSP, full-width punctuation, emoji…) | **Raw Unicode characters** — write `—` `–` `©` `®` `→` directly | HTML named entities — `&mdash;` `&ndash;` `&copy;` `&reg;` `&rarr;` `&middot;` `&nbsp;` `&hellip;` `&bull;` etc. |
-| XML reserved characters (`&`, `<`, `>`, `"`, `'`) | **XML entities only** — `&amp;` `&lt;` `&gt;` `&quot;` `&apos;` (e.g. `R&amp;D`, `error &lt; 5%`) | Bare `&` `<` `>` (e.g. `R&D`, `error < 5%`) |
+| 排版字符与符号（长破折号、短破折号、©、®、→、·、NBSP、全角标点、emoji…） | **直接写 Unicode 原字符**——如直接写 `—` `–` `©` `®` `→` | HTML 命名实体——如 `&mdash;` `&ndash;` `&copy;` `&reg;` `&rarr;` `&middot;` `&nbsp;` `&hellip;` `&bull;` 等 |
+| XML 保留字符（`&`、`<`、`>`、`"`、`'`） | **只能用 XML 实体**——如 `&amp;` `&lt;` `&gt;` `&quot;` `&apos;`（例如 `R&amp;D`、`error &lt; 5%`） | 裸写 `&` `<` `>`（例如 `R&D`、`error < 5%`） |
 
-One offending character invalidates the file and aborts export. Numeric refs (`&#160;` / `&#xa0;`) are XML-legal but discouraged.
+只要有一个非法字符，整个文件就会失效，导出也会中断。数字实体（如 `&#160;` / `&#xa0;`）虽然合法，但不推荐。
 
-**Structural blacklist** (in addition to the character rules above):
+**结构黑名单**（除上面的字符规则外）：
 
-| Banned Feature | Description |
+| 禁用特性 | 说明 |
 |----------------|-------------|
-| `mask` | Masks |
-| `<style>` | Embedded stylesheets |
-| `class` | CSS selector attributes (`id` inside `<defs>` is a legitimate reference and is NOT banned) |
-| External CSS | External stylesheet links |
-| `<foreignObject>` | Embedded external content |
-| `<symbol>` + `<use>` | Symbol reference reuse |
-| `textPath` | Text along a path |
-| `@font-face` | Custom font declarations |
-| `<animate*>` / `<set>` | SVG animations |
-| `<script>` / event attributes | Scripts and interactivity |
-| `<iframe>` | Embedded frames |
+| `mask` | 蒙版 |
+| `<style>` | 内嵌样式表 |
+| `class` | CSS 选择器属性（`<defs>` 内的 `id` 是合法引用，不在禁用之列） |
+| External CSS | 外部样式表链接 |
+| `<foreignObject>` | 嵌入外部内容 |
+| `<symbol>` + `<use>` | symbol 引用复用 |
+| `textPath` | 路径文字 |
+| `@font-face` | 自定义字体声明 |
+| `<animate*>` / `<set>` | SVG 动画 |
+| `<script>` / event attributes | 脚本与交互事件 |
+| `<iframe>` | 嵌入式框架 |
 
-> **`marker-start` / `marker-end` is conditionally allowed** — see §1.1 for constraints. The converter maps qualifying markers to native DrawingML `<a:headEnd>` / `<a:tailEnd>`.
+> **`marker-start` / `marker-end` 在满足条件时允许使用**——约束见 §1.1。转换器会把符合条件的 marker 转为原生 DrawingML `<a:headEnd>` / `<a:tailEnd>`。
 >
-> **`clipPath` on `<image>` is conditionally allowed** — see §1.2 for constraints. The converter maps qualifying clip shapes to native DrawingML picture geometry (`<a:prstGeom>` or `<a:custGeom>`).
+> **`<image>` 上的 `clipPath` 在满足条件时允许使用**——约束见 §1.2。转换器会把符合条件的裁切形状转为原生 DrawingML 图片几何（`<a:prstGeom>` 或 `<a:custGeom>`）。
 >
-> **Replacing `<mask>` effects** — DrawingML has no per-pixel alpha. Route by effect:
-> - Image gradient overlay (vignette/fade/tint) → stacked `<rect>` with `<linearGradient>`/`<radialGradient>` (§6 Image Overlay)
-> - Non-rectangular image crop (circle/rounded/hexagon) → `clipPath` on `<image>` (§1.2)
-> - Inner glow / soft-edge → `<filter>` with `<feGaussianBlur>` (§6 Glow)
-> - Drop shadow → filter shadow or layered rect (§6 Shadow)
+> **替代 `<mask>` 效果的方法**——DrawingML 不支持逐像素 alpha。请按效果类型改写：
+> - 图片渐变蒙层（暗角 / 渐隐 / 染色）→ 叠加 `<rect>` + `<linearGradient>` / `<radialGradient>`（见 §6 图片覆盖层）
+> - 非矩形图片裁切（圆形 / 圆角 / 六边形）→ 在 `<image>` 上使用 `clipPath`（见 §1.2）
+> - 内发光 / 柔边 → 使用 `<filter>` + `<feGaussianBlur>`（见 §6 Glow）
+> - 投影 → 使用滤镜阴影或叠层矩形（见 §6 Shadow）
 >
-> Pixel-level alpha effects (text-knockout image fills, arbitrary alpha composites) have no PPT path — bake into the source image at Image_Generator stage.
+> 像素级 alpha 效果（如文字镂空图片填充、任意 alpha 合成）在 PPT 中没有可靠路径，应在 Image_Generator 阶段直接烘焙进源图。
 
 ---
 
-### 1.1 Line-end Markers (Conditionally Allowed)
+### 1.1 线端标记（条件允许）
 
-`marker-start` and `marker-end` on `<line>` and `<path>` elements are allowed **only** when the referenced `<marker>` satisfies all of the following:
+`<line>` 和 `<path>` 上的 `marker-start` / `marker-end` **仅在**所引用的 `<marker>` 满足以下全部条件时允许使用：
 
-| Requirement | Reason |
+| 要求 | 原因 |
 |-------------|--------|
-| Marker `<marker>` element defined inside `<defs>` | Converter looks up marker defs via id index |
-| `orient="auto"` | DrawingML arrow auto-rotates along the line tangent; other orient values will not round-trip |
-| Marker shape is **one of**: closed 3-vertex path/polygon (triangle), closed 4-vertex path/polygon (diamond), `<circle>` / `<ellipse>` (oval) | These three map cleanly to DrawingML `type="triangle" / "diamond" / "oval"`. Any other shape is silently dropped with a warning. |
-| Marker child's `fill` **matches** the parent line's `stroke` color | In DrawingML the arrow head inherits the line color — a mismatched marker fill will look wrong on export. |
-| `markerWidth` / `markerHeight` roughly in `3–15` range | Mapped to `sm` (<6) / `med` (6–12) / `lg` (>12) size buckets. |
+| `<marker>` 必须定义在 `<defs>` 中 | 转换器通过 id 索引查找 marker 定义 |
+| `orient="auto"` | DrawingML 箭头会沿切线方向自动旋转，其他 orient 值无法可靠往返 |
+| Marker 形状必须是以下之一：闭合 3 点 path/polygon（三角形）、闭合 4 点 path/polygon（菱形）、`<circle>` / `<ellipse>`（椭圆） | 只有这三类能稳定映射为 DrawingML 的 `triangle` / `diamond` / `oval`；其他形状会被静默丢弃，并附带 warning |
+| Marker 子元素的 `fill` **必须与**父线条的 `stroke` 颜色一致 | DrawingML 中箭头头部继承线条颜色；若不一致，导出后效果会错 |
+| `markerWidth` / `markerHeight` 大致落在 `3–15` 范围 | 会映射为 `sm`（<6）/ `med`（6–12）/ `lg`（>12） |
 
-**Use boundary**:
+**使用边界**：
 
-- `marker-start` / `marker-end`: only for connector arrows where the line is primary
-- For block / chunky / solid arrows (arrow body is the visual object), use standalone closed `<path>` / `<polygon>`; see `templates/charts/chevron_process.svg` or `templates/charts/process_flow.svg`
+- `marker-start` / `marker-end`：只用于“线条本体是主体”的连接箭头
+- 如果箭头本体是块状 / 实心 / 粗箭头，请直接使用独立闭合的 `<path>` / `<polygon>`；可参考 `templates/charts/chevron_process.svg` 或 `templates/charts/process_flow.svg`
 
-**Supported DrawingML mapping**:
+**支持的 DrawingML 映射**：
 
-| SVG Marker Shape | DrawingML Output |
+| SVG marker 形状 | DrawingML 输出 |
 |------------------|------------------|
-| `<path d="M0,0 L10,5 L0,10 Z"/>` (triangle) | `<a:tailEnd type="triangle" w="med" len="med"/>` |
+| `<path d="M0,0 L10,5 L0,10 Z"/>`（triangle） | `<a:tailEnd type="triangle" w="med" len="med"/>` |
 | `<polygon points="0,0 10,5 0,10"/>` | `<a:tailEnd type="triangle" w="med" len="med"/>` |
 | 4-vertex closed path/polygon | `<a:tailEnd type="diamond" .../>` |
 | `<circle cx="5" cy="5" r="4"/>` | `<a:tailEnd type="oval" .../>` |
 
-**Recommended template** — a standard arrow-head definition ready to reuse:
+**推荐模板**——可直接复用的标准箭头定义：
 
 ```xml
 <defs>
@@ -88,36 +88,36 @@ One offending character invalidates the file and aborts export. Numeric refs (`&
       marker-end="url(#arrowHead)"/>
 ```
 
-> ⚠️ Unclassifiable marker shapes (curved paths, multi-segment, >4 vertices) are silently dropped — line renders without arrow. Use a manual `<polygon>` for exotic shapes.
+> ⚠️ 无法归类的 marker 形状（曲线路径、多段路径、顶点数 > 4）会被静默丢弃，最终只剩线条、没有箭头。特殊箭头请直接手动画 `<polygon>`。
 
 ---
 
-### 1.2 Image Clipping (Conditionally Allowed)
+### 1.2 图片裁切（条件允许）
 
-`clip-path` on `<image>` elements is allowed when the referenced `<clipPath>` satisfies the following:
+`<image>` 元素上的 `clip-path` 在其引用的 `<clipPath>` 满足以下条件时允许使用：
 
-| Requirement | Reason |
+| 要求 | 原因 |
 |-------------|--------|
-| `<clipPath>` element defined inside `<defs>` | Converter looks up clip defs via id index |
-| Contains a **single** shape child | First child is used; multiple children are not composited |
-| Shape is one of: `<circle>`, `<ellipse>`, `<rect>` (with rx/ry), `<path>`, `<polygon>` | These map to DrawingML geometry (preset or custom) |
-| Used **only on `<image>` elements** | Non-image elements with clip-path are **forbidden** |
+| `<clipPath>` 必须定义在 `<defs>` 中 | 转换器通过 id 索引查找裁切定义 |
+| 只能包含**一个**图形子元素 | 只会读取第一个子元素；多个子元素不会合成 |
+| 形状必须是：`<circle>`、`<ellipse>`、`<rect>`（可带 rx/ry）、`<path>`、`<polygon>` | 这些可以映射到 DrawingML 预设或自定义几何 |
+| **只能用于 `<image>` 元素** | 非图片元素使用 clip-path **禁止** |
 
-**Use boundary**:
+**使用边界**：
 
-- Only on `<image>` for non-rectangular crops (circular avatars, rounded frames, hexagons)
-- NOT on shapes (`<rect>`/`<circle>`/`<path>`/`<g>`/`<text>`) — draw the target shape directly. A rect clipped to a circle is just a circle.
-- PowerPoint's SVG renderer doesn't handle `clipPath`; only the Native PPTX converter does.
+- 只用于 `<image>` 的非矩形裁切（如圆形头像、圆角相框、六边形图片）
+- **不能**用于形状元素（`<rect>` / `<circle>` / `<path>` / `<g>` / `<text>`）——目标形状应直接画出来。比如把一个矩形裁成圆，本质上就该直接画圆。
+- PowerPoint 自带 SVG 渲染器并不处理 `clipPath`；只有原生 PPTX 转换链路会处理。
 
-**Supported DrawingML mapping**:
+**支持的 DrawingML 映射**：
 
-| SVG Clip Shape | DrawingML Output | Use Case |
+| SVG 裁切形状 | DrawingML 输出 | 用途 |
 |----------------|------------------|----------|
-| `<circle>` / `<ellipse>` | `<a:prstGeom prst="ellipse"/>` | Circular avatar, oval frame |
-| `<rect rx="..."/>` | `<a:prstGeom prst="roundRect"/>` with adj value | Rounded rectangle photo frame |
-| `<path>` / `<polygon>` | `<a:custGeom>` with path commands | Hexagon, diamond, custom shape |
+| `<circle>` / `<ellipse>` | `<a:prstGeom prst="ellipse"/>` | 圆形头像、椭圆相框 |
+| `<rect rx="..."/>` | `<a:prstGeom prst="roundRect"/>` with adj value | 圆角矩形照片框 |
+| `<path>` / `<polygon>` | `<a:custGeom>` with path commands | 六边形、菱形、自定义图形 |
 
-**Recommended template** — circular image clip:
+**推荐模板**——圆形图片裁切：
 
 ```xml
 <defs>
@@ -129,7 +129,7 @@ One offending character invalidates the file and aborts export. Numeric refs (`&
        clip-path="url(#avatarClip)" preserveAspectRatio="xMidYMid slice"/>
 ```
 
-**Rounded rectangle clip** — for card-style image frames:
+**圆角矩形裁切**——适用于卡片式图片框：
 
 ```xml
 <defs>
@@ -141,46 +141,46 @@ One offending character invalidates the file and aborts export. Numeric refs (`&
        clip-path="url(#cardClip)" preserveAspectRatio="xMidYMid slice"/>
 ```
 
-> ⚠️ `clip-path` on non-image elements is FORBIDDEN — quality checker errors out. Draw target geometry directly.
+> ⚠️ 在非图片元素上使用 `clip-path` 是**禁止**的，质量检查器会直接报错。目标几何请直接绘制。
 
 ---
 
-## 2. PPT Compatibility Alternatives
+## 2. PPT 兼容替代写法
 
-| Banned Syntax | Correct Alternative |
+| 禁用写法 | 正确替代 |
 |---------------|---------------------|
 | `fill="rgba(255,255,255,0.1)"` | `fill="#FFFFFF" fill-opacity="0.1"` |
-| `<g opacity="0.2">...</g>` | Set `fill-opacity` / `stroke-opacity` on each child element individually |
-| `<image opacity="0.3"/>` | Overlay a `<rect fill="background-color" opacity="0.7"/>` mask layer after the image |
+| `<g opacity="0.2">...</g>` | 把 `fill-opacity` / `stroke-opacity` 分别写到每个子元素上 |
+| `<image opacity="0.3"/>` | 在图片上方叠加一个 `<rect fill="background-color" opacity="0.7"/>` 作为遮罩层 |
 
-**Mnemonic**: PPT does not recognize rgba, group opacity, or image opacity.
+**记忆口诀**：PPT 不识别 rgba、不识别 group opacity，也不识别 image opacity。
 
-> Arrows: prefer `marker-end` for connector lines (§1.1) — converter produces native auto-rotating arrow heads. For block/chunky arrows, use standalone closed shapes; see `templates/charts/chevron_process.svg` and `templates/charts/process_flow.svg`.
-
----
-
-## 3. Canvas Format Quick Reference
-
-> See [`canvas-formats.md`](canvas-formats.md) for the full format table (presentations / social / marketing) and the format-selection decision tree.
+> 箭头建议：连接线优先使用 `marker-end`（见 §1.1），转换器会输出原生自动旋转箭头。块状 / 实心箭头请使用独立闭合形状，参考 `templates/charts/chevron_process.svg` 和 `templates/charts/process_flow.svg`。
 
 ---
 
-## 4. Basic SVG Rules
+## 3. 画布格式速查
 
-- **viewBox** must match the canvas dimensions (`width`/`height` must match `viewBox`)
-- **Background**: Use `<rect>` to define the page background color
-- **`<tspan>`** has two purposes: (1) manual line breaks (use `dy` or explicit `y`); (2) inline run formatting on the same line (color/weight/size). `<foreignObject>` is FORBIDDEN. See "Single logical line" rule below.
-- **Fonts**: every `font-family` stack MUST end with a pre-installed family (Microsoft YaHei / SimSun / Arial / Times New Roman / Consolas …); `@font-face` is FORBIDDEN. Full rule: [`strategist.md §g`](strategist.md).
-- **Styles**: inline only (`fill=""`, `font-size=""`); `<style>`/`class` FORBIDDEN (`id` inside `<defs>` is fine)
-- **Colors**: HEX only; transparency via `fill-opacity`/`stroke-opacity`
-- **Images**: `<image href="../images/xxx.png" preserveAspectRatio="xMidYMid slice"/>`
-- **Icons**: `<use data-icon="<library>/<name>" x="" y="" width="48" height="48" fill="#HEX"/>` (auto-embedded post-processing). Always include library prefix. One stylistic library per deck (`chunk-filled`/`tabler-filled`/`tabler-outline`/`phosphor-duotone`); `simple-icons` only for real brand marks. See [`../templates/icons/README.md`](../templates/icons/README.md).
+> 完整格式表（演示 / 社交 / 营销）及格式选择决策树见 [`canvas-formats.md`](canvas-formats.md)。
 
-### Inline Text Runs (Single Logical Line = Single `<text>`)
+---
 
-One logical line — even with mixed colors/weights/sizes — MUST be one `<text>` with inline `<tspan>` children. Never use multiple adjacent `<text>` elements. The converter maps each `<tspan>` to a `<a:r>` run within the same PPT text frame, keeping the line as one editable shape.
+## 4. 基础 SVG 规则
 
-✅ **DO** — one `<text>` → one text frame with three runs:
+- **viewBox** 必须与画布尺寸一致（`width` / `height` 必须和 `viewBox` 对应）
+- **背景**：使用 `<rect>` 定义页面背景色
+- **`<tspan>`** 有两种用途：1）手动换行（用 `dy` 或显式 `y`）；2）同一行内做局部格式变化（颜色 / 字重 / 字号）。`<foreignObject>` **禁止**。详见下方“单逻辑行”规则。
+- **字体**：每个 `font-family` 栈都**必须**以系统预装字体结尾（如 Microsoft YaHei / SimSun / Arial / Times New Roman / Consolas 等）；`@font-face` **禁止**。完整规则见 [`strategist.md §g`](strategist.md)。
+- **样式**：只能写行内样式（如 `fill=""`、`font-size=""`）；`<style>` / `class` **禁止**（`<defs>` 内的 `id` 合法）
+- **颜色**：只用 HEX；透明度通过 `fill-opacity` / `stroke-opacity`
+- **图片**：`<image href="../images/xxx.png" preserveAspectRatio="xMidYMid slice"/>`
+- **图标**：`<use data-icon="<library>/<name>" x="" y="" width="48" height="48" fill="#HEX"/>`（后处理自动嵌入）。必须始终带图标库前缀。每套 deck 只能用一种风格库（`chunk-filled` / `tabler-filled` / `tabler-outline` / `phosphor-duotone`）；`simple-icons` 只用于真实品牌标识。详见 [`../templates/icons/README.md`](../templates/icons/README.md)。
+
+### 行内文字分段（单个逻辑行 = 单个 `<text>`）
+
+一个逻辑上的单行文本——即使包含不同颜色 / 字重 / 字号——也**必须**写成一个 `<text>`，内部用 `<tspan>` 做行内分段。不要把同一行拆成多个相邻 `<text>`。转换器会把每个 `<tspan>` 映射为同一个 PPT 文本框中的 `<a:r>` run，从而保证整行仍是一个可编辑对象。
+
+✅ **推荐**——一个 `<text>` 对应一个文本框，内部三个 run：
 
 ```xml
 <text x="100" y="200" font-size="24" fill="#333333">
@@ -188,7 +188,7 @@ One logical line — even with mixed colors/weights/sizes — MUST be one `<text
 </text>
 ```
 
-❌ **DON'T** — three side-by-side `<text>` elements become three separate text frames in PPT (breaks edit-as-one-line, risks alignment drift, makes spacing fragile):
+❌ **不要这样做**——三个并排 `<text>` 会在 PPT 中变成三个独立文本框（无法作为一行整体编辑，还容易对齐漂移、间距脆弱）：
 
 ```xml
 <text x="100" y="200" font-size="24" fill="#333333">实现</text>
@@ -196,9 +196,9 @@ One logical line — even with mixed colors/weights/sizes — MUST be one `<text
 <text x="240" y="200" font-size="24" fill="#333333">效率提升</text>
 ```
 
-**⚠️ Inline tspans must NOT carry `x`/`y`/`dy`** — those mark a new line, and `flatten_tspan` will split into a separate text frame. `dx` is safe (kerning, stays inline). Only set `x`/`y`/`dy` on tspans that genuinely start a new line.
+**⚠️ 行内 tspan 不能带 `x` / `y` / `dy`**——这些属性代表新起一行，`flatten_tspan` 会把它拆成独立文本框。`dx` 是安全的（用于字距调整，仍保持行内）。只有真正开始新行时，才应给 tspan 设置 `x` / `y` / `dy`。
 
-**Multi-line `<text>` with per-line emphasis works**: an outer line-break tspan (with `x` + `dy` or `y`) MAY contain nested inline tspans for color/weight/size — converter walks nested tspans and emits one run per styled segment:
+**带逐行强调的多行 `<text>` 是允许的**：外层换行 tspan（带 `x` + `dy` 或 `y`）内部，可以再嵌套行内 tspan 来控制颜色 / 字重 / 字号——转换器会递归解析，并为每个样式片段生成一个 run：
 
 ```xml
 <text x="80" y="190" font-size="18" fill="#333333">
@@ -207,7 +207,7 @@ One logical line — even with mixed colors/weights/sizes — MUST be one `<text
 </text>
 ```
 
-❌ **DON'T** — same-line column jump via `<tspan x="...">`:
+❌ **不要这样做**——同一行内通过 `<tspan x="...">` 强行跳列：
 
 ```xml
 <text x="100" y="200" font-size="18" fill="#333333">
@@ -215,19 +215,19 @@ One logical line — even with mixed colors/weights/sizes — MUST be one `<text
 </text>
 ```
 
-`x` on a tspan starts a new line, splitting into two independent text frames. For two-column layouts, write two `<text>` elements.
+在 tspan 上写 `x` 会被视为新起一行，从而拆成两个独立文本框。若要做双列，请直接写两个 `<text>`。
 
-**Default — lift key information.** Uniform-styled paragraphs read as walls of text. Wrap these in `<tspan fill="..." font-weight="bold">`:
+**默认原则——主动抬升关键信息。** 整段文字都用统一样式会变成“文字墙”。以下内容应使用 `<tspan fill="..." font-weight="bold">` 强调：
 
-- **Numerical results** — percentages, multipliers (`10x`), absolute amounts (`¥120万`)
-- **Contrasts** — gain/loss, before/after, target/actual
-- **One or two load-bearing nouns per sentence** — the term that carries the insight
+- **数字结果**——百分比、倍数（如 `10x`）、绝对金额（如 `¥120万`）
+- **对比项**——得失、前后、目标 / 实际
+- **每句中 1-2 个承重名词**——真正承载洞察的术语
 
-Do NOT highlight: connectives, common verbs, every noun, decorative adjectives, structural text (footer/axis/legend/page number/labels).
+不要强调：连接词、普通动词、所有名词、装饰性形容词，以及结构性文字（页脚 / 坐标轴 / 图例 / 页码 / 标签）。
 
-Color: use the deck's primary brand color for emphasis. Reserve green/red for actual positive/negative semantics.
+颜色建议：强调优先使用 deck 的主品牌色。绿色 / 红色只留给真实的正负语义。
 
-❌ **DON'T** — uniform-styled paragraph buries the insight:
+❌ **不要这样做**——整段统一样式会埋没洞察：
 
 ```xml
 <text x="80" y="200" font-size="20" fill="#333333">
@@ -235,7 +235,7 @@ Color: use the deck's primary brand color for emphasis. Reserve green/red for ac
 </text>
 ```
 
-✅ **DO** — same line, key data lifted:
+✅ **推荐**——同一行中主动抬升关键数据：
 
 ```xml
 <text x="80" y="200" font-size="20" fill="#333333">
@@ -243,147 +243,147 @@ Color: use the deck's primary brand color for emphasis. Reserve green/red for ac
 </text>
 ```
 
-### Element Grouping (Mandatory)
+### 元素分组（强制）
 
-Wrap logically related elements in top-level `<g id="...">` groups. Produces PowerPoint groups in PPTX, making slides easier to select/move/edit and providing stable anchors for optional per-element entrance animation.
+逻辑相关的元素必须包进顶层 `<g id="...">` 分组中。这样导出到 PPTX 后会形成 PowerPoint 分组，便于选中 / 移动 / 编辑，同时也为可选的逐元素入场动画提供稳定锚点。
 
-> ⚠️ Only `<g opacity="...">` is banned (§2). Plain `<g>` for grouping is required.
+> ⚠️ 被禁用的只有 `<g opacity="...">`（见 §2）。普通的 `<g>` 分组不仅允许，而且是必需的。
 
-**Animation-ready rule**: direct children of `<svg>` should be semantic groups, not raw drawing atoms. Aim for **3–8 top-level content `<g id>` groups per slide** (the 3–8 budget excludes page chrome — see below); each content group becomes one entrance step under the chosen `--animation-trigger` mode (one click in `on-click`, one cascade slot in `after-previous`, parallel in `with-previous`).
+**面向动画的规则**：`<svg>` 的直接子元素应该是语义分组，而不是零散绘图原子。建议**每页有 3–8 个顶层内容 `<g id>` 分组**（这个 3–8 不包含页面 chrome，见下文）；在 `--animation-trigger` 的不同模式下，每个内容组会成为一个入场步骤（`on-click` 为一次点击，`after-previous` 为一个串联槽位，`with-previous` 为并行播放）。
 
-**Chrome groups are excluded automatically.** The exporter treats top-level groups whose id contains chrome tokens as page chrome and skips them in the animation sequence — they appear together with the slide. Tokens (matched against id after splitting on `-` / `_`): `background`, `bg`, `decoration` / `decorations` / `decor`, `header`, `footer`, `chrome`, `watermark`, `pagenumber` / `pagenum` / `page-number`. So `<g id="bg-texture">`, `<g id="cover-footer">`, `<g id="p03-header">`, `<g id="bottom-decor">` all skip animation while keeping their `<g>` wrapper for editing/grouping. Use these naming conventions for chrome — do **not** strip the `<g>` wrapper.
+**Chrome 分组会被自动排除。** 导出器会把顶层 id 中包含 chrome 关键词的分组视为页面装饰层，并跳过动画序列——它们会和整页一起出现。匹配关键词（id 按 `-` / `_` 拆分后匹配）：`background`、`bg`、`decoration` / `decorations` / `decor`、`header`、`footer`、`chrome`、`watermark`、`pagenumber` / `pagenum` / `page-number`。因此 `<g id="bg-texture">`、`<g id="cover-footer">`、`<g id="p03-header">`、`<g id="bottom-decor">` 都会跳过动画，但仍保留 `<g>` 以便编辑和分组。页面 chrome 应统一使用这套命名，不要移除 `<g>` 包装。
 
-**What to group**:
+**应该分组的对象**：
 
-| Grouping Unit | Contains |
+| 分组单元 | 包含内容 |
 |---------------|----------|
-| Card / panel | Background rect + (optional shadow only if the card floats over a photo/colored panel — see §6) + icon + title + body text |
-| Process step | Number circle + icon + label + description |
-| List item | Bullet / number + icon + title + description |
-| Icon-text combo | Icon element + adjacent label |
-| Page header | Title + subtitle + accent decoration |
-| Page footer | Page number + branding |
-| Decorative cluster | Related decorative shapes (rings, orbs, dots) |
+| 卡片 / 面板 | 背景矩形 +（仅当卡片浮在照片 / 色块上方时才加可选阴影，见 §6）+ 图标 + 标题 + 正文 |
+| 流程步骤 | 编号圆点 + 图标 + 标签 + 描述 |
+| 列表项 | 项目符号 / 编号 + 图标 + 标题 + 描述 |
+| 图标 + 文本组合 | 图标元素 + 相邻标签 |
+| 页眉 | 标题 + 副标题 + 强调装饰 |
+| 页脚 | 页码 + 品牌标识 |
+| 装饰簇 | 一组相关装饰元素（圆环、光点、圆球等） |
 
-**Do not**:
+**不要这样做**：
 
-- Put the whole slide into one giant `<g>`; that leaves only one animation step.
-- Leave many top-level `<rect>` / `<text>` / `<path>` elements ungrouped; fallback animation is capped at 8 primitives and dense flat pages may skip animation.
-- Split every icon, text line, or decorative mark into separate top-level groups; that creates too many click steps.
-- Use anonymous top-level groups. Every top-level semantic group needs a descriptive `id`.
+- 不要把整页都塞进一个巨大的 `<g>`，否则只剩一个动画步骤。
+- 不要让大量顶层 `<rect>` / `<text>` / `<path>` 裸露不分组；回退动画最多只取 8 个 primitive，密集页面还可能直接跳过动画。
+- 不要把每个图标、每行文字、每个装饰点都拆成独立顶层组，否则点击步骤会爆炸。
+- 不要使用匿名顶层组。每个顶层语义组都必须有可读的 `id`。
 
-**Example**:
+**示例**：
 
 ```xml
 <g id="card-benefits-1">
-  <!-- This card floats over a colored panel — shadow is appropriate. On a flat white canvas, omit the filter. -->
+  <!-- 这张卡片浮在色块面板上方，因此适合加阴影；若是纯白平面画布，则应去掉滤镜。 -->
   <rect x="60" y="115" width="565" height="260" rx="20" fill="#FFFFFF" filter="url(#shadow)"/>
   <use data-icon="chunk-filled/bolt" x="108" y="163" width="44" height="44" fill="#0071E3"/>
   <text x="105" y="270" font-size="56" font-weight="bold" fill="#0071E3">10×</text>
-  <text x="250" y="270" font-size="30" font-weight="bold" fill="#1D1D1F">Faster</text>
-  <text x="105" y="310" font-size="18" fill="#6E6E73">Reduce production time from days to hours.</text>
+  <text x="250" y="270" font-size="30" font-weight="bold" fill="#1D1D1F">更快</text>
+  <text x="105" y="310" font-size="18" fill="#6E6E73">将生产周期从数天缩短到数小时。</text>
 </g>
 ```
 
-**Naming**: descriptive `id` on top-level `<g>` is **required** (e.g., `card-1`, `step-discover`, `header`, `footer`). Each top-level `<g id>` becomes one anchor for per-element entrance animation in PPTX export; without it, the exporter falls back to at most 8 top-level primitives or skips animation on dense pages.
+**命名要求**：顶层 `<g>` 的描述性 `id` 是**强制**的（如 `card-1`、`step-discover`、`header`、`footer`）。每个顶层 `<g id>` 都会成为 PPTX 导出时逐元素动画的锚点；如果没有，导出器只能退回到最多 8 个顶层 primitive，或在密集页面中直接跳过动画。
 
 ---
 
-## 5. Post-processing Pipeline (3 Steps)
+## 5. 后处理流程（3 步）
 
-Must be executed in order — skipping or adding extra flags is FORBIDDEN:
+必须按顺序执行——禁止跳步，也禁止额外乱加参数：
 
 ```bash
-# 1. Split speaker notes into per-page note files
-python3 scripts/total_md_split.py <project_path>
+# 1. 将总备注拆分为逐页备注文件
+python scripts/total_md_split.py <project_path>
 
-# 2. SVG post-processing (icon embedding, image crop/embed, text flattening, rounded rect to path)
-python3 scripts/finalize_svg.py <project_path>
+# 2. SVG 后处理（嵌入图标、裁切/嵌入图片、文字扁平化、圆角矩形转 path）
+python scripts/finalize_svg.py <project_path>
 
-# 3. Export PPTX (from svg_final/, embeds speaker notes by default)
-python3 scripts/svg_to_pptx.py <project_path> -s final
-# Output:
-#   exports/<project_name>_<timestamp>.pptx           ← main native pptx
-#   backup/<timestamp>/<project_name>_svg.pptx        ← SVG snapshot
-#   backup/<timestamp>/svg_output/                    ← Executor SVG source backup
+# 3. 导出 PPTX（从 svg_final/ 导出，默认嵌入演讲备注）
+python scripts/svg_to_pptx.py <project_path> -s final
+# 输出：
+#   exports/<project_name>_<timestamp>.pptx           ← 主原生 pptx
+#   backup/<timestamp>/<project_name>_svg.pptx        ← SVG 快照
+#   backup/<timestamp>/svg_output/                    ← Executor SVG 源文件备份
 ```
 
-**Optional animation flags** (only when the user asks):
-- `-t <effect>` — page transition (`fade` / `push` / `wipe` / `split` / `strips` / `cover` / `random` / `none`; default `fade`)
-- `-a <effect>` — per-element entrance animation (`fade` / `mixed` / `random` / one of 22 named effects / `none`; default `mixed`). Anchors on top-level `<g id="...">` groups.
-- `--animation-trigger {on-click,with-previous,after-previous}` — Start mode matching PowerPoint's animation-pane Start dropdown. Default `after-previous` (cascade on slide entry; pace via `--animation-stagger <seconds>`); `on-click` advances per click; `with-previous` plays all groups together.
-- `--auto-advance <seconds>` — kiosk-style auto-play
+**可选动画参数**（仅当用户明确要求时）：
+- `-t <effect>` —— 页面切换效果（`fade` / `push` / `wipe` / `split` / `strips` / `cover` / `random` / `none`；默认 `fade`）
+- `-a <effect>` —— 逐元素入场动画（`fade` / `mixed` / `random` / 22 种命名效果之一 / `none`；默认 `mixed`）。锚点是顶层 `<g id="...">` 分组。
+- `--animation-trigger {on-click,with-previous,after-previous}` —— 对应 PowerPoint 动画面板里的 Start 模式。默认 `after-previous`（页面进入后自动串联播放，节奏由 `--animation-stagger <seconds>` 控制）；`on-click` 逐次点击推进；`with-previous` 为全部组同时播放。
+- `--auto-advance <seconds>` —— 展台 / 轮播式自动播放
 
-Full reference: [`animations.md`](animations.md).
+完整说明见 [`animations.md`](animations.md)。
 
-**Prohibited**:
-- NEVER use `cp` as a substitute for `finalize_svg.py`
-- NEVER export directly from `svg_output/` — MUST export from `svg_final/` (use `-s final`)
-- NEVER use `--only` (it suppresses one of the two output files)
+**禁止事项**：
+- 绝对不要用 `cp` 替代 `finalize_svg.py`
+- 绝对不要直接从 `svg_output/` 导出——**必须**从 `svg_final/` 导出（使用 `-s final`）
+- 绝对不要使用 `--only`（它会抑制两种输出中的一种）
 
-**Re-run rule**: Any change to `svg_output/` after post-processing requires re-running Steps 2-3. Step 1 only re-runs if `notes/total.md` changed.
+**重跑规则**：后处理之后，只要 `svg_output/` 再次发生变化，就必须重新执行第 2-3 步。第 1 步只在 `notes/total.md` 发生变化时才需要重跑。
 
 ---
 
-## 6. Shadow & Overlay Techniques
+## 6. 阴影与覆盖层技巧
 
-> `<mask>` elements and `<image opacity="...">` are banned. Always use stacked `<rect>` or gradient overlays instead (see §2).
+> `<mask>` 元素和 `<image opacity="...">` 都是禁用的。请始终改用叠加 `<rect>` 或渐变覆盖层（见 §2）。
 
 ### Shadow
 
-> **Shadow is restraint, not default.** The "designed" feel comes from absence, not abundance.
+> **阴影应克制使用，而不是默认就上。** “设计感”往往来自节制，而不是堆叠。
 
-#### When to use
+#### 何时使用
 
-Only when the element genuinely floats above another layer:
-- Card / quote bubble / annotation on a photo or colored panel
-- Single primary CTA or "recommended" item picked out from peers
-- Overlay layer (callout, tooltip, modal emphasis)
-- Floating image card on a textured background
+只有当元素确实“浮”在另一层之上时才使用：
+- 浮在照片或色块上的卡片 / 引语框 / 注释框
+- 一页中唯一的主 CTA，或需要从同级对象中被挑出来的“推荐项”
+- 覆盖层（callout、tooltip、弹层强调）
+- 浮在纹理背景上的图片卡片
 
-#### When NOT to use
+#### 何时不要用
 
-- Background panels / dividers / decorative bars — they are the floor
-- Equal peer cards in a 2/3/4-up grid — keep all flat
-- Containers with visible border, gradient fill, or strong tint — redundant
-- Body-text paragraph containers — disrupts scan rhythm
-- Decorative lines / dividers / icons — they are symbols, not objects
-- Pages with only one content container — no second layer to lift above
-- Dark backgrounds — black shadows vanish; use 1px low-opacity white stroke or outer glow
+- 背景面板 / 分隔条 / 装饰条——它们是“地板层”
+- 2 / 3 / 4 列的同级卡片网格——应全部保持平面
+- 已经有明显边框、渐变填充或强底色的容器——再加阴影会重复
+- 正文段落容器——会破坏阅读节奏
+- 装饰线 / 分隔线 / 图标——它们是符号，不是物体
+- 页面只有一个内容容器——没有第二层可供“抬起”
+- 深色背景页面——黑色阴影会消失；应改用 1px 低透明白描边或外发光
 
-**Per-page budget**: ≤2-3 shadowed elements. If you reach for a 4th, drop one first.
+**每页预算**：最多 2-3 个带阴影元素。想加第 4 个前，先删掉一个。
 
-#### Single light source per page
+#### 每页单一光源
 
-All `feOffset` on a page must share the same `dx`/`dy` direction. Default: `dx="0"`, `dy="4"`-`dy="8"` (light from upper front).
+同一页内，所有 `feOffset` 必须保持相同的 `dx` / `dy` 方向。默认值可用：`dx="0"`，`dy="4"` 到 `dy="8"`（相当于光从上前方打下）。
 
-#### Restraint over visibility
+#### 以克制代替“看得见”
 
-Standard: "the shadow is felt, not seen." If noticed, it's too strong.
-- Resting cards: `flood-opacity` 0.06-0.12
-- Raised elements (CTA, overlay): max `flood-opacity` 0.20
-- Above 0.20 = Office 2007 hard-shadow look
-- Color: near-black at low opacity, or a darker tint of background. Brand-color shadow only on accent elements sharing that hue.
+标准原则是：“阴影应该被感受到，而不是被看见。” 如果用户一眼看到阴影本身，通常就太重了。
+- 静止层卡片：`flood-opacity` 0.06-0.12
+- 抬升层元素（CTA、覆盖层）：最大 `flood-opacity` 0.20
+- 超过 0.20 会很容易变成 Office 2007 式硬阴影
+- 颜色建议：低透明近黑色，或背景色的更深一档。品牌色阴影只应用于同色系强调元素。
 
-#### Two-tier elevation maximum
+#### 抬升层最多两级
 
-A page may have at most two non-floor tiers.
+一页中最多只允许两个“非地板层”层级。
 
-| Tier | When | dy | stdDeviation | flood-opacity |
+| 层级 | 使用场景 | dy | stdDeviation | flood-opacity |
 |------|------|----|--------------|---------------|
-| Floor (no shadow) | Backgrounds, peer-grid cards, dividers, body-text containers | — | — | — |
-| Resting | Cards on photos/panels, secondary callouts | 2-4 | 4-8 | 0.06-0.10 |
-| Raised | Primary CTA, focused/recommended card, overlay | 6-10 | 10-16 | 0.12-0.20 |
+| 地板层（无阴影） | 背景、同级卡片网格、分隔线、正文容器 | — | — | — |
+| 静止层 | 浮在照片/面板上的卡片、次级提示框 | 2-4 | 4-8 | 0.06-0.10 |
+| 抬升层 | 主 CTA、重点 / 推荐卡片、覆盖层 | 6-10 | 10-16 | 0.12-0.20 |
 
-#### Don't stack visual-weight tools
+#### 不要叠加“视觉重量工具”
 
-Pick **one** per container: shadow, border, gradient fill, or strong tint. Stacking = instant template look.
+每个容器只选**一种**：阴影、边框、渐变填充、强底色。叠加使用会立刻变成“模板味”。
 
 ---
 
-#### Filter Soft Shadow — Recommended
+#### 滤镜软阴影——推荐方案
 
-Best for: cards, floating panels, elevated elements. The `svg_to_pptx` converter automatically converts `feGaussianBlur` + `feOffset` into native PPTX `<a:outerShdw>`.
+适用于：卡片、浮层面板、抬升元素。`svg_to_pptx` 转换器会自动把 `feGaussianBlur` + `feOffset` 转为原生 PPTX `<a:outerShdw>`。
 
 ```xml
 <defs>
@@ -401,19 +401,19 @@ Best for: cards, floating panels, elevated elements. The `svg_to_pptx` converter
 <rect x="60" y="60" width="400" height="240" rx="12" fill="#FFFFFF" filter="url(#softShadow)"/>
 ```
 
-Recommended parameters (see "Two-tier elevation maximum" above for tier guidance):
+推荐参数（层级含义见上方“抬升层最多两级”）：
 ```
-stdDeviation:   4–16       (resting cards: 4–8;  raised elements: 10–16)
-flood-opacity:  0.06–0.12  (resting cards — default)
-                0.12–0.20  (raised elements only — primary CTA, overlay)
-                NEVER     > 0.20  (Office 2007 hard-shadow look)
-dy:             2–10       (resting: 2–4;  raised: 6–10)
-dx:             0–2        (must match every other shadow on the page — single light source)
+stdDeviation:   4–16       （静止层卡片：4–8；抬升层元素：10–16）
+flood-opacity:  0.06–0.12  （静止层卡片——默认）
+                0.12–0.20  （仅用于抬升层元素——主 CTA、覆盖层）
+                不要超过 0.20 （会变成 Office 2007 式硬阴影）
+dy:             2–10       （静止层：2–4；抬升层：6–10）
+dx:             0–2        （必须与页面上其他阴影方向一致——单一光源）
 ```
 
-#### Colored Shadow
+#### 彩色阴影
 
-Best for: accent buttons, brand-colored cards. Use the element's own color family instead of black.
+适用于：强调按钮、品牌色卡片。应使用元素自身色系，而不是黑色。
 
 ```xml
 <filter id="colorShadow" x="-15%" y="-15%" width="140%" height="140%">
@@ -428,11 +428,11 @@ Best for: accent buttons, brand-colored cards. Use the element's own color famil
 </filter>
 ```
 
-Replace `flood-color` with the element's brand color. Keep `flood-opacity` 0.12-0.20. Reserve for the single primary CTA per page — using on every button defeats the cue.
+把 `flood-color` 替换为元素的品牌色。`flood-opacity` 建议维持在 0.12-0.20。每页最好只保留给唯一的主 CTA；如果每个按钮都加，强调就失效了。
 
-#### Glow Effect
+#### 发光效果
 
-Best for: title highlights, key metrics, hero text. The converter automatically converts `feGaussianBlur` without `feOffset` into native PPTX `<a:glow>`.
+适用于：标题强调、关键指标、hero 文案。转换器会自动把“没有 `feOffset` 的 `feGaussianBlur`”识别为原生 PPTX `<a:glow>`。
 
 ```xml
 <defs>
@@ -446,36 +446,36 @@ Best for: title highlights, key metrics, hero text. The converter automatically 
     </feMerge>
   </filter>
 </defs>
-<text x="640" y="360" text-anchor="middle" font-size="48" fill="#1A73E8" filter="url(#titleGlow)">Key Insight</text>
+<text x="640" y="360" text-anchor="middle" font-size="48" fill="#1A73E8" filter="url(#titleGlow)">关键洞察</text>
 ```
 
-Recommended parameters:
+推荐参数：
 ```
-stdDeviation:   4–8      (smaller = subtle, larger = prominent)
-flood-color:    brand color or accent color (NOT black)
-flood-opacity:  0.35–0.55  (stronger than shadow for visibility)
+stdDeviation:   4–8      （更小 = 更克制；更大 = 更显著）
+flood-color:    品牌色或强调色（不要用黑色）
+flood-opacity:  0.35–0.55  （为了可见性，通常比阴影更强）
 ```
 
-**vs shadow**: no `<feOffset>` (or dx=0/dy=0). The converter uses this to distinguish glow from shadow.
+**与阴影的区别**：不应包含 `<feOffset>`（或 dx=0 / dy=0）。转换器正是通过这一点来区分 glow 和 shadow。
 
-#### Layered Rect Shadow — High-Compatibility Fallback
+#### 叠层矩形阴影——高兼容回退方案
 
-Best for: maximum compatibility with older PowerPoint versions. Stack 2–3 semi-transparent rectangles behind the main card:
+适用于：需要兼容较旧 PowerPoint 版本时。做法是在主卡片后面叠 2-3 个半透明矩形：
 
 ```xml
-<!-- Shadow layers (back to front, largest offset first) -->
+<!-- 阴影层（从后往前，先放位移最大的） -->
 <rect x="68" y="72" width="400" height="240" rx="16" fill="#000000" fill-opacity="0.03"/>
 <rect x="65" y="69" width="400" height="240" rx="14" fill="#000000" fill-opacity="0.05"/>
 <rect x="62" y="66" width="400" height="240" rx="12" fill="#1A73E8" fill-opacity="0.04"/>
-<!-- Main card -->
+<!-- 主卡片 -->
 <rect x="60" y="60" width="400" height="240" rx="12" fill="#FFFFFF"/>
 ```
 
-### Image Overlay
+### 图片覆盖层
 
-#### Linear Gradient Overlay — Most Common
+#### 线性渐变覆盖层——最常用
 
-Best for: image+text pages. Gradient direction should match text position (text on left → gradient darkens toward left).
+适用于：图文叠加页面。渐变方向应与文字位置一致（文字在左，就让左侧更暗）。
 
 ```xml
 <image href="..." x="0" y="0" width="1280" height="720" preserveAspectRatio="xMidYMid slice"/>
@@ -489,9 +489,9 @@ Best for: image+text pages. Gradient direction should match text position (text 
 <rect x="0" y="0" width="1280" height="720" fill="url(#imgOverlay)"/>
 ```
 
-#### Bottom Gradient Bar
+#### 底部渐变条
 
-Best for: cover slides and full-image pages with bottom title.
+适用于：封面页，或标题放在底部的全图页面。
 
 ```xml
 <defs>
@@ -503,9 +503,9 @@ Best for: cover slides and full-image pages with bottom title.
 <rect x="0" y="380" width="1280" height="340" fill="url(#bottomBar)"/>
 ```
 
-#### Radial Gradient Overlay — Vignette Effect
+#### 径向渐变覆盖层——暗角效果
 
-Best for: full-screen atmosphere slides; draws attention to the center.
+适用于：全屏氛围页；可把注意力拉回中心区域。
 
 ```xml
 <defs>
@@ -517,9 +517,9 @@ Best for: full-screen atmosphere slides; draws attention to the center.
 <rect x="0" y="0" width="1280" height="720" fill="url(#vignette)"/>
 ```
 
-#### Brand Color Overlay
+#### 品牌色覆盖层
 
-Best for: slides needing strong visual brand identity.
+适用于：需要强化品牌识别的页面。
 
 ```xml
 <defs>
@@ -531,34 +531,34 @@ Best for: slides needing strong visual brand identity.
 <rect x="0" y="0" width="1280" height="720" fill="url(#brandOverlay)"/>
 ```
 
-### Quick-Reference Table
+### 快速对照表
 
-| Scenario | Recommended Technique | Avoid |
+| 场景 | 推荐手法 | 避免 |
 |----------|-----------------------|-------|
-| Card / panel shadow (only when floating over photo/colored panel) | Filter soft shadow (`flood-opacity` 0.06–0.12, single light source) | Hard black shadow, full-page abundance |
-| Equal peer cards in a grid | All flat (no shadow) | Lifting every card uniformly |
-| Page-section background panel | Flat fill, no shadow | Treating panels as floating cards |
-| Accent / CTA button (one per page) | Colored shadow (same hue family, `flood-opacity` 0.12–0.20) | Generic gray shadow, applying to every button |
-| Title / metric highlight | Glow filter (brand color, no offset) | Overuse on body text |
-| Text over image | Linear gradient overlay (direction matches text side) | Uniform flat opacity over whole image |
-| Cover / full-image slide | Bottom gradient bar + brand color | Solid black overlay |
-| Atmosphere / hero slide | Radial vignette | Unprocessed raw image |
-| Max PPT compatibility needed | Layered rect shadow | Filter-based shadow |
+| 卡片 / 面板阴影（仅在浮于照片 / 色块之上时） | 滤镜软阴影（`flood-opacity` 0.06–0.12，单一光源） | 硬黑阴影、整页泛滥使用 |
+| 同级卡片网格 | 全部保持平面（无阴影） | 每张卡都一起抬起来 |
+| 页面分区背景面板 | 平面填充，无阴影 | 把背景面板当浮层卡片 |
+| 强调 / CTA 按钮（每页一个） | 彩色阴影（同色系，`flood-opacity` 0.12–0.20） | 通用灰色阴影，或每个按钮都加 |
+| 标题 / 指标强调 | 发光滤镜（品牌色，无偏移） | 在正文里大量滥用 |
+| 图片上叠文字 | 线性渐变覆盖层（方向与文字所在侧一致） | 整张图统一压平透明黑层 |
+| 封面 / 全图页 | 底部渐变条 + 品牌色 | 纯黑硬蒙层 |
+| 氛围 / hero 页 | 径向暗角 | 未处理的原始大图 |
+| 最高 PPT 兼容要求 | 叠层矩形阴影 | 滤镜型阴影 |
 
 ---
 
-## 7. Stroke, Text & Shape Effects
+## 7. 描边、文字与图形效果
 
-### stroke-dasharray — Dashed / Dotted Lines
+### `stroke-dasharray` —— 虚线 / 点线
 
-Converts to native PPTX `<a:prstDash>`. Use preset patterns for best results:
+会转换为原生 PPTX `<a:prstDash>`。建议优先使用以下预设模式：
 
-| SVG Value | PPTX Preset | Best For |
+| SVG 值 | PPTX 预设 | 适用场景 |
 |-----------|-------------|----------|
-| `4,4` | Dash | General dashed lines, separators |
-| `2,2` | Dot (sysDot) | Subtle dotted borders, placeholder outlines |
-| `8,4` | Long dash | Timeline connectors, flow arrows |
-| `8,4,2,4` | Long dash-dot | Technical drawings, dimension lines |
+| `4,4` | Dash | 普通虚线、分隔线 |
+| `2,2` | Dot (sysDot) | 轻量点线边框、占位轮廓 |
+| `8,4` | Long dash | 时间轴连接线、流程箭头 |
+| `8,4,2,4` | Long dash-dot | 技术图、尺寸线 |
 
 ```xml
 <rect x="60" y="60" width="400" height="240" rx="12"
@@ -568,44 +568,44 @@ Converts to native PPTX `<a:prstDash>`. Use preset patterns for best results:
   stroke="#CCCCCC" stroke-width="1" stroke-dasharray="2,2"/>
 ```
 
-### stroke-linejoin
+### `stroke-linejoin`
 
-Controls how line segments join at corners. Supported values convert to native PPTX line join types:
+控制线段在拐角处的连接方式。支持值会转换为原生 PPTX 的 line join 类型：
 
-| SVG Value | PPTX Equivalent | Best For |
+| SVG 值 | PPTX 等价项 | 适用场景 |
 |-----------|-----------------|----------|
-| `round` | Round join | Smooth polyline charts, organic shapes |
-| `bevel` | Bevel join | Technical diagrams |
-| `miter` | Miter join (default) | Sharp-cornered rectangles, arrows |
+| `round` | 圆角连接 | 圆滑折线图、有机形状 |
+| `bevel` | 斜角连接 | 技术图 |
+| `miter` | 尖角连接（默认） | 尖角矩形、箭头 |
 
 ```xml
 <polyline points="100,200 200,100 300,200" fill="none"
   stroke="#1A73E8" stroke-width="3" stroke-linejoin="round"/>
 ```
 
-### text-decoration
+### `text-decoration`
 
-Supported text decorations convert to native PPTX text formatting:
+支持的文字装饰会转换为原生 PPTX 文本格式：
 
-| SVG Value | PPTX Equivalent | Best For |
+| SVG 值 | PPTX 等价项 | 适用场景 |
 |-----------|-----------------|----------|
-| `underline` | Single underline | Emphasis, links, key terms |
-| `line-through` | Strikethrough | Removed items, before/after comparisons |
+| `underline` | 单下划线 | 强调、链接、关键术语 |
+| `line-through` | 删除线 | 删除项、前后对比 |
 
 ```xml
-<text x="100" y="200" font-size="20" fill="#333333" text-decoration="underline">Important Term</text>
+<text x="100" y="200" font-size="20" fill="#333333" text-decoration="underline">重要术语</text>
 
-<!-- Per-tspan decoration -->
+<!-- 针对单个 tspan 的装饰 -->
 <text x="100" y="240" font-size="18" fill="#333333">
-  Regular text <tspan text-decoration="line-through" fill="#999999">old value</tspan> new value
+  当前值 <tspan text-decoration="line-through" fill="#999999">旧值</tspan> 新值
 </text>
 ```
 
-### Gradient Fill — linearGradient & radialGradient
+### 渐变填充——`linearGradient` 与 `radialGradient`
 
-Gradients defined in `<defs>` and referenced via `fill="url(#id)"` convert to native PPTX `<a:gradFill>`. Use them as shape fills (not just overlays) for polished surfaces.
+在 `<defs>` 中定义，并通过 `fill="url(#id)"` 引用的渐变，会转换为原生 PPTX `<a:gradFill>`。它们既可用于覆盖层，也可直接作为图形填充，做出更精致的表面效果。
 
-**Linear gradient** — best for buttons, header bars, background panels:
+**线性渐变**——适用于按钮、标题栏、背景面板：
 
 ```xml
 <defs>
@@ -617,7 +617,7 @@ Gradients defined in `<defs>` and referenced via `fill="url(#id)"` convert to na
 <rect x="540" y="600" width="200" height="48" rx="24" fill="url(#btnGrad)"/>
 ```
 
-**Radial gradient** — best for spotlight backgrounds, circular accents:
+**径向渐变**——适用于聚光背景、圆形强调元素：
 
 ```xml
 <defs>
@@ -629,90 +629,90 @@ Gradients defined in `<defs>` and referenced via `fill="url(#id)"` convert to na
 <circle cx="640" cy="360" r="300" fill="url(#spotBg)"/>
 ```
 
-### transform: rotate — Element Rotation
+### `transform: rotate` —— 元素旋转
 
-Rotation converts to native PPTX `<a:xfrm rot="...">`. Supported on all element types: `rect`, `circle`, `ellipse`, `line`, `path`, `polygon`, `polyline`, `image`, and `text`.
+旋转会转换为原生 PPTX `<a:xfrm rot="...">`。支持所有常见元素：`rect`、`circle`、`ellipse`、`line`、`path`、`polygon`、`polyline`、`image`、`text`。
 
 ```xml
-<!-- Rotated decorative element -->
+<!-- 旋转的装饰元素 -->
 <rect x="100" y="100" width="60" height="60" fill="#1A73E8" fill-opacity="0.1"
   transform="rotate(45, 130, 130)"/>
 
-<!-- Rotated text label -->
+<!-- 旋转的文字标签 -->
 <text x="50" y="400" font-size="14" fill="#999999"
-  transform="rotate(-90, 50, 400)">Y-Axis Label</text>
+  transform="rotate(-90, 50, 400)">Y 轴标签</text>
 ```
 
-**Syntax**: `rotate(angle)` or `rotate(angle, cx, cy)` where `cx,cy` is the rotation center. Positive angles rotate clockwise.
+**语法**：`rotate(angle)` 或 `rotate(angle, cx, cy)`，其中 `cx,cy` 是旋转中心。正角度表示顺时针旋转。
 
-### Arc Paths — Donut / Pie Charts
+### 圆弧路径——环图 / 饼图
 
-Calculate arc endpoint coordinates precisely with trigonometry. Never estimate — small errors produce wildly wrong shapes.
+圆弧端点坐标必须用三角函数精确计算，绝不能靠目测估。哪怕很小的误差，也可能让形状完全错误。
 
-**Calculation formula** (center `cx,cy`, radius `r`, angle `θ` in degrees):
+**计算公式**（圆心 `cx,cy`，半径 `r`，角度 `θ`，单位为度）：
 ```
 x = cx + r × cos(θ × π / 180)
 y = cy + r × sin(θ × π / 180)
 ```
 
-**Key rules**:
-1. Start at **-90°** (12 o'clock position) and go clockwise
-2. Each sector spans `percentage × 360°`
-3. Use **large-arc flag = 1** when the sector is > 180°, **0** otherwise
-4. sweep-direction = 1 (clockwise) for outer arc, 0 (counter-clockwise) for inner arc returning
-5. **Always verify** that the sum of all sector angles equals 360° and that the last sector's end point matches the first sector's start point
+**关键规则**：
+1. 从 **-90°**（12 点钟方向）开始，按顺时针计算
+2. 每个扇区的角度 = `percentage × 360°`
+3. 当扇区角度 > 180° 时，**large-arc flag = 1**；否则为 **0**
+4. 外弧的 `sweep-direction = 1`（顺时针），内弧回程的 `sweep-direction = 0`（逆时针）
+5. **务必检查**：所有扇区角度之和是否等于 360°，且最后一个扇区的终点是否与第一个扇区的起点闭合一致
 
-**Example — 75% donut sector** (center 400,400, outer r=180, inner r=100):
+**示例——75% 环形扇区**（圆心 400,400，外半径 r=180，内半径 r=100）：
 ```
-Start angle: -90°    → outer(400, 220), inner(400, 300)
-End angle: -90+270=180° → outer(220, 400), inner(300, 400)
-Large-arc flag: 1 (270° > 180°)
+起始角：-90°          → 外弧点(400, 220)，内弧点(400, 300)
+结束角：-90+270=180° → 外弧点(220, 400)，内弧点(300, 400)
+Large-arc flag：1（270° > 180°）
 
 <path d="M 400,220 A 180,180 0 1,1 220,400 L 300,400 A 100,100 0 1,0 400,300 Z"/>
 ```
 
-### Polygon Arrows on Diagonal Lines
+### 斜线上的多边形箭头
 
-> For connector lines prefer `marker-end`/`marker-start` (§1.1). For chunky/wide solid/non-connector arrows, use standalone polygon or path.
+> 连接线优先使用 `marker-end` / `marker-start`（见 §1.1）。块状 / 宽体 / 实心 / 非连接器箭头，请使用独立 `polygon` 或 `path`。
 
-Horizontal/vertical lines can use simple point offsets for `<polygon>` arrowheads. Diagonal lines need triangle vertices rotated to match line direction.
+水平 / 垂直线可以直接用简单偏移计算 `<polygon>` 箭头。斜线则必须把三角形顶点按线条方向旋转后再计算。
 
-**Method** — calculate triangle points using the line's direction vector:
+**方法**——通过线段方向向量计算三角形三个顶点：
 
 ```
-Given line from (x1,y1) to (x2,y2):
-1. Direction vector: dx = x2-x1, dy = y2-y1
-2. Normalize: len = √(dx²+dy²), ux = dx/len, uy = dy/len
-3. Perpendicular: px = -uy, py = ux
-4. Arrow tip = (x2, y2)
-5. Back point 1 = (x2 - ux×12 + px×5,  y2 - uy×12 + py×5)
-6. Back point 2 = (x2 - ux×12 - px×5,  y2 - uy×12 - py×5)
+已知线段从 (x1,y1) 到 (x2,y2)：
+1. 方向向量：dx = x2-x1, dy = y2-y1
+2. 归一化：len = √(dx²+dy²), ux = dx/len, uy = dy/len
+3. 垂直向量：px = -uy, py = ux
+4. 箭头尖端 = (x2, y2)
+5. 底边点 1 = (x2 - ux×12 + px×5,  y2 - uy×12 + py×5)
+6. 底边点 2 = (x2 - ux×12 - px×5,  y2 - uy×12 - py×5)
 ```
 
-**Example — diagonal line** from (260,310) to (370,430):
+**示例——斜线**，从 (260,310) 到 (370,430)：
 ```
 dx=110, dy=120, len≈162.8, ux=0.676, uy=0.737
 px=-0.737, py=0.676
-Tip: (370, 430)
-Back1: (370-8.1-3.7, 430-8.8+3.4) = (358.2, 424.6)
-Back2: (370-8.1+3.7, 430-8.8-3.4) = (365.6, 417.8)
+尖端： (370, 430)
+底边点1： (370-8.1-3.7, 430-8.8+3.4) = (358.2, 424.6)
+底边点2： (370-8.1+3.7, 430-8.8-3.4) = (365.6, 417.8)
 
 <polygon points="370,430 365.6,417.8 358.2,424.6" fill="#C8A96E"/>
 ```
 
-⚠️ Never use a fixed downward/rightward triangle on a diagonal line — arrow will point wrong.
+⚠️ 不要在斜线上直接套用“固定朝右 / 朝下”的三角箭头，否则箭头方向一定会错。
 
 ---
 
-## 8. Project Directory Structure
+## 8. 项目目录结构
 
 ```
 project/
-├── svg_output/    # Raw SVGs (Executor output, contains placeholders)
-├── svg_final/     # Post-processed final SVGs (finalize_svg.py output)
-├── images/        # Image assets (user-provided + AI-generated)
-├── notes/         # Speaker notes (.md files matching SVG names)
-│   └── total.md   # Complete speaker notes document (before splitting)
-├── templates/     # Project templates (if any)
-└── *.pptx         # Exported PPT file
+├── svg_output/    # 原始 SVG（Executor 输出，可能含占位内容）
+├── svg_final/     # 后处理后的最终 SVG（finalize_svg.py 输出）
+├── images/        # 图片资源（用户提供 + AI 生成）
+├── notes/         # 演讲备注（与 SVG 文件同名的 .md 文件）
+│   └── total.md   # 完整备注文档（拆分前）
+├── templates/     # 项目模板（如有）
+└── *.pptx         # 导出的 PPT 文件
 ```
