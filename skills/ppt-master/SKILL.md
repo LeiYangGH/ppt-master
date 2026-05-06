@@ -1,9 +1,7 @@
 ---
 name: ppt-master
 description: >
-  AI驱动的多格式SVG内容生成系统。通过多角色协作，将源文档（PDF/DOCX/URL/Markdown）
-  转换为高质量SVG页面并导出为PPTX。当用户要求“生成PPT”、“做PPT”、“制作演示文稿”
-  或提及“ppt-master”时调用。
+  AI驱动的多格式SVG内容生成系统。通过多角色协作，将源文档Markdown转换为高质量SVG页面并导出为PPTX。当用户要求“生成PPT”、“做PPT”、“制作演示文稿”时调用。
 ---
 
 # PPT Master 技能
@@ -31,6 +29,7 @@ description: >
 >
 > - **优先使用虚拟环境**：本项目应优先使用工作区下的虚拟环境（如 `.venv` 或 `venv`）。**绝不能**使用系统默认的 Python。所有示例指令中的 `python xxx.py` 仅为简单惯例，实际执行时必须使用当前项目的虚拟环境中的 python。
 > - **使用 Windows PowerShell**：所有的终端操作都在 Windows PowerShell 下进行。**绝不能使用 Linux 命令**（如 `cp`、`ls`、`grep`、`rm` 等）。所有向终端发送的命令必须是原生兼容 PowerShell 的。
+> - **直接读写文件**：当前运行于 AI IDE 环境（如 VS Code + Continue 插件），具备原生文件读写能力。**必须**使用 IDE 提供的文件读写工具直接操作文件，**禁止**通过新建 Python 脚本等迂回方式间接读写文件。调用文件读写工具时须注意传参规范，确保路径正确、编码无误。
 
 > [!IMPORTANT]
 > ## 🌐 语言与沟通规则
@@ -327,10 +326,3 @@ python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 | 图片布局规范 | `references/image-layout-spec.md` |
 | SVG 图片嵌入说明 | `references/svg-image-embedding.md` |
 | 图标库说明 | `templates/icons/README.md` |
-
----
-
-## 备注
-
-- 本地预览：`python -m http.server -d <project_path>/svg_final 8000`
-- **故障排查**：遇到生成问题（如布局溢出、导出错误、图片空白等），请查阅 `docs/faq.md` 获取已知解决方案
