@@ -59,15 +59,6 @@ python scripts/batch_validate.py examples --export
 
 用于发布或清理前的全仓库健康检查。
 
-## `generate_examples_index.py`
-
-自动重建 `examples/README.md`。
-
-```powershell
-python scripts/generate_examples_index.py
-python scripts/generate_examples_index.py examples
-```
-
 ## `pptx_template_import.py`
 
 `/create-template` 的统一 PPTX 预处理入口。

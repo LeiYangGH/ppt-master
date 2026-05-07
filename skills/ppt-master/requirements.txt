@@ -1,41 +1,6 @@
-# PPT Master Dependencies / PPT Master 依赖
-# =============================================
-#
-# Most tools use only the Python standard library. Below are optional dependencies.
-# 大部分工具仅使用 Python 标准库，以下为可选依赖。
-#
-# Install / 安装方式：
-#   pip install -r requirements.txt
-
-# ─────────────────────────────────────────────────────────────
-# SVG to PPTX tool / SVG 转 PPTX 工具 (skills/ppt-master/scripts/svg_to_pptx.py)
-# ─────────────────────────────────────────────────────────────
-# Batch-convert SVG files to PowerPoint presentations.
-# 用于将 SVG 文件批量转换为 PowerPoint 演示文稿
-# Uses Office-compatible mode (PNG + SVG dual format) by default, supports all Office versions.
-# 默认使用 Office 兼容模式（PNG + SVG 双格式），支持所有 Office 版本
 python-pptx>=0.6.21
-
-# Office compatibility dependencies (choose one, CairoSVG preferred)
-# Office 兼容模式依赖（二选一，优先使用 cairosvg）
-# Converts SVG to PNG fallback images for Office LTSC 2021 etc.
-# 用于将 SVG 转换为 PNG 后备图片，确保 Office LTSC 2021 等版本正常显示
-#
-# Option A / 方案 A: CairoSVG (recommended / 推荐, ~25MB, full gradient/filter support)
-#   pip install cairosvg
-#   macOS: brew install cairo
-#
-# Option B / 方案 B: svglib (lightweight / 轻量, ~5MB, some gradients may be lost)
 svglib>=1.5.0
 reportlab>=4.0.0
-
-# ─────────────────────────────────────────────────────────────
-# Image processing tools / 图片处理工具
-# ─────────────────────────────────────────────────────────────
-# fix_image_aspect.py - Fix image aspect ratio (prevent stretching during PPT shape conversion)
-# fix_image_aspect.py - 修复图片宽高比（防止 PPT 转形状时拉伸）
-# gemini_watermark_remover.py - Remove watermarks from Gemini-generated images
-# gemini_watermark_remover.py - 去除 Gemini 生成图片的水印
 Pillow>=9.0.0
 numpy>=1.20.0
 

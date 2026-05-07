@@ -102,7 +102,7 @@
 
 ### 1. Cover Page (01_cover.svg)
 
-- Supports background image (AI-generated / user-provided)
+- Supports background image (user-provided)
 - Semi-transparent overlay for text readability
 - Large centered Logo
 - Main title + subtitle

@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1280 720">
     <!-- 模板: 封面页 - 中汽研风格 -->
 
-    <!-- 背景层 - 使用封面背景图（AI生成或用户提供） -->
+    <!-- 背景层 - 使用封面背景图（用户提供） -->
     <image href="../images/{{COVER_BG_IMAGE}}" x="0" y="0" width="1280" height="720"
         preserveAspectRatio="xMidYMid slice" />
 

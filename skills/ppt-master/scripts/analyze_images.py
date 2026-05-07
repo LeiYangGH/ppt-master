@@ -290,11 +290,11 @@ def generate_markdown(results: list[ImageAnalysis], canvas_key: str) -> None:
     print("> intent is side-by-side; ignore them for hero / atmosphere / accent intents.\n")
 
     if has_layout:
-        print("| Filename | Size | Ratio | Category | Img Area (SxS) | Text Area (SxS) | Intent | Usage | Type | Status | Generation Description |")
-        print("|----------|------|-------|----------|----------------|-----------------|--------|-------|------|--------|-----------------------|")
+        print("| Filename | Size | Ratio | Category | Img Area (SxS) | Text Area (SxS) | Intent | Usage | Type |")
+        print("|----------|------|-------|----------|----------------|-----------------|--------|-------|------|")
     else:
-        print("| Filename | Size | Ratio | Category | Intent | Usage | Type | Status | Generation Description |")
-        print("|----------|------|-------|----------|--------|-------|------|--------|-----------------------|")
+        print("| Filename | Size | Ratio | Category | Intent | Usage | Type |")
+        print("|----------|------|-------|----------|--------|-------|------|")
 
     for img in results:
         ratio_str = f"{img['aspect_ratio']:.2f}"
@@ -302,9 +302,9 @@ def generate_markdown(results: list[ImageAnalysis], canvas_key: str) -> None:
         if has_layout:
             img_area = f"{img['image_w']}x{img['image_h']}"
             text_area = f"{img['text_w']}x{img['text_h']}"
-            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | {img_area} | {text_area} | (to be filled) | (to be filled) | | Existing | - |")
+            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | {img_area} | {text_area} | (to be filled) | (to be filled) | |")
         else:
-            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | (to be filled) | (to be filled) | | Existing | - |")
+            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | (to be filled) | (to be filled) | |")
 
     print("\n" + "=" * REPORT_WIDTH + "\n")
 

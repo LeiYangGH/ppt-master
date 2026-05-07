@@ -24,7 +24,7 @@
 
 ⛔ **阻塞规则**：读取完成后，必须把下面八项的专业建议一次性打包给用户，并等待用户明确确认。
 
-> **执行纪律**：除模板选择外，这是最后一个 BLOCKING 检查点。用户确认后，应连续完成 Design Spec，并继续进入图片生成 / SVG / 后处理，不再额外中断。
+> **执行纪律**：除模板选择外，这是最后一个 BLOCKING 检查点。用户确认后，应连续完成 Design Spec，并继续进入 SVG 生成 / 后处理，不再额外中断。
 
 ### a. 画布格式确认
 
@@ -80,9 +80,8 @@
 | 选项 | 方式 | 适用场景 |
 |--------|----------|-------------------|
 | **A** | Emoji | 轻松、活泼、社交媒体场景 |
-| **B** | AI 生成 | 需要定制风格 |
-| **C** | 内置图标库 | 专业场景（推荐） |
-| **D** | 自定义图标 | 已有品牌资产 |
+| **B** | 内置图标库 | 专业场景（推荐） |
+| **C** | 自定义图标 | 已有品牌资产 |
 
 内置图标库包含多种风格库，以及一个品牌 logo 库：
 
@@ -160,12 +159,10 @@
 |--------|----------|-------------------|
 | **A** | 不使用图片 | 数据报告、流程文档 |
 | **B** | 用户提供 | 已有现成图片资产 |
-| **C** | AI 生成 | 需要定制插画、背景图 |
-| **D** | 占位图 | 图片后续补充 |
 
-**若选择包含 B**，则在输出 spec 之前，必须先运行 `python scripts/analyze_images.py <project_path>/images`，并把扫描结果整合进图片资源清单。
+**若选择 B**，则在输出 spec 之前，必须先运行 `python scripts/analyze_images.py <project_path>/images`，并把扫描结果整合进图片资源清单。
 
-**若选择了 B / C / D**，则必须在 spec 中加入图片资源清单：
+图片资源清单列名：
 
 | 列名 | 说明 |
 |--------|-------------|
@@ -175,16 +172,6 @@
 | Layout suggestion | 例如 `Wide landscape (suitable for full-screen/illustration)` |
 | Purpose | 例如 `Cover background` |
 | Type | Background / Photography / Illustration / Diagram / Decorative pattern |
-| Status | 初始状态必须是 `Pending`、`Existing` 或 `Placeholder`；完整状态枚举见 `svg-image-embedding.md` |
-| Generation description | 填写用于 AI 生成的详细描述 |
-
-**Generation description 的质量要求**——它会用于生成图片 prompt；需要明确主体、数量、场景、光线、颜色（HEX）、构图。不要只写 "team photo" / "tech background" / "chart" 这种单词级描述。
-
-| 优秀示例 |
-|---------------|
-| `Professional team of 4 diverse people collaborating at a modern office desk, natural lighting, laptop visible` |
-| `Abstract flowing digital waves in deep navy (#1E3A5F) to midnight blue gradient, subtle particle effects, clean center area for text overlay` |
-| `Clean flowchart showing 4 sequential steps connected by arrows, flat design, light gray background, blue accent nodes` |
 
 **图片类型说明**：
 
@@ -223,8 +210,6 @@
 
 > **多图页面**：若一页中包含多张图片，请使用 `references/image-layout-spec.md` 中 “Multi-Image Layout” 的网格公式。
 
-> **流程交接**：若选择 C) AI generation，用户需手动将 AI 生成的图片放入 `images/` 目录，并将状态从 `Pending` 更新为 `Generated`。状态名称见 `svg-image-embedding.md`。
-
 ### 可视化参考（非阻塞——Strategist 直接推荐，无需用户确认）
 
 当内容大纲中的页面涉及**数据可视化或信息图式结构化表达**（如对比、趋势、占比、KPI、流程、时间轴、组织结构、战略框架等）时，Strategist 应从内置模板库中选择合适的可视化类型。
@@ -257,7 +242,7 @@
 >
 > **当没有模板合适时的回退策略**：
 > 1. 重新扫描 `categories` 和 `quickLookup`——很多概念会藏在不那么直观的标签下（例如 “causal chain” 可能落在 `process` 类下的 `process_flow` / `sankey_chart`）
-> 2. 仍然不匹配时：数据驱动内容 → 表格布局；概念 / 说明性内容 → "AI-generated image"（用户自行生成）；结构性内容 → "custom layout"
+> 2. 仍然不匹配时：数据驱动内容 → 表格布局；概念 / 说明性内容 → 图片占位区；结构性内容 → "custom layout"
 > 3. 在第 VII 节把该页标记为 `no-template-match`，并说明采用了哪种回退方式以及原因。不要静默拿一个“差不多但其实不对”的图表顶上。
 
 ### 演讲备注要求（默认规则——无需讨论）
@@ -382,7 +367,7 @@
 | V. Layout Principles | 页面结构（header / content / footer 分区）、布局模式库（可组合 / 打破）、间距规范 |
 | VI. Icon Usage Spec | 图标来源说明、占位语法、推荐图标清单 |
 | VII. Visualization Reference List | 可视化类型、参考模板路径、使用页码、用途 |
-| VIII. Image Resource List | 文件名、尺寸、比例、用途、状态、生成描述 |
+| VIII. Image Resource List | 文件名、尺寸、比例、用途、类型 |
 | IX. Content Outline | 按章节组织；每页需包含布局、标题、内容要点、可视化类型（如适用） |
 | X. Speaker Notes Requirements | 备注文件命名规则、内容结构说明 |
 | XI. Technical Constraints Reminder | SVG 生成规则、PPT 兼容规则 |
@@ -411,20 +396,18 @@ python scripts/project_manager.py init <project_name> --format <canvas_format>
 
 ## 8. 完成 Design Spec 后的下一步提示
 
-写完 `design_spec.md` 和 `spec_lock.md` 后，应根据模板情况和图片选择，输出下面的下一步提示。它属于交接说明，不属于 `design_spec.md` 正文。
+写完 `design_spec.md` 和 `spec_lock.md` 后，应根据模板情况输出下面的下一步提示。它属于交接说明，不属于 `design_spec.md` 正文。
 
 ### 模板选项 A（使用现有模板）
 
 ```
 ✅ Design spec 已完成，模板已就绪。
-下一步：
-- 若图片不包含 AI 生成 → 调用 Executor
+下一步：调用 Executor
 ```
 
 ### 模板选项 B（无模板）
 
 ```
 ✅ Design spec 已完成。
-下一步：
-- 若图片不包含 AI 生成 → 调用 Executor（每页自由设计）
+下一步：调用 Executor（每页自由设计）
 ```

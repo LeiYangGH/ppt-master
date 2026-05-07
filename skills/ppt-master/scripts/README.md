@@ -32,7 +32,7 @@ python scripts/update_repo.py
 
 | Area | Primary scripts | Documentation |
 |------|-----------------|---------------|
-| Project management | `project_manager.py`, `batch_validate.py`, `generate_examples_index.py`, `error_helper.py`, `pptx_template_import.py` | [docs/project.md](./docs/project.md) |
+| Project management | `project_manager.py`, `batch_validate.py`, `error_helper.py`, `pptx_template_import.py` | [docs/project.md](./docs/project.md) |
 | SVG pipeline | `finalize_svg.py`, `svg_to_pptx.py`, `notes_all_md_split.py`, `svg_quality_checker.py` | [docs/svg-pipeline.md](./docs/svg-pipeline.md) |
 | Spec maintenance | `update_spec.py` | [docs/update_spec.md](./docs/update_spec.md) |
 | Repo maintenance | `update_repo.py` | README install/update section |

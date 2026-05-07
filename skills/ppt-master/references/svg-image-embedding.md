@@ -8,36 +8,28 @@
 
 ## 图片资源清单格式
 
-图片资源清单定义在《设计规范与内容大纲》中；每张图片都要带状态。本文件是**状态命名与 SVG 嵌图行为的权威说明**。如果图片策略包含 “B) 用户提供”，则应在八项确认之后立刻运行 `analyze_images.py`，并在输出设计规范前补全清单。
+图片资源清单定义在《设计规范与内容大纲》中。如果图片策略包含 "B) 用户提供"，则应在八项确认之后立刻运行 `analyze_images.py`，并在输出设计规范前补全清单。
 
 ```markdown
-| 文件名 | 尺寸 | 用途 | 类型 | 状态 | 生成描述 |
-|----------|------------|---------|------|--------|------------------------|
-| cover_bg.png | 1280x720 | 封面背景 | 背景 | Pending | 现代科技抽象背景，深蓝渐变 |
-| product.png | 600x400 | 第 3 页产品照片 | 摄影 | Existing | - |
-| team.png | 600x400 | 第 5 页团队场景 | 插画 | Placeholder | 团队协作场景，待添加 |
+| 文件名 | 尺寸 | 用途 | 类型 |
+|----------|------------|---------|------|
+| cover_bg.png | 1280x720 | 封面背景 | 背景 |
+| product.png | 600x400 | 第 3 页产品照片 | 摄影 |
 ```
 
-### 图片状态枚举
+### 图片状态
 
-| 状态 | 含义 | Executor 处理方式 |
-|--------|---------|-------------------|
-| **Pending** | 需要 AI 生成，且已有生成描述 | 应由用户手动生成后放入 `images/` 目录；若文件不存在，则显示虚线占位 |
-| **Generated** | AI 生成成功，目标路径已有文件 | 直接引用 `../images/` |
-| **Needs-Manual** | 已尝试生成并重试一次，仍失败 | 若用户未手动补图，则显示虚线占位 |
-| **Existing** | 用户已有图片 | 放入 `images/`，用 `<image>` 引用 |
-| **Placeholder** | 有意暂不准备 | 使用虚线占位，后续再替换 |
+图片均由用户提供，状态统一为 **Existing**，直接从 `../images/` 引用。
 
 ---
 
 ## 工作流
 
 ```
-1. Strategist 明确图片需求 → 添加图片资源清单，并标注状态
-2. 准备图片（Pending / Existing）→ 将可用文件放入 project/images/
+1. Strategist 明确图片需求 → 添加图片资源清单
+2. 用户将图片放入 project/images/
 3. Executor 生成 SVG（svg_output/）
-   ├── Existing / Generated → <image href="../images/xxx.png" .../>
-   └── Placeholder / Needs-Manual 且无文件 → 虚线框 + 描述文字
+   └── Existing → <image href="../images/xxx.png" .../>
 4. 预览：python -m http.server -d <project_path> 8000 → /svg_output/<filename>.svg
 5. 后处理与导出 → 按 shared-standards.md §5 执行
 ```
