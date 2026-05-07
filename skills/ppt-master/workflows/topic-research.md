@@ -1,118 +1,118 @@
 ---
-description: Research a topic from scratch when the user provides only a brief description or requirements without detailed source materials. Produces a structured Markdown document and a folder of related images.
+description: 当用户仅提供简要描述或需求而无详细源材料时，从零开始研究主题。生成结构化Markdown文档和相关图片文件夹。
 ---
 
-# Topic Research Workflow
+# 主题研究工作流
 
-> **Standalone pre-processing workflow** — produces source materials that can feed into the main PPT generation pipeline or be used independently.
+> **独立预处理工作流** — 产出可输入主PPT生成流水线的源材料，也可独立使用。
 
-## Trigger Condition
+## 触发条件
 
-The user provides **only a topic name, a brief description, or a set of requirements** — no PDF, DOCX, URL, or other source files.
+用户**仅提供主题名称、简要描述或一组需求** — 无PDF、DOCX、URL或其他源文件。
 
-Examples:
-- "Make a PPT about Joe Hisaishi"
-- "Create a presentation about renewable energy trends"
-- "I want to introduce our new product (with a brief description)"
+示例：
+- "做一个关于久石让的PPT"
+- "创建一个关于可再生能源趋势的演示文稿"
+- "我想介绍我们的新产品（附带简要描述）"
 
-## Deliverables
+## 交付物
 
-All outputs MUST be placed under the `projects/` directory:
+所有输出必须放在 `projects/` 目录下：
 
-| Deliverable | Path | Example |
-|-------------|------|---------|
-| Structured Markdown document | `projects/<topic_name>.md` | `projects/joe_hisaishi.md` |
-| Image folder | `projects/<topic_name>/` (same name as the document, without extension) | `projects/joe_hisaishi/` |
+| 交付物 | 路径 | 示例 |
+|--------|------|------|
+| 结构化Markdown文档 | `projects/<topic_name>.md` | `projects/joe_hisaishi.md` |
+| 图片文件夹 | `projects/<topic_name>/`（与文档同名，不含扩展名） | `projects/joe_hisaishi/` |
 
-> **Naming consistency rule**: The Markdown filename (without `.md`) and the image folder name MUST be identical.
+> **命名一致性规则**：Markdown文件名（不含 `.md`）与图片文件夹名必须完全相同。
 >
-> **Output directory rule**: Both the document and image folder MUST be created inside `projects/`. Never place them in the repository root or any other location.
+> **输出目录规则**：文档和图片文件夹必须在 `projects/` 内创建，不得放在仓库根目录或其他位置。
 
-## Process Overview
+## 流程概览
 
 ```
-Confirm Topic → Research Content → Collect Images → Output
+确认主题 → 研究内容 → 收集图片 → 输出
 ```
 
 ---
 
-## Step 1: Topic Confirmation
+## 步骤 1：主题确认
 
-⛔ **BLOCKING**: Before starting research, confirm the following with the user. If the user's initial message already covers these points clearly, skip the confirmation and proceed.
+⛔ **阻断性步骤**：开始研究前，需与用户确认以下内容。如用户初始消息已清晰涵盖这些要点，则跳过确认直接进行。
 
-| Item | Description | Example |
-|------|-------------|---------|
-| **Topic** | Core subject | Joe Hisaishi |
-| **Scope / Focus** | What aspects to cover | Biography, major works, collaboration with Miyazaki, awards |
-| **Depth** | Surface overview vs. deep dive | General knowledge level |
-| **Language** | Output language | English |
+| 项目 | 说明 | 示例 |
+|------|------|------|
+| **主题** | 核心主题 | 久石让 |
+| **范围/重点** | 涵盖哪些方面 | 传记、主要作品、与宫崎骏的合作、获奖 |
+| **深度** | 概览还是深入 | 通用知识级别 |
+| **语言** | 输出语言 | 中文 |
 
-**If the user's request is already clear enough** (e.g., "Make a PPT about Joe Hisaishi"), infer reasonable defaults and proceed — do not over-ask.
+**如用户请求已足够清晰**（如"做一个关于久石让的PPT"），推断合理默认值直接进行 — 不要过度询问。
 
 ---
 
-## Step 2: Content Research
+## 步骤 2：内容研究
 
-### 2.1 Information Gathering
+### 2.1 信息收集
 
-Use `WebSearch` and `WebFetch` to collect information from multiple sources:
+使用 `WebSearch` 和 `WebFetch` 从多个来源收集信息：
 
-| Source Type | Priority | Tools | Notes |
-|------------|----------|-------|-------|
-| Wikipedia / Encyclopedia | High | WebSearch → WebFetch | Authoritative overview, timeline, key facts |
-| Official websites | High | WebFetch | First-party information |
-| News / media articles | Medium | WebSearch → WebFetch | Recent events, awards, public reception |
-| Professional databases | Low | WebSearch | Industry-specific data if relevant |
+| 来源类型 | 优先级 | 工具 | 备注 |
+|----------|--------|------|------|
+| Wikipedia/百科 | 高 | WebSearch → WebFetch | 权威概览、时间线、关键事实 |
+| 官方网站 | 高 | WebFetch | 第一方信息 |
+| 新闻/媒体文章 | 中 | WebSearch → WebFetch | 近期事件、获奖、公众反响 |
+| 专业数据库 | 低 | WebSearch | 行业相关数据（如适用） |
 
-**Research strategy**:
-1. Start with a broad WebSearch to understand the topic landscape
-2. WebFetch 2-3 key authoritative pages (Wikipedia, official sites) for detailed content
-3. Supplement with targeted searches for specific subtopics as needed
+**研究策略**：
+1. 先进行广泛WebSearch了解主题全貌
+2. WebFetch 2-3个权威页面（Wikipedia、官网）获取详细内容
+3. 按需对特定子主题进行针对性搜索补充
 
-### 2.2 Content Organization
+### 2.2 内容组织
 
-Organize the gathered information into a structured Markdown document with the following skeleton:
+将收集的信息整理为结构化Markdown文档，骨架如下：
 
 ```markdown
-# <Topic Name>
+# <主题名称>
 
-> Brief one-line description of the topic.
+> 主题的一句话简要描述。
 
-## Overview
-[2-3 paragraph summary]
+## 概述
+[2-3段摘要]
 
-## Background / History
-[Timeline, origin story, key milestones]
+## 背景/历史
+[时间线、起源、关键里程碑]
 
-## Key Aspects
-### Aspect 1: [...]
-### Aspect 2: [...]
-### Aspect 3: [...]
+## 核心方面
+### 方面1：[...]
+### 方面2：[...]
+### 方面3：[...]
 
-## Achievements / Impact
-[Awards, recognition, influence]
+## 成就/影响
+[获奖、认可、影响力]
 
-## Key Facts & Figures
-| Item | Value |
-|------|-------|
+## 关键数据
+| 项目 | 数值 |
+|------|------|
 | ... | ... |
 
-## Sources
-- [Source 1 title](URL)
-- [Source 2 title](URL)
+## 来源
+- [来源1标题](URL)
+- [来源2标题](URL)
 ```
 
-> The skeleton above is a **reference template** — adapt the section structure to fit the topic. A person biography will differ from a technology overview or a company profile.
+> 上述骨架为**参考模板** — 根据主题调整章节结构。人物传记与技术概览或公司简介的结构不同。
 
-**Content guidelines**:
-- Include specific facts, dates, and names — avoid vague generalizations
-- Preserve key quotes when found
-- Note data sources for verifiability
-- Aim for PPT-ready content density: enough detail to fill 10-15 slides, but not an exhaustive research paper
+**内容准则**：
+- 包含具体事实、日期和名称 — 避免模糊概括
+- 保留找到的关键引述
+- 注明数据来源以保证可验证性
+- 追求PPT适用的内容密度：足够填充10-15页幻灯片，但非穷尽式研究论文
 
-### 2.3 Save Document
+### 2.3 保存文档
 
-Save the Markdown document to the `projects/` directory:
+将Markdown文档保存到 `projects/` 目录：
 
 ```
 projects/<topic_name>.md
@@ -120,81 +120,81 @@ projects/<topic_name>.md
 
 ---
 
-## Step 3: Image Collection
+## 步骤 3：图片收集
 
-### 3.1 Image Source Strategy
+### 3.1 图片来源策略
 
-Search for **publicly available, freely usable** images in this priority order:
+按以下优先级搜索**公开可用的免费图片**：
 
-| Source | How to Find | License Notes |
-|--------|------------|---------------|
-| **Wikipedia / Wikimedia Commons** | WebFetch the Wikipedia page → extract `upload.wikimedia.org` image URLs → get full-resolution versions (remove `/thumb/` and size suffix from URL) | CC-BY-SA or Public Domain |
-| **Official websites** | WebFetch official/institutional pages → look for gallery or press sections | Typically free for editorial/educational use |
-| **Government / institutional releases** | WebSearch for official press kits, public galleries | Usually public domain |
-| **Creative Commons search** | WebSearch with `site:commons.wikimedia.org` or `site:flickr.com/photos` + creative commons | Check specific CC license |
+| 来源 | 查找方式 | 许可说明 |
+|------|----------|----------|
+| **Wikipedia/Wikimedia Commons** | WebFetch Wikipedia页面 → 提取 `upload.wikimedia.org` 图片URL → 获取全分辨率版本（移除URL中的 `/thumb/` 和尺寸后缀） | CC-BY-SA或公共领域 |
+| **官方网站** | WebFetch 官方/机构页面 → 查找画廊或新闻区 | 通常可免费用于编辑/教育用途 |
+| **政府/机构发布** | WebSearch 官方新闻资料包、公开画廊 | 通常为公共领域 |
+| **Creative Commons搜索** | WebSearch `site:commons.wikimedia.org` 或 `site:flickr.com/photos` + creative commons | 检查具体CC许可 |
 
-**Avoid**: Stock photo sites with watermarks, copyrighted commercial images, social media uploads without clear licensing.
+**避免**：带水印的图库网站、有版权的商业图片、无明确许可的社交媒体上传。
 
-### 3.2 Image Selection Criteria
+### 3.2 图片选择标准
 
-| Criterion | Guideline |
-|-----------|-----------|
-| **Quantity** | 6-12 images (enough to support a 10-15 page PPT) |
-| **Variety** | Mix of portraits, scenes, logos, event photos as relevant |
-| **Resolution** | Prefer 1000px+ width; avoid thumbnails |
-| **Relevance** | Each image should serve a clear purpose (cover, illustration, background) |
-| **Aspect ratio mix** | Include both landscape (for backgrounds) and portrait (for profiles) when applicable |
+| 标准 | 指南 |
+|------|------|
+| **数量** | 6-12张（足以支撑10-15页PPT） |
+| **多样性** | 人物像、场景、Logo、活动照片等混合 |
+| **分辨率** | 优先宽度1000px+；避免缩略图 |
+| **相关性** | 每张图片应有明确用途（封面、插图、背景） |
+| **宽高比混合** | 适用时同时包含横版（背景用）和竖版（人物用） |
 
-### 3.3 Download Process
+### 3.3 下载流程
 
 ```powershell
-# Create image folder under projects/ (same name as the document)
+# 在projects/下创建图片文件夹（与文档同名）
 New-Item -ItemType Directory -Force -Path "projects/<topic_name>"
 
-# Download images with descriptive filenames
+# 用描述性文件名下载图片
 curl -L -o "projects/<topic_name>/descriptive_name.jpg" "<image_url>"
 ```
 
-**Filename rules**:
-- Use descriptive English names: `joe_hisaishi_concert.jpg`, not `image1.jpg`
-- Lowercase, underscores for spaces
-- Include subject and context: `spirited_away_poster.jpg`, `tokyo_concert_2023.jpg`
+**文件命名规则**：
+- 使用描述性英文名：`joe_hisaishi_concert.jpg`，而非 `image1.jpg`
+- 小写，空格用下划线
+- 包含主体和上下文：`spirited_away_poster.jpg`、`tokyo_concert_2023.jpg`
 
-### 3.4 Full-Resolution URL Patterns
+### 3.4 全分辨率URL模式
 
-Common patterns for getting full-resolution images from known sources:
+从已知来源获取全分辨率图片的常见模式：
 
-| Source | Thumbnail URL | Full-Resolution URL |
-|--------|--------------|---------------------|
-| Wikimedia | `.../thumb/a/ab/File.jpg/250px-File.jpg` | `.../a/ab/File.jpg` (remove `thumb/` and `/250px-File.jpg`) |
-| Ghibli official | `www.ghibli.jp/gallery/thumb-xxx.png` | `www.ghibli.jp/gallery/xxx.jpg` |
+| 来源 | 缩略图URL | 全分辨率URL |
+|------|-----------|-------------|
+| Wikimedia | `.../thumb/a/ab/File.jpg/250px-File.jpg` | `.../a/ab/File.jpg`（移除 `thumb/` 和 `/250px-File.jpg`） |
+| Ghibli官网 | `www.ghibli.jp/gallery/thumb-xxx.png` | `www.ghibli.jp/gallery/xxx.jpg` |
 
 ---
 
-## Step 4: Output Summary
+## 步骤 4：输出摘要
 
-After completing Steps 2 and 3, output a brief summary:
+完成步骤2和3后，输出简要摘要：
 
 ```markdown
-## Topic Research Complete
+## 主题研究完成
 
-**Topic**: <topic_name>
-**Document**: `projects/<topic_name>.md` — [X sections, approximately Y words]
-**Images**: `projects/<topic_name>/` — [N images collected]
+**主题**: <topic_name>
+**文档**: `projects/<topic_name>.md` — [X个章节，约Y字]
+**图片**: `projects/<topic_name>/` — [N张图片]
 
-| Filename | Source | Description |
-|----------|--------|-------------|
+| 文件名 | 来源 | 描述 |
+|--------|------|------|
 | ... | ... | ... |
 ```
 
-> From here, the user or main pipeline can use these materials as input for PPT generation (import via `project_manager.py import-sources` or read directly).
+> 此后，用户或主流水线可将这些材料作为PPT生成的输入（通过 `project_manager.py import-sources` 导入或直接读取）。
 
 ---
 
-## Notes
+## 备注
 
-- This workflow is **content-gathering only** — it does not create a PPT project, generate SVGs, or produce a design spec
-- The Markdown document should be **PPT-ready**: well-structured, factual, with clear sections that map naturally to presentation slides
-- Always include a **Sources** section in the Markdown for attribution and verifiability
-- When a topic is well-known (e.g., a famous person, a major technology), 2-3 WebSearch + WebFetch rounds are usually sufficient; avoid over-researching
-- For niche topics, more extensive searching may be needed — use judgment
+- 本工作流**仅收集内容** — 不创建PPT项目、不生成SVG、不产出设计规格
+- Markdown文档应为**PPT就绪**：结构良好、事实准确、章节清晰对应演示文稿幻灯片
+- 始终在Markdown中包含**来源**章节以注明出处和可验证性
+- 知名主题（如名人、重大技术）通常2-3轮WebSearch + WebFetch即足够；避免过度研究
+- 冷门主题可能需要更多搜索 — 视情况判断
