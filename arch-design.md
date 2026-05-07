@@ -39,8 +39,8 @@ PPT Master 是一个 AI 驱动的多格式 SVG 内容生成系统，通过多角
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   LLM SVG 生成层 (Step 5-6)                      │
-│  Image_Generator (可选) → Executor (执行器) → svg_output/       │
+│                   LLM SVG 生成层 (Step 5)                        │
+│  Executor (执行器) → svg_output/                                  │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
@@ -85,7 +85,6 @@ PPT Master 是一个 AI 驱动的多格式 SVG 内容生成系统，通过多角
 | 角色 | 职责 | 输出 |
 |------|------|------|
 | **Strategist (策略师)** | 分析源内容，确定设计规范 | design_spec.md (人类可读), spec_lock.md (机器可读执行锁) |
-| **Image_Generator (图像生成器)** | 可选：生成 AI 图像 | images/*.png/*.jpg + image_prompts.md |
 | **Executor (执行器)** | 根据 spec_lock.md 生成 SVG 页面 | svg_output/*.svg + notes/total.md |
 
 **关键约束**：

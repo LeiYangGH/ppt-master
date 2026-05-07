@@ -3,8 +3,6 @@
 Gemini Image Generation Backend
 
 Generates images via the Google GenAI API (Gemini).
-Used by image_gen.py as a backend module.
-
 Configuration keys:
   GEMINI_API_KEY   (required)
   GEMINI_BASE_URL  (optional) Custom API endpoint for proxy services

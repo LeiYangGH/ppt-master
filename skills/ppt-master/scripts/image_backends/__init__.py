@@ -1,1 +1,1 @@
-"""Internal backend implementations for image_gen.py."""
+"""Internal backend implementations for image generation."""

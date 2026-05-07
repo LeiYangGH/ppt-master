@@ -8,7 +8,7 @@ description: >
 
 > AI驱动的多格式SVG内容生成系统。通过多角色协作将源文档转换为高质量SVG页面，并导出为PPTX。
 
-**核心流程**：`源文档 → 创建项目 → 模板选项 → Strategist → [Image_Generator] → Executor → 后处理 → 导出`
+**核心流程**：`源文档 → 创建项目 → 模板选项 → Strategist → Executor → 后处理 → 导出`
 
 > [!CAUTION]
 > ## 🚨 全局执行纪律（强制）
@@ -20,8 +20,8 @@ description: >
 > 3. **禁止跨阶段打包** —— 跨阶段打包是禁止的。（注：第 4 步中的八项确认是 ⛔ BLOCKING——AI 必须提供建议并等待用户的明确确认。一旦用户确认，后续所有非阻塞步骤——设计规范、SVG、演讲备注和后处理——都可自动连续进行）。
 > 4. **先检查门控** —— 每个步骤顶部都列有前提条件（🚧 GATE）；在开始该步骤前**必须**核实。
 > 5. **禁止推测性执行** —— **禁止**为后续步骤“预先准备”内容（例如，在 Strategist 阶段编写 SVG 代码）。
-> 6. **禁止子智能体生成 SVG** —— 第 6 步 Executor 生成 SVG 高度依赖上下文，**必须**由当前主智能体端到端完成。**禁止**委托给子智能体。
-> 7. **仅限逐页生成** —— 在第 6 步 Executor 中，全局设计上下文确认后，SVG 页面**必须**在一个连续的上下文中按顺序一页一页地生成。**禁止**批量生成（例如每次 5 页）。
+> 6. **禁止子智能体生成 SVG** —— 第 5 步 Executor 生成 SVG 高度依赖上下文，**必须**由当前主智能体端到端完成。**禁止**委托给子智能体。
+> 7. **仅限逐页生成** —— 在第 5 步 Executor 中，全局设计上下文确认后，SVG 页面**必须**在一个连续的上下文中按顺序一页一页地生成。**禁止**批量生成（例如每次 5 页）。
 > 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`anchor` / `dense` / `breathing`——见 executor-base.md §2.1）。
 
 > [!IMPORTANT]
@@ -50,7 +50,6 @@ description: >
 |--------|---------|
 | `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理 |
 | `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析 |
-| `${SKILL_DIR}/scripts/image_gen.py` | AI 图片生成（多服务商） |
 | `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
 | `${SKILL_DIR}/scripts/total_md_split.py` | 演讲备注拆分 |
 | `${SKILL_DIR}/scripts/finalize_svg.py` | SVG 后处理（统一入口） |
@@ -185,41 +184,14 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 - [x] 八项确认完成（用户已确认）
 - [x] 已生成设计规范和内容大纲 (Design Specification & Content Outline)
 - [x] 已生成执行锁文件 (spec_lock.md)
-- [ ] **下一步**：自动进入 [Image_Generator / Executor] 阶段
+- [ ] **下一步**：自动进入 Executor 阶段
 ```
 
 ---
 
-### 第 5 步：Image_Generator 阶段（按需执行）
+### 第 5 步：Executor 阶段
 
-🚧 **GATE**：第 4 步完成；已生成设计规范与内容大纲并获用户确认。
-
-> **触发条件**：图片使用方式包含“AI generation (AI 生成)”。否则跳过此步直接进入第 6 步。
-
-读取 `references/image-generator.md`
-
-1. 从设计规范中提取所有状态为 `Pending` 的图片
-2. 生成提示词文档 → `<project_path>/images/image_prompts.md`
-3. 生成图片（推荐使用 CLI 工具）：
-   ```powershell
-   python ${SKILL_DIR}/scripts/image_gen.py "prompt" --aspect_ratio 16:9 --image_size 1K -o <project_path>/images
-   ```
-
-**✅ 检查点 —— 确认已为每一行尝试生成图片，继续进入第 6 步**：
-```markdown
-## ✅ Image_Generator 阶段完成
-- [x] 提示词文档已创建
-- [x] 每张图片：状态为 `Generated`（文件存在于 images/ 目录）或 `Needs-Manual`（已向用户报告文件名及原因）
-- [x] 没有状态仍为 `Pending` 的行
-```
-
-> 生成失败时不要停止 —— 遵循 `references/image-generator.md` §4.3 中的失败处理规则：重试一次，然后将该行标记为 `Needs-Manual`，向用户报告并继续执行第 6 步。
-
----
-
-### 第 6 步：Executor 阶段
-
-🚧 **GATE**：第 4 步（如果触发还包括第 5 步）完成；所有前置交付物已准备就绪。
+🚧 **GATE**：第 4 步完成；所有前置交付物已准备就绪。
 
 根据选定的风格读取角色定义：
 ```
@@ -251,7 +223,7 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 
 **逻辑构建阶段**：生成演讲备注 → `<project_path>/notes/total.md`
 
-**✅ 检查点 —— 确认所有 SVG 和演讲备注均已生成并完成质量检查。直接进入第 7 步后处理**：
+**✅ 检查点 —— 确认所有 SVG 和演讲备注均已生成并完成质量检查。直接进入第 6 步后处理**：
 ```markdown
 ## ✅ Executor 阶段完成
 - [x] 所有 SVG 均已生成到 svg_output/
@@ -259,13 +231,13 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 - [x] 演讲备注已生成到 notes/total.md
 ```
 
-> **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 7 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。
+> **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 6 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。
 
 ---
 
-### 第 7 步：后处理与导出
+### 第 6 步：后处理与导出
 
-🚧 **GATE**：第 6 步完成；所有 SVG 生成到 `svg_output/`；演讲备注 `notes/total.md` 已生成。
+🚧 **GATE**：第 5 步完成；所有 SVG 生成到 `svg_output/`；演讲备注 `notes/total.md` 已生成。
 
 > ⚠️ 这三个子步骤必须**依次单独运行** —— 每一步成功完成后才能进行下一步。
 > ❌ **绝不要**把它们合并成一个代码块或一次 Shell 调用。

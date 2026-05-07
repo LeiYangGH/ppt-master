@@ -45,7 +45,7 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 > - 内发光 / 柔边 → 使用 `<filter>` + `<feGaussianBlur>`（见 §6 Glow）
 > - 投影 → 使用滤镜阴影或叠层矩形（见 §6 Shadow）
 >
-> 像素级 alpha 效果（如文字镂空图片填充、任意 alpha 合成）在 PPT 中没有可靠路径，应在 Image_Generator 阶段直接烘焙进源图。
+> 像素级 alpha 效果（如文字镂空图片填充、任意 alpha 合成）在 PPT 中没有可靠路径，应直接烘焙进源图。
 
 ---
 

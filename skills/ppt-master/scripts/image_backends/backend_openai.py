@@ -3,8 +3,6 @@
 OpenAI Compatible Image Generation Backend
 
 Generates images via OpenAI-compatible APIs (OpenAI, local models like Qwen-Image, etc.).
-Used by image_gen.py as a backend module.
-
 Configuration keys:
   OPENAI_API_KEY   (required) API key
   OPENAI_BASE_URL  (optional) Custom API endpoint (e.g. http://127.0.0.1:3000/v1)

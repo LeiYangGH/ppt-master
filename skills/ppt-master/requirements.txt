@@ -39,10 +39,4 @@ reportlab>=4.0.0
 Pillow>=9.0.0
 numpy>=1.20.0
 
-# ─────────────────────────────────────────────────────────────
-# AI image generation tool / AI 图片生成工具 (skills/ppt-master/scripts/image_gen.py)
-# ─────────────────────────────────────────────────────────────
-# Gemini backend / Gemini 后端 (IMAGE_BACKEND=gemini)
-google-genai>=1.0.0
-# OpenAI-compatible backend / OpenAI 兼容后端 (IMAGE_BACKEND=openai)
-openai>=1.0.0
+

@@ -16,8 +16,8 @@ PPT Master — AI 驱动的多角色协作演示文稿生成系统。
 | 目录 | 用途 |
 |------|------|
 | `skills/ppt-master/` | 技能包根目录（SKILL.md、脚本、模板、参考规范） |
-| `skills/ppt-master/references/` | 角色定义（Strategist / Image_Generator / Executor）和技术约束 |
-| `skills/ppt-master/scripts/` | 可运行工具脚本（项目管理、图片生成、SVG 质检、导出等） |
+| `skills/ppt-master/references/` | 角色定义（Strategist / Executor）和技术约束 |
+| `skills/ppt-master/scripts/` | 可运行工具脚本（项目管理、SVG 质检、导出等） |
 | `skills/ppt-master/templates/` | 布局模板、图表模板、图标库 |
 | `examples/` | 已完成的示例项目（可供参考风格和结构） |
 | `projects/` | 用户项目工作区（运行时产出目录） |

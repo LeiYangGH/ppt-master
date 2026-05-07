@@ -8,7 +8,7 @@
 
 | 上一步 | 当前 | 下一步 |
 |--------------|---------|-----------|
-| 已创建项目并确认模板选项 | **Strategist**：八项确认 + Design Spec | Image_Generator 或 Executor |
+| 已创建项目并确认模板选项 | **Strategist**：八项确认 + Design Spec | Executor |
 
 ---
 
@@ -178,7 +178,7 @@
 | Status | 初始状态必须是 `Pending`、`Existing` 或 `Placeholder`；完整状态枚举见 `svg-image-embedding.md` |
 | Generation description | 填写用于 AI 生成的详细描述 |
 
-**Generation description 的质量要求**——它会直接喂给 Image_Generator 生成 prompt；需要明确主体、数量、场景、光线、颜色（HEX）、构图。不要只写 “team photo” / “tech background” / “chart” 这种单词级描述。
+**Generation description 的质量要求**——它会用于生成图片 prompt；需要明确主体、数量、场景、光线、颜色（HEX）、构图。不要只写 "team photo" / "tech background" / "chart" 这种单词级描述。
 
 | 优秀示例 |
 |---------------|
@@ -223,7 +223,7 @@
 
 > **多图页面**：若一页中包含多张图片，请使用 `references/image-layout-spec.md` 中 “Multi-Image Layout” 的网格公式。
 
-> **流程交接**：若选择 C) AI generation，则 Image_Generator 会处理 `Pending` 行，并在 Executor 接手前把状态更新为 `Generated` 或 `Needs-Manual`。状态名称见 `svg-image-embedding.md`。
+> **流程交接**：若选择 C) AI generation，用户需手动将 AI 生成的图片放入 `images/` 目录，并将状态从 `Pending` 更新为 `Generated`。状态名称见 `svg-image-embedding.md`。
 
 ### 可视化参考（非阻塞——Strategist 直接推荐，无需用户确认）
 
@@ -257,7 +257,7 @@
 >
 > **当没有模板合适时的回退策略**：
 > 1. 重新扫描 `categories` 和 `quickLookup`——很多概念会藏在不那么直观的标签下（例如 “causal chain” 可能落在 `process` 类下的 `process_flow` / `sankey_chart`）
-> 2. 仍然不匹配时：数据驱动内容 → 表格布局；概念 / 说明性内容 → “AI-generated image”（交给 Image_Generator）；结构性内容 → “custom layout”
+> 2. 仍然不匹配时：数据驱动内容 → 表格布局；概念 / 说明性内容 → "AI-generated image"（用户自行生成）；结构性内容 → "custom layout"
 > 3. 在第 VII 节把该页标记为 `no-template-match`，并说明采用了哪种回退方式以及原因。不要静默拿一个“差不多但其实不对”的图表顶上。
 
 ### 演讲备注要求（默认规则——无需讨论）
@@ -418,7 +418,6 @@ python scripts/project_manager.py init <project_name> --format <canvas_format>
 ```
 ✅ Design spec 已完成，模板已就绪。
 下一步：
-- 若图片包含 AI 生成 → 调用 Image_Generator
 - 若图片不包含 AI 生成 → 调用 Executor
 ```
 
@@ -427,6 +426,5 @@ python scripts/project_manager.py init <project_name> --format <canvas_format>
 ```
 ✅ Design spec 已完成。
 下一步：
-- 若图片包含 AI 生成 → 调用 Image_Generator
 - 若图片不包含 AI 生成 → 调用 Executor（每页自由设计）
 ```
