@@ -22,6 +22,8 @@
 
 🚧 **GATE —— 必须先读**：在做任何分析或写作前，先执行 `read_file templates/design_spec_reference.md`。最终输出的 `design_spec.md` **必须**严格遵循该模板的 11 节结构。写完后自检各节是否齐全：I Project Info → II Canvas → III Visual Theme → IV Typography → V Layout → VI Icon → VII Visualization → VIII Image → IX Outline → X Speaker Notes → XI Tech Constraints。
 
+**先思考后动手**：在呈现八项确认之前，先读取 `projects/task_plan.md` 和 `projects/findings.md`。如果对用户需求存在多种解读（如"季度汇报"还是"项目汇报"、图片全用还是部分用），**必须**在确认中呈现权衡和你的假设，让用户选择——不要默默选一种。如果存在更简单的方案，主动提出来。
+
 ⛔ **阻塞规则**：读取完成后，必须把下面八项的专业建议一次性打包给用户，并等待用户明确确认。
 
 > **执行纪律**：除模板选择外，这是最后一个 BLOCKING 检查点。用户确认后，应连续完成 Design Spec，并继续进入 SVG 生成 / 后处理，不再额外中断。

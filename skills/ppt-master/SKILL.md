@@ -19,10 +19,11 @@ description: >
 > 2. **阻塞 = 强制停止** —— 标有 ⛔ BLOCKING 的步骤需要完全停止；AI **必须**等待用户的明确回复后才能继续，**绝对不能**替用户做决定。
 > 3. **禁止跨阶段打包** —— 跨阶段打包是禁止的。（注：第 4 步中的八项确认是 ⛔ BLOCKING——AI 必须提供建议并等待用户的明确确认。一旦用户确认，后续所有非阻塞步骤——设计规范、SVG、演讲备注和后处理——都可自动连续进行）。
 > 4. **先检查门控** —— 每个步骤顶部都列有前提条件（🚧 GATE）；在开始该步骤前**必须**核实。
-> 5. **禁止推测性执行** —— **禁止**为后续步骤“预先准备”内容（例如，在 Strategist 阶段编写 SVG 代码）。
+> 5. **极简改动** —— **禁止**为后续步骤"预先准备"内容（例如，在 Strategist 阶段编写 SVG 代码）。**禁止**添加用户未要求的功能、装饰、颜色或布局变体。不为一次性场景创建抽象。如果 50 行 SVG 能解决的问题不要用 200 行。**检验标准**：每一处改动都能直接溯源到用户的请求或 spec_lock 的要求——无法溯源的改动就是过度工程。
 > 6. **禁止子智能体生成 SVG** —— 第 5 步 Executor 生成 SVG 高度依赖上下文，**必须**由当前主智能体端到端完成。**禁止**委托给子智能体。
 > 7. **仅限逐页生成** —— 在第 5 步 Executor 中，全局设计上下文确认后，SVG 页面**必须**在一个连续的上下文中按顺序一页一页地生成。**禁止**批量生成（例如每次 5 页）。
 > 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`anchor` / `dense` / `breathing`——见 executor-base.md §2.1）。
+> 9. **先思考后动手** —— 在关键决策前，**必须**先读取 `projects/task_plan.md` 和 `projects/findings.md`，确保理解当前状态和已积累的经验教训。如果对用户需求存在多种解读，**必须**呈现权衡让用户选择，而非默默选一种。如果存在更简单的方案，**必须**提出来。困惑时停下来问，不要假设。
 
 > [!IMPORTANT]
 > ## 💻 运行环境与命令规则（强制）
@@ -40,11 +41,36 @@ description: >
 > - **不要**默认创建 `.worktrees/`、`tests/`、分支工作流或通用工程结构。
 > - 当与通用编码技能发生冲突时，优先遵循本技能规则。
 
+> [!IMPORTANT]
+> ## 📋 会话状态管理（三件套）
+>
+> 三个 Markdown 文件位于 `projects/` 根目录下，作为 LLM 的**磁盘工作内存**——对抗上下文压缩、会话中断、重复犯错。
+>
+> | 文件 | 用途 | 生命周期 |
+> |------|------|----------|
+> | `projects/task_plan.md` | 当前项目、当前阶段、页进度、决策与错误日志 | 新项目 init 时重置 |
+> | `projects/findings.md` | 当前项目发现 + **跨项目经验教训** | 经验教训部分持久保留 |
+> | `projects/progress.md` | 时间戳追加式进度日志 | 持续追加 |
+>
+> **读写时机（强制）**：
+>
+> | 时机 | 必须读 | 必须写 |
+> |------|--------|--------|
+> | 会话启动 / 恢复 | `task_plan.md` + `findings.md` | — |
+> | 阶段切换 | — | `task_plan.md`（当前阶段 + 阶段清单） |
+> | 每页 SVG 生成后 | — | `task_plan.md`（当前页进度，如 P03/12） |
+> | 遇到并解决错误 | — | `task_plan.md` 错误日志 + `findings.md` 经验教训 |
+> | 用户做出关键决策 | — | `task_plan.md` 决策记录 |
+> | 关键动作完成（脚本执行、⛔ 通过等） | — | `progress.md` 追加一行 |
+> | 发现图片/源文档关键信息 | — | `findings.md` 当前项目发现 |
+>
+> **经验教训**（`findings.md` 经验教训章节）是最重要的跨项目资产——每次解决一个反复出现的问题后，必须追加一条简明记录，下个项目的 LLM 可直接参考避免重犯。
+
 ## 主要流程脚本
 
 | 脚本 | 用途 |
 |--------|---------|
-| `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理 |
+| `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理（含三件套状态文件初始化） |
 | `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析 |
 | `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
 | `${SKILL_DIR}/scripts/notes_all_md_split.py` | 演讲备注拆分 |
@@ -76,9 +102,13 @@ description: >
 
 🚧 **GATE**：用户已准备好 Markdown 格式的源材料。
 
+**会话恢复检测**：如果 `projects/task_plan.md` 存在且当前阶段非 S0，说明有未完成的项目——读取 `task_plan.md` 和 `findings.md`，从记录的阶段继续，不要重新开始。
+
 直接读取用户提供的 Markdown 源内容即可。
 
 **✅ 检查点 —— 确认源内容准备就绪，继续进入第 2 步。**
+
+> **成功标准**：`sources/` 目录存在且包含至少一个 `.md` 文件，或用户已在对话中提供了文本内容。
 
 ---
 
@@ -102,6 +132,10 @@ python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 > ⚠️ **必须使用 `--move`** (而不是复制)：所有源文件 —— 原始 Markdown / 图片 —— 都通过 `import-sources --move` 移动到 `sources/` 中。执行后它们在原位置将不再存在。中间产物（例如 `_files/`）会自动处理。
 
 **✅ 检查点 —— 确认项目结构创建成功，`sources/` 包含所有源文件，转换材料准备就绪。继续进入第 3 步。**
+
+> **成功标准**：`project_manager.py init` 返回 `[OK]`；`sources/` 包含所有源文件；三件套文件（`projects/task_plan.md` / `findings.md` / `progress.md`）已创建。
+
+> **三件套**：`project_manager.py init` 已自动在 `projects/` 下创建/重置 `task_plan.md`、`findings.md`、`progress.md`。确认这些文件存在。
 
 ---
 
@@ -135,6 +169,8 @@ Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.jpg" -Destination "<
 > 要创建新的全局模板，请阅读 `workflows/create-template.md`
 
 **✅ 检查点 —— 默认路径无需用户交互即可进入第 4 步。如果触发了模板，需在进入下一步前复制模板文件。**
+
+> **成功标准**：如触发了模板，`<project_path>/templates/` 下存在对应的 `.svg` 和 `design_spec.md` 文件；如未触发，无额外文件。
 
 ---
 
@@ -182,6 +218,10 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 - [ ] **下一步**：自动进入 Executor 阶段
 ```
 
+> **成功标准**：`design_spec.md` 包含完整的 I-XI 章节；`spec_lock.md` 包含 `colors` / `typography` / `icons` / `page_rhythm` 四个必需段；用户已对八项确认明确回复。
+
+**三件套更新**：更新 `projects/task_plan.md`——阶段清单标记 S0-S3 完成，当前阶段改为 S4；`projects/progress.md` 追加 Strategist 完成记录。如果用户在 ⛔ 处做了修改决策，记入 `task_plan.md` 决策记录。
+
 ---
 
 ### 第 5 步：Executor 阶段
@@ -208,6 +248,8 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 
 **视觉构建阶段**：一次连续处理中按顺序逐页生成 SVG 页面 → `<project_path>/svg_output/`
 
+**每页更新页进度（强制）**：每完成一页 SVG 写入后，立即更新 `projects/task_plan.md` 的“当前页进度”字段（如 P03/12），以便会话中断后可从该页恢复。
+
 **质量检查门控（强制）** —— 在所有 SVG 生成后，生成演讲备注之前：
 ```powershell
 python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
@@ -215,6 +257,8 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 - 任何 `error`（使用了禁用的 SVG 特性、viewBox 不匹配、偏离 spec_lock 等）**必须**在继续前修复 —— 返回视觉构建阶段，重新生成该页，再次运行检查。
 - `warning` 条目（低分辨率图片、非 PPT 安全字体结尾等）：如果容易修复就修复，否则确认情况后放行。
 - 对 `svg_output/` 运行检查（不要在运行 `finalize_svg.py` 之后检查，因为 finalize 会重写 SVG 并掩盖违规项）。
+
+**三件套更新**：如果 quality_checker 报告 error，将错误记入 `projects/task_plan.md` 错误日志。如果发现新类型的错误模式（如首次遇到的 spec_lock 漂移原因），追加到 `projects/findings.md` 经验教训。修复后更新 `progress.md`。
 
 **逻辑构建阶段**：生成演讲备注 → `<project_path>/notes/notes_all.md`
 
@@ -224,7 +268,12 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 - [x] 所有 SVG 均已生成到 svg_output/
 - [x] svg_quality_checker.py 检查通过 (0 errors)
 - [x] 演讲备注已生成到 notes/notes_all.md
+- [x] task_plan.md 页进度已更新至最后一页
 ```
+
+> **成功标准**：`svg_output/` 包含与 spec_lock `page_rhythm` 页数匹配的 SVG 文件；`svg_quality_checker.py` 返回 0 errors；每页 SVG 的颜色/字体/图标均来自 spec_lock。
+
+**三件套更新**：`projects/task_plan.md` 阶段清单标记 S4 完成，当前阶段改为 S5；`projects/progress.md` 追加 Executor 完成记录。
 
 > **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 6 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。
 
@@ -270,6 +319,8 @@ python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 > ❌ **绝不要**从 `svg_output/` 目录导出 —— **必须**使用 `-s final`（从 `svg_final/` 导出）
 > ❌ **绝不要**使用 `--only`（这会抑制生成两个输出文件之一）
 
+> **成功标准**：`exports/` 下存在带时间戳的 `.pptx` 文件且文件大小 > 0；`svg_final/` 文件数与 `svg_output/` 一致；`notes/` 下每页一个独立 `.md` 文件。
+
 ---
 
 ## 角色切换协议
@@ -293,3 +344,47 @@ python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 | 图片布局规范 | `references/image-layout-spec.md` |
 | SVG 图片嵌入说明 | `references/svg-image-embedding.md` |
 | 图标库说明 | `templates/icons/README.md` |
+| 三件套状态模板 | `templates/state/` |
+
+---
+
+## 错误恢复协议
+
+当 LLM 遇到以下情况时，按照标准流程处理并记录到三件套：
+
+### 会话中断恢复
+
+1. 新会话启动时，`read_file projects/task_plan.md` 和 `read_file projects/findings.md`
+2. 根据 task_plan.md 的“当前阶段”和“当前页进度”定位恢复点
+3. 从该阶段继续，**不要**从头重跑已完成阶段
+4. 恢复后追加 `progress.md` 一行：`| <时间> | 会话恢复 | 从 <阶段/页> 继续 |`
+
+### tool call 失败
+
+1. 记录到 `progress.md`
+2. 重试一次（使用相同或等效的调用方式）
+3. 仍失败：写入 `findings.md` 经验教训，告知用户具体错误
+
+### spec_lock 漂移
+
+1. 记录到 `task_plan.md` 错误日志（漂移值 + 所在页）
+2. 修复后追加到 `findings.md` 经验教训（漂移原因 + 修复方式），防止后续页面重犯
+3. 更新 `progress.md`
+
+### 脚本执行失败
+
+1. 记录错误信息到 `task_plan.md` 错误日志
+2. 分析错误原因（参数错误？路径问题？Python 异常？）
+3. 如果是首次遇到的错误类型，追加到 `findings.md` 经验教训
+4. 修正后重试；修正动作也追加到 `progress.md`
+
+### 手术刀修复（强制）
+
+修复错误时**只动目标页/目标元素**，不连带改写无关内容：
+
+- quality_checker 报 P05 漂移 → 只重生成 P05，**不要**"顺便"检查/修改 P04 和 P06
+- 用户说"P05 标题溢出" → 只缩小 P05 标题字号或换行，**不要**重新布局 P05 整页
+- 修一个颜色漂移 → 只替换该颜色值，**不要**"统一"相邻页面的间距或布局
+- 修改产生孤儿代码时（如删除了图片引用后的 `<clipPath>`），**必须**清理；但预先存在的死代码不要删
+
+**检验标准**：diff 中每一行改动都应该能直接追溯到触发修复的那个错误。

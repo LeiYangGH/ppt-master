@@ -126,7 +126,105 @@ class ProjectManager:
 
         print(f"项目已创建: {project_path}")
         print(f"画布: {canvas_info['name']} ({canvas_info['dimensions']})")
+
+        # 初始化共享三件套状态文件（位于 projects/ 根目录）
+        self._init_shared_state(base_path, project_name, normalized_format, date_str)
+
         return str(project_path)
+
+    def _init_shared_state(
+        self,
+        base_path: Path,
+        project_name: str,
+        canvas_format: str,
+        date_str: str,
+    ) -> None:
+        """初始化 projects/ 下的共享三件套状态文件。
+
+        - task_plan.md: 新项目时覆盖重写
+        - findings.md: 保留已有（经验教训跨项目持久）；不存在则从模板创建
+        - progress.md: 追加新项目分隔行；不存在则从模板创建
+        """
+        state_dir = SKILL_DIR / "templates" / "state"
+
+        # task_plan.md: 始终从模板重新生成，填入当前项目信息
+        task_plan_path = base_path / "task_plan.md"
+        template_tp = state_dir / "task_plan.md"
+        if template_tp.exists():
+            content = template_tp.read_text(encoding="utf-8")
+            content = content.replace(
+                "_（未初始化 — 运行 project_manager.py init 后自动填写）_",
+                f"{project_name} ({canvas_format}, {date_str})",
+            )
+            content = content.replace(
+                "S0 — 未开始",
+                "S0 项目初始化 — 进行中",
+            )
+            task_plan_path.write_text(content, encoding="utf-8")
+        else:
+            # 模板不存在时生成最小版本
+            task_plan_path.write_text(
+                f"# 任务计划\n\n"
+                f"## 当前项目\n{project_name} ({canvas_format}, {date_str})\n\n"
+                f"## 当前阶段\nS0 项目初始化 — 进行中\n\n"
+                f"## 阶段清单\n"
+                f"- [/] S0 项目初始化\n"
+                f"- [ ] S1 源内容处理\n"
+                f"- [ ] S2 模板选项\n"
+                f"- [ ] S3 Strategist（八项确认 ⛔）\n"
+                f"- [ ] S4 Executor（逐页生成）\n"
+                f"- [ ] S5 后处理 + 导出\n\n"
+                f"## 当前页进度\n_（Executor 阶段填写）_\n\n"
+                f"## 决策记录\n| # | 决策 | 原因 |\n|---|------|------|\n\n"
+                f"## 错误日志\n| 错误 | 阶段 | 处理 |\n|------|------|------|\n",
+                encoding="utf-8",
+            )
+
+        # findings.md: 保留已有文件（经验教训跨项目持久），不存在则从模板创建
+        findings_path = base_path / "findings.md"
+        if not findings_path.exists():
+            template_fi = state_dir / "findings.md"
+            if template_fi.exists():
+                content = template_fi.read_text(encoding="utf-8")
+                # 清空当前项目发现，保留经验教训模板结构
+                findings_path.write_text(content, encoding="utf-8")
+            else:
+                findings_path.write_text(
+                    "# 研究发现与经验\n\n"
+                    "## 当前项目发现\n_（暂无）_\n\n---\n\n"
+                    "## 经验教训（跨项目持久保留）\n\n"
+                    "### SVG 生成\n\n### 工作流\n\n### 工具与脚本\n",
+                    encoding="utf-8",
+                )
+
+        # progress.md: 追加新项目分隔行，不存在则从模板创建
+        progress_path = base_path / "progress.md"
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+        separator = f"\n| {now_str} | 项目初始化 {project_name} | 成功 |\n"
+        separator += f"\n--- 新项目: {project_name} ({date_str}) ---\n"
+
+        if progress_path.exists():
+            existing = progress_path.read_text(encoding="utf-8")
+            progress_path.write_text(
+                existing.rstrip() + "\n" + separator,
+                encoding="utf-8",
+            )
+        else:
+            template_pr = state_dir / "progress.md"
+            if template_pr.exists():
+                content = template_pr.read_text(encoding="utf-8")
+                progress_path.write_text(
+                    content.rstrip() + separator,
+                    encoding="utf-8",
+                )
+            else:
+                progress_path.write_text(
+                    "# 进度日志\n\n"
+                    "| 时间 | 动作 | 结果 |\n"
+                    "|------|------|------|\n"
+                    f"| {now_str} | 项目初始化 {project_name} | 成功 |\n",
+                    encoding="utf-8",
+                )
 
     def _source_dir(self, project_path: Path) -> Path:
         sources_dir = project_path / SOURCE_DIRNAME
