@@ -1,57 +1,57 @@
 # update_spec.py
 
-Propagate a `spec_lock.md` value change to both the lock file and every `svg_output/*.svg`. The single edit surface for bulk style tweaks after generation.
+将 `spec_lock.md` 的值变更同步到锁文件本身以及每个 `svg_output/*.svg`。生成后批量调整样式的单一编辑入口。
 
-## Usage
+## 用法
 
 ```bash
 python skills/ppt-master/scripts/update_spec.py <project_path> <section>.<key>=<value>
 ```
 
-Bare `<key>=<value>` (no dot) is treated as `colors.<key>=<value>` for backward compat.
+省略点的裸 `<key>=<value>` 视为 `colors.<key>=<value>`，保持向后兼容。
 
-One invocation = one change. The tool:
+一次调用 = 一次变更。工具流程：
 
-1. Reads the old value from `<project_path>/spec_lock.md`
-2. Writes the new value into `spec_lock.md`
-3. Propagates the change into every `.svg` under `svg_output/`
-4. Prints the list of files touched
+1. 从 `<project_path>/spec_lock.md` 读取旧值
+2. 将新值写入 `spec_lock.md`
+3. 将变更传播到 `svg_output/` 下的每个 `.svg`
+4. 输出受影响的文件列表
 
-## Examples
+## 示例
 
 ```bash
-# swap the primary color deck-wide (bare key → colors.primary)
+# 全演示文稿换主色（裸 key → colors.primary）
 python skills/ppt-master/scripts/update_spec.py projects/acme_ppt169_20260301 primary=#0066AA
 
-# explicit section.key form
+# 显式 section.key 形式
 python skills/ppt-master/scripts/update_spec.py projects/acme_ppt169_20260301 colors.accent=#FF6B35
 
-# change the deck-wide font family
+# 更换全演示文稿字体
 python skills/ppt-master/scripts/update_spec.py projects/acme_ppt169_20260301 \
   'typography.font_family="Inter", Arial, sans-serif'
 ```
 
-## v2 scope
+## v2 支持范围
 
-- **Supported**:
-  - `colors.*` — HEX value replacement across `svg_output/*.svg` (case-insensitive).
-  - `typography.font_family` — replaces the inner value of every `font-family="..."` / `font-family='...'` attribute.
-- **Not supported**: typography sizes, icons, images, canvas, forbidden — these involve attribute-scoped or semantic replacements whose risk/benefit does not warrant bulk propagation. Edit `spec_lock.md` and the affected SVGs by hand, or re-author the pages.
+- **支持**：
+  - `colors.*` — 在 `svg_output/*.svg` 中替换 HEX 值（不区分大小写）。
+  - `typography.font_family` — 替换每个 `font-family="..."` / `font-family='...'` 属性的内部值。
+- **不支持**：字号、图标、图像、画布、禁用项 — 这些涉及属性级或语义级替换，批量传播的风险收益不成比例。请手动编辑 `spec_lock.md` 和受影响 SVG，或由 Executor 重生成对应页面。
 
-## When to use
+## 何时使用
 
-- "Change the primary color across the whole deck" → one `update_spec.py` call
-- "Switch the deck-wide font family" → one `update_spec.py` call
-- "Switch an individual page's accent" → just edit that page's SVG directly
-- "Re-design the palette / type system" → update `spec_lock.md` manually, then the Executor can regenerate affected pages
+- "更换全演示文稿主色" → 一次 `update_spec.py` 调用
+- "更换全演示文稿字体" → 一次 `update_spec.py` 调用
+- "更换单页强调色" → 直接编辑该页 SVG
+- "重新设计配色 / 字体系统" → 手动更新 `spec_lock.md`，再由 Executor 重生成受影响页面
 
-## Safety
+## 安全性
 
-- HEX values (e.g. `#005587`) are unique enough in SVG content that literal replacement is safe
-- `font-family` substitution is scoped to the attribute; the outer quote character is preserved, and switched automatically if the new value contains the same quote
-- The tool refuses non-HEX inputs, unknown keys, and unsupported sections
-- No backups are created — the project folder should be under git so you can diff / revert
+- HEX 值（如 `#005587`）在 SVG 内容中足够唯一，字面替换安全
+- `font-family` 替换限定于属性内；外层引号保留，若新值含相同引号则自动切换
+- 工具拒绝非 HEX 输入、未知键和不支持的节
+- 不创建备份 — 项目文件夹应受 git 管理，以便 diff / 回退
 
-### Note on first `font-family` update
+### 首次 `font-family` 更新的注意事项
 
-The script writes the `spec_lock.md` value verbatim into every SVG's `font-family` attribute. If the Executor generated SVGs with quote-flattened font names (e.g. `font-family="Microsoft YaHei, Arial, sans-serif"`) while `spec_lock.md` holds the quoted form (`"Microsoft YaHei", Arial, sans-serif`), the **first** substitution will normalize every SVG to match the `spec_lock.md` literal (e.g. `font-family='"Microsoft YaHei", Arial, sans-serif'`). The two forms are semantically equivalent (CSS and DrawingML parse them identically), but the normalization produces byte-level diffs across every SVG that contains text. Subsequent updates only touch files where the value actually changes.
+脚本将 `spec_lock.md` 的值原样写入每个 SVG 的 `font-family` 属性。若 Executor 生成的 SVG 中字体名未加引号（如 `font-family="Microsoft YaHei, Arial, sans-serif"`），而 `spec_lock.md` 采用带引号形式（`"Microsoft YaHei", Arial, sans-serif`），则**首次**替换会将所有 SVG 规范化为与 `spec_lock.md` 字面一致（如 `font-family='"Microsoft YaHei", Arial, sans-serif'`）。两种形式语义等价（CSS 和 DrawingML 解析结果一致），但规范化会在含文本的 SVG 上产生字节级差异。后续更新仅触及值真正变化的文件。

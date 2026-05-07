@@ -1,10 +1,10 @@
-# SVG Pipeline Tools
+# SVG 流水线工具
 
-These tools cover post-processing, SVG validation, speaker notes, and PPTX export.
+涵盖后处理、SVG 校验、演讲者备注和 PPTX 导出。
 
-## Recommended Pipeline
+## 推荐流水线
 
-Run these steps in order:
+按顺序执行以下步骤：
 
 ```bash
 python scripts/total_md_split.py <project_path>
@@ -14,9 +14,9 @@ python scripts/svg_to_pptx.py <project_path> -s final
 
 ## `finalize_svg.py`
 
-Unified post-processing entry point. This is the preferred way to run SVG cleanup.
+统一后处理入口。这是运行 SVG 清理的首选方式。
 
-It aggregates:
+它聚合了：
 - `embed_icons.py`
 - `crop_images.py`
 - `fix_image_aspect.py`
@@ -26,7 +26,7 @@ It aggregates:
 
 ## `svg_to_pptx.py`
 
-Convert project SVGs into PPTX.
+将项目 SVG 转换为 PPTX。
 
 ```bash
 python scripts/svg_to_pptx.py <project_path> -s final
@@ -38,22 +38,22 @@ python scripts/svg_to_pptx.py <project_path> -s final --auto-advance 3
 python scripts/svg_to_pptx.py <project_path> -s final --animation mixed --animation-duration 0.8
 ```
 
-Behavior:
-- Default output:
-  - `exports/<project_name>_<timestamp>.pptx` — main native editable pptx
-  - `backup/<timestamp>/<project_name>_svg.pptx` — SVG snapshot for visual reference
-  - `backup/<timestamp>/svg_output/` — copy of Executor SVG source, so the pptx can be rebuilt via `finalize_svg → svg_to_pptx` without re-running the LLM
-- Explicit `-o/--output` keeps the legacy side-by-side `_svg.pptx` next to the chosen path and skips `backup/`
-- Recommended source directory: `svg_final/`
-- Speaker notes are embedded automatically unless `--no-notes` is used
-- Page transitions are controlled by `-t/--transition`; per-element entrance animations are controlled by `-a/--animation`
-- Per-element animation applies to top-level SVG `<g id="...">` groups in z-order; aim for 3–8 content groups per slide. Page chrome (background / header / footer / decorations / watermark / page number, by id token) is skipped automatically
-- Start mode is set by `--animation-trigger`, mirroring PowerPoint's Start dropdown: `after-previous` (default, cascade with `--animation-stagger` spacing on slide entry), `on-click` (presenter-paced), `with-previous` (all together on slide entry)
-- Flat SVG roots without top-level groups fall back to at most 8 visible primitives; beyond that, animation is skipped on the slide
-- `mixed` is deterministic: the first animated group on each slide uses `fade`, then later groups cycle through a curated visible-effect pool across the whole deck; `random` samples from that same pool
-- `--animation-duration` controls per-element entrance length; `--animation-stagger` adds gap between elements in `after-previous` mode
+行为说明：
+- 默认输出：
+  - `exports/<project_name>_<timestamp>.pptx` — 主文件，原生可编辑 PPTX
+  - `backup/<timestamp>/<project_name>_svg.pptx` — SVG 快照，用于视觉参考
+  - `backup/<timestamp>/svg_output/` — Executor SVG 源码副本，不重新运行 LLM 也能通过 `finalize_svg → svg_to_pptx` 重建 PPTX
+- 显式指定 `-o/--output` 会在目标路径旁保留传统并排 `_svg.pptx`，并跳过 `backup/`
+- 推荐源目录：`svg_final/`
+- 演讲者备注默认自动嵌入，加 `--no-notes` 可禁用
+- 页面切换由 `-t/--transition` 控制；元素入场动画由 `-a/--animation` 控制
+- 元素动画作用于顶层 SVG `<g id="...">` 组，按 z 轴顺序执行；建议每页 3–8 个内容组。页面装饰（背景 / 页眉 / 页脚 / 装饰 / 水印 / 页码，按 id 标识）自动跳过
+- 启动模式由 `--animation-trigger` 设置，对应 PowerPoint 的"开始"下拉框：`after-previous`（默认，幻灯片进入时按 `--animation-stagger` 间隔级联）、`on-click`（点击触发）、`with-previous`（幻灯片进入时同时启动）
+- 无顶层分组的扁平 SVG 根节点最多回退到 8 个可见图元；超过此数量则跳过该页动画
+- `mixed` 为确定性模式：每页第一个动画组使用 `fade`，后续组在整个演示文稿中循环使用精选可见效果池；`random` 从同一池中随机采样
+- `--animation-duration` 控制单个元素入场时长；`--animation-stagger` 在 `after-previous` 模式下增加元素间间隔
 
-Dependency:
+依赖：
 
 ```bash
 pip install python-pptx
@@ -61,7 +61,7 @@ pip install python-pptx
 
 ## `total_md_split.py`
 
-Split `total.md` into per-slide note files.
+将 `total.md` 拆分为每页讲稿文件。
 
 ```bash
 python scripts/total_md_split.py <project_path>
@@ -69,14 +69,14 @@ python scripts/total_md_split.py <project_path> -o <output_directory>
 python scripts/total_md_split.py <project_path> -q
 ```
 
-Requirements:
-- Each section begins with `# `
-- Heading text matches the SVG filename
-- Sections are separated by `---`
+要求：
+- 每节以 `# ` 开头
+- 标题文字与 SVG 文件名匹配
+- 节之间以 `---` 分隔
 
 ## `svg_quality_checker.py`
 
-Validate SVG technical compliance.
+校验 SVG 技术合规性。
 
 ```bash
 python scripts/svg_quality_checker.py examples/project/svg_output/01_cover.svg
@@ -87,19 +87,19 @@ python scripts/svg_quality_checker.py --all examples
 python scripts/svg_quality_checker.py examples/project --export
 ```
 
-Checks include:
+检查项：
 - `viewBox`
-- banned elements
-- width/height consistency
-- line-break structure
+- 禁用元素
+- width/height 一致性
+- 换行结构
 
 ## `svg_position_calculator.py`
 
-Analyze and review supported chart coordinates after SVG generation.
+SVG 生成后，分析并复核支持的图表坐标。
 
-Use this after `svg_quality_checker.py` passes, and only for chart types supported by this script: `bar`, `pie` / `donut`, `radar`, `line` / `area` / `scatter`, and `grid`. Area charts do not have a separate calculator mode: use `calc line` for the upper boundary points, then close the filled region to the plot area's bottom baseline (`y_max`) in the SVG.
+在 `svg_quality_checker.py` 通过后使用，且仅支持以下图表类型：`bar`、`pie` / `donut`、`radar`、`line` / `area` / `scatter`、`grid`。面积图无独立计算模式：先用 `calc line` 算出上边界点，再在 SVG 中将填充区域闭合到绘图区底部基线（`y_max`）。
 
-### Calculate expected coordinates
+### 计算预期坐标
 
 ```bash
 python scripts/svg_position_calculator.py calc bar --data "A:185,B:142" --area "130,155,1200,480" --bar-width 120
@@ -108,23 +108,23 @@ python scripts/svg_position_calculator.py calc pie --data "A:35,B:25,C:20" --cen
 python scripts/svg_position_calculator.py calc grid --rows 2 --cols 3 --area "50,150,1230,670"
 ```
 
-For an area chart, use the line output as the top boundary:
+面积图使用 line 输出作为上边界：
 
 ```svg
 M first_x,first_y ... L last_x,last_y L last_x,y_max L first_x,y_max Z
 ```
 
-Manually compare the calculator output with the coordinates already present in the generated SVG. If coordinates differ, update the SVG from the `calc` output, rerun `svg_quality_checker.py`, then repeat the coordinate review. The tool intentionally does not rewrite SVG files automatically.
+手动将计算器输出与生成 SVG 中已有坐标对比。若不一致，按 `calc` 输出更新 SVG，重新运行 `svg_quality_checker.py`，再重复坐标复核。该工具故意不自动改写 SVG 文件。
 
-### Analyze (inspect existing SVG)
+### 分析（检查已有 SVG）
 
 ```bash
 python scripts/svg_position_calculator.py analyze <svg_file>
 ```
 
-Use this after SVG generation to inspect existing SVG geometry when manual comparison needs more context.
+SVG 生成后，当手动对比需要更多上下文时，用此命令检查已有 SVG 几何结构。
 
-## Advanced Standalone Tools
+## 高级独立工具
 
 ### `flatten_tspan.py`
 
@@ -141,7 +141,7 @@ python scripts/svg_finalize/svg_rect_to_path.py <project_path> -s final
 python scripts/svg_finalize/svg_rect_to_path.py path/to/file.svg
 ```
 
-Use when rounded corners must survive PowerPoint shape conversion.
+圆角需要保留到 PowerPoint 形状转换时使用。
 
 ### `fix_image_aspect.py`
 
@@ -151,7 +151,7 @@ python scripts/svg_finalize/fix_image_aspect.py 01_cover.svg 02_toc.svg
 python scripts/svg_finalize/fix_image_aspect.py --dry-run path/to/slide.svg
 ```
 
-Use when embedded images stretch after PowerPoint shape conversion.
+嵌入图像在 PowerPoint 形状转换后拉伸时使用。
 
 ### `embed_icons.py`
 
@@ -161,19 +161,19 @@ python scripts/svg_finalize/embed_icons.py svg_output/*.svg
 python scripts/svg_finalize/embed_icons.py --dry-run svg_output/*.svg
 ```
 
-Replaces `<use data-icon="chunk-filled/name" .../>`, `<use data-icon="tabler-filled/name" .../>` and `<use data-icon="tabler-outline/name" .../>` placeholders with actual SVG path elements. Use for manual icon embedding checks outside `finalize_svg.py`.
+将 `<use data-icon="chunk-filled/name" .../>`、`<use data-icon="tabler-filled/name" .../>` 和 `<use data-icon="tabler-outline/name" .../>` 占位符替换为实际 SVG path 元素。用于 `finalize_svg.py` 之外的手动图标嵌入检查。
 
-## PPT Compatibility Rules
+## PPT 兼容性规则
 
-Use PowerPoint-safe transparency syntax:
+使用 PowerPoint 安全的透明度语法：
 
-| Avoid | Use instead |
+| 避免使用 | 改用 |
 |------|-------------|
 | `fill=\"rgba(...)\"` | `fill=\"#hex\"` + `fill-opacity` |
-| `<g opacity=\"...\">` | Set opacity on each child |
-| `<image opacity=\"...\">` | Overlay with a mask layer |
+| `<g opacity=\"...\">` | 在每个子元素上设置 opacity |
+| `<image opacity=\"...\">` | 叠加遮罩层 |
 
-PowerPoint also has trouble with:
-- marker-based arrows
-- unsupported filters
-- direct SVG features not mapped to DrawingML
+PowerPoint 同样不兼容：
+- 基于 marker 的箭头
+- 不支持的滤镜
+- 未映射到 DrawingML 的原生 SVG 特性
