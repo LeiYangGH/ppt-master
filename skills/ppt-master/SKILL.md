@@ -52,7 +52,6 @@ description: >
 | `${SKILL_DIR}/scripts/svg_to_pptx.py` | 导出为 PPTX |
 | `${SKILL_DIR}/scripts/update_spec.py` | 将 `spec_lock.md` 中的颜色 / 字体变更同步到所有 SVG |
 
-完整的工具文档见 `${SKILL_DIR}/scripts/README.md`。
 
 ## 模板索引
 

@@ -111,4 +111,3 @@ python skills/ppt-master/scripts/svg_to_pptx.py <project> --animation-trigger wi
 | 放慢元素入场 | `--animation-duration 0.5` |
 | 增大 after-previous 间隔 | `--animation-stagger 0.8` |
 
-另见：[`scripts/docs/svg-pipeline.md`](../scripts/docs/svg-pipeline.md)，其中有完整的 `svg_to_pptx.py` 说明。

@@ -73,15 +73,6 @@
 | `xMidYMid meet` | 完整显示，类似 CSS `contain` |
 | `none` | 拉伸铺满，不保留比例 |
 
-### 预览方式
-
-浏览器直接打开 SVG 时会拦截外部图片。应从项目根目录启动 HTTP 服务：
-
-```powershell
-python -m http.server -d <project_path> 8000
-# Visit http://localhost:8000/svg_output/your_file.svg
-```
-
 ---
 
 ## 方法二：Base64 嵌入（推荐用于交付阶段）
@@ -152,18 +143,3 @@ project/
 仅当 `clipPath` 用在 **`<image>` 元素** 上时，才属于条件允许。权威约束见 [shared-standards.md §1.2](shared-standards.md)，这里不重复放宽。
 
 若 `clipPath` 不适用，兜底方案是在嵌入前先把圆角烘焙进源图（带 alpha 的 PNG）。
-
----
-
-## FAQ
-
-**Q：直接打开 SVG 看不到图片？**  
-浏览器会拦截跨目录资源。请从项目根目录启动 HTTP 服务，或先运行 `finalize_svg.py` 后从 `svg_final/` 查看。
-
-**Q：Base64 文件太大怎么办？**  
-压缩源图、改用 JPEG，或把分辨率降到与实际显示尺寸一致。
-
-**Q：如何把 Base64 图片反解出来？**
-```powershell
-base64 -d image.b64 > image.png
-```

@@ -704,15 +704,3 @@ px=-0.737, py=0.676
 
 ---
 
-## 8. 项目目录结构
-
-```
-project/
-├── svg_output/    # 原始 SVG（Executor 输出，可能含占位内容）
-├── svg_final/     # 后处理后的最终 SVG（finalize_svg.py 输出）
-├── images/        # 图片资源（用户提供）
-├── notes/         # 演讲备注（与 SVG 文件同名的 .md 文件）
-│   └── notes_all.md   # 完整备注文档（拆分前）
-├── templates/     # 项目模板（如有）
-└── *.pptx         # 导出的 PPT 文件
-```
