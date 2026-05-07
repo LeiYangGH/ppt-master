@@ -7,7 +7,7 @@
 按顺序执行以下步骤：
 
 ```powershell
-python scripts/total_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path>
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
 ```
@@ -59,14 +59,14 @@ python scripts/svg_to_pptx.py <project_path> -s final --animation mixed --animat
 pip install python-pptx
 ```
 
-## `total_md_split.py`
+## `notes_all_md_split.py`
 
-将 `total.md` 拆分为每页讲稿文件。
+将 `notes_all.md` 拆分为每页讲稿文件。
 
 ```powershell
-python scripts/total_md_split.py <project_path>
-python scripts/total_md_split.py <project_path> -o <output_directory>
-python scripts/total_md_split.py <project_path> -q
+python scripts/notes_all_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path> -o <output_directory>
+python scripts/notes_all_md_split.py <project_path> -q
 ```
 
 要求：

@@ -16,7 +16,7 @@ project_name_format_YYYYMMDD/
 ├── design_spec.md
 ├── sources/          # 原始文件 / URL 存档 / 转换后的 Markdown 及其附件
 ├── images/           # 项目图片素材
-├── notes/            # 工作笔记 (01_xxx.md, total.md 等)
+├── notes/            # 工作笔记 (01_xxx.md, notes_all.md 等)
 ├── svg_output/       # Executor 生成的 SVG
 ├── svg_final/        # 后处理后的最终 SVG
 ├── templates/        # 项目级模板（可选）

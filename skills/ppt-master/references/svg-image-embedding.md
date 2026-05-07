@@ -114,7 +114,7 @@ python -m http.server -d <project_path> 8000
 
 ## 转换流程
 
-使用 [shared-standards.md §5](shared-standards.md) 中的统一流程。`finalize_svg.py` 会在导出前把 `svg_output/` 中的图片引用嵌入到 `svg_final/`。
+使用`shared-standards.md`中的统一流程。`finalize_svg.py` 会在导出前把 `svg_output/` 中的图片引用嵌入到 `svg_final/`。
 
 ```powershell
 python scripts/finalize_svg.py <project_path>

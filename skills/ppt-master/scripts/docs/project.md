@@ -7,7 +7,7 @@
 项目初始化和验证的主入口。
 
 ```powershell
-python scripts/project_manager.py init <project_name> --format ppt169
+python scripts/project_manager.py init <project_name>
 python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...]
 python scripts/project_manager.py validate <project_path>
 python scripts/project_manager.py info <project_path>
@@ -20,19 +20,12 @@ python scripts/project_manager.py info <project_path>
   如需强制复制仓库内文件，加 `--copy`
 - `--move` 与 `--copy` 互斥
 
-常用画布格式：
-- `ppt169`
-- `ppt43`
-- `xiaohongshu`
-- `moments`
-- `story`
-- `banner`
-- `a4`
+画布格式：`ppt169`（PPT 16:9，1280×720）
 
 示例：
 
 ```powershell
-python scripts/project_manager.py init my_presentation --format ppt169
+python scripts/project_manager.py init my_presentation
 python scripts/project_manager.py validate projects/my_presentation_ppt169_20251116
 python scripts/project_manager.py info projects/my_presentation_ppt169_20251116
 ```

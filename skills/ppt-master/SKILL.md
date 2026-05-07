@@ -51,7 +51,7 @@ description: >
 | `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理 |
 | `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析 |
 | `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
-| `${SKILL_DIR}/scripts/total_md_split.py` | 演讲备注拆分 |
+| `${SKILL_DIR}/scripts/notes_all_md_split.py` | 演讲备注拆分 |
 | `${SKILL_DIR}/scripts/finalize_svg.py` | SVG 后处理（统一入口） |
 | `${SKILL_DIR}/scripts/svg_to_pptx.py` | 导出为 PPTX |
 | `${SKILL_DIR}/scripts/update_spec.py` | 将 `spec_lock.md` 中的颜色 / 字体变更同步到所有 SVG |
@@ -92,10 +92,10 @@ description: >
 🚧 **GATE**：第 1 步完成；源内容准备就绪（Markdown 文件或对话中描述的需求均有效）。
 
 ```powershell
-python ${SKILL_DIR}/scripts/project_manager.py init <project_name> --format <format>
+python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 ```
 
-格式选项：`ppt169` (默认)、`ppt43`、`xhs`、`story` 等。完整格式列表请参见 `references/canvas-formats.md`。
+画布格式固定为 `ppt169`（PPT 16:9）。
 
 导入源内容（视情况选择）：
 
@@ -221,14 +221,14 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 - `warning` 条目（低分辨率图片、非 PPT 安全字体结尾等）：如果容易修复就修复，否则确认情况后放行。
 - 对 `svg_output/` 运行检查（不要在运行 `finalize_svg.py` 之后检查，因为 finalize 会重写 SVG 并掩盖违规项）。
 
-**逻辑构建阶段**：生成演讲备注 → `<project_path>/notes/total.md`
+**逻辑构建阶段**：生成演讲备注 → `<project_path>/notes/notes_all.md`
 
 **✅ 检查点 —— 确认所有 SVG 和演讲备注均已生成并完成质量检查。直接进入第 6 步后处理**：
 ```markdown
 ## ✅ Executor 阶段完成
 - [x] 所有 SVG 均已生成到 svg_output/
 - [x] svg_quality_checker.py 检查通过 (0 errors)
-- [x] 演讲备注已生成到 notes/total.md
+- [x] 演讲备注已生成到 notes/notes_all.md
 ```
 
 > **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 6 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。
@@ -237,7 +237,7 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 
 ### 第 6 步：后处理与导出
 
-🚧 **GATE**：第 5 步完成；所有 SVG 生成到 `svg_output/`；演讲备注 `notes/total.md` 已生成。
+🚧 **GATE**：第 5 步完成；所有 SVG 生成到 `svg_output/`；演讲备注 `notes/notes_all.md` 已生成。
 
 > ⚠️ 这三个子步骤必须**依次单独运行** —— 每一步成功完成后才能进行下一步。
 > ❌ **绝不要**把它们合并成一个代码块或一次 Shell 调用。
@@ -246,7 +246,7 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 
 **第 7.1 步** —— 拆分演讲备注：
 ```powershell
-python ${SKILL_DIR}/scripts/total_md_split.py <project_path>
+python ${SKILL_DIR}/scripts/notes_all_md_split.py <project_path>
 ```
 
 **第 7.2 步** —— SVG 后处理（图标嵌入 / 图片裁剪与嵌入 / 文本扁平化 / 圆角矩形转路径）：

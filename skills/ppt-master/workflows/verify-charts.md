@@ -148,7 +148,7 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 继续后处理与导出（[SKILL.md 步骤7](../SKILL.md)）：
 
 ```powershell
-python skills/ppt-master/scripts/total_md_split.py <project_path>
+python skills/ppt-master/scripts/notes_all_md_split.py <project_path>
 python skills/ppt-master/scripts/finalize_svg.py <project_path>
 python skills/ppt-master/scripts/svg_to_pptx.py <project_path> -s final
 ```

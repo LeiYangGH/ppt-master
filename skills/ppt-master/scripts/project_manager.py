@@ -2,7 +2,7 @@
 """PPT Master project management helpers.
 
 Usage:
-    python scripts/project_manager.py init <project_name> [--format ppt169] [--dir projects]
+    python scripts/project_manager.py init <project_name> [--dir projects]
     python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...] [--move | --copy]
     python scripts/project_manager.py validate <project_path>
     python scripts/project_manager.py info <project_path>
@@ -83,7 +83,7 @@ class ProjectManager:
             available = ", ".join(sorted(self.CANVAS_FORMATS.keys()))
             raise ValueError(
                 f"Unsupported canvas format: {canvas_format} "
-                f"(available: {available}; common alias: xhs -> xiaohongshu)"
+                f"(available: {available})"
             )
 
         date_str = datetime.now().strftime("%Y%m%d")
@@ -401,27 +401,23 @@ def print_usage() -> None:
     print(__doc__)
 
 
-def parse_init_args(argv: list[str]) -> tuple[str, str, str]:
+def parse_init_args(argv: list[str]) -> tuple[str, str]:
     """Parse arguments for the `init` subcommand."""
     if len(argv) < 3:
         raise ValueError("Project name is required")
 
     project_name = argv[2]
-    canvas_format = "ppt169"
     base_dir = "projects"
 
     i = 3
     while i < len(argv):
-        if argv[i] == "--format" and i + 1 < len(argv):
-            canvas_format = argv[i + 1]
-            i += 2
-        elif argv[i] == "--dir" and i + 1 < len(argv):
+        if argv[i] == "--dir" and i + 1 < len(argv):
             base_dir = argv[i + 1]
             i += 2
         else:
             i += 1
 
-    return project_name, canvas_format, base_dir
+    return project_name, base_dir
 
 
 def parse_import_args(argv: list[str]) -> tuple[str, list[str], bool, bool]:
@@ -459,8 +455,8 @@ def main() -> None:
 
     try:
         if command == "init":
-            project_name, canvas_format, base_dir = parse_init_args(sys.argv)
-            project_path = manager.init_project(project_name, canvas_format, base_dir=base_dir)
+            project_name, base_dir = parse_init_args(sys.argv)
+            project_path = manager.init_project(project_name, base_dir=base_dir)
             print(f"[OK] Project initialized: {project_path}")
             print("Next:")
             print("1. Put source files into sources/ (or use import-sources)")

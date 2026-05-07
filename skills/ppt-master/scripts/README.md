@@ -15,9 +15,9 @@ This directory contains user-facing scripts for conversion, project setup, SVG p
 Typical end-to-end workflow:
 
 ```powershell
-python scripts/project_manager.py init <project_name> --format ppt169
+python scripts/project_manager.py init <project_name>
 python scripts/project_manager.py import-sources <project_path> <source_files...> --move
-python scripts/total_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path>
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
 ```
@@ -33,7 +33,7 @@ python scripts/update_repo.py
 | Area | Primary scripts | Documentation |
 |------|-----------------|---------------|
 | Project management | `project_manager.py`, `batch_validate.py`, `generate_examples_index.py`, `error_helper.py`, `pptx_template_import.py` | [docs/project.md](./docs/project.md) |
-| SVG pipeline | `finalize_svg.py`, `svg_to_pptx.py`, `total_md_split.py`, `svg_quality_checker.py` | [docs/svg-pipeline.md](./docs/svg-pipeline.md) |
+| SVG pipeline | `finalize_svg.py`, `svg_to_pptx.py`, `notes_all_md_split.py`, `svg_quality_checker.py` | [docs/svg-pipeline.md](./docs/svg-pipeline.md) |
 | Spec maintenance | `update_spec.py` | [docs/update_spec.md](./docs/update_spec.md) |
 | Repo maintenance | `update_repo.py` | README install/update section |
 | Troubleshooting | validation, preview, export, dependency issues | [docs/troubleshooting.md](./docs/troubleshooting.md) |
@@ -43,7 +43,7 @@ python scripts/update_repo.py
 Project setup:
 
 ```powershell
-python scripts/project_manager.py init <project_name> --format ppt169
+python scripts/project_manager.py init <project_name>
 python scripts/project_manager.py import-sources <project_path> <source_files...> --move
 python scripts/project_manager.py validate <project_path>
 ```
@@ -58,7 +58,7 @@ python scripts/pptx_template_import.py <template.pptx> --manifest-only
 Post-processing and export:
 
 ```powershell
-python scripts/total_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path>
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
 ```

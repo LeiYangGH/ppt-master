@@ -264,7 +264,7 @@
 
 - 文件命名：建议与 SVG 名一致（如 `01_cover.svg` → `notes/01_cover.md`），也兼容 `notes/slide01.md`
 - 在 Design Spec 中填写：总演讲时长、备注风格（formal / conversational / interactive）、演讲目的（inform / persuade / inspire / instruct / report）
-- 拆分后的备注文件**不能**包含 `#` 标题行（但 `notes/total.md` 主文档**必须**使用 `#` 标题行）
+- 拆分后的备注文件**不能**包含 `#` 标题行（但 `notes/notes_all.md` 主文档**必须**使用 `#` 标题行）
 ---
 
 ## 2. Executor 风格细节（供确认项 #4 参考）

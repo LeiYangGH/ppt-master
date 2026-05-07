@@ -14,7 +14,6 @@ numbers are conditional on the Strategist picking the side-by-side intent.
 Usage:
     python scripts/analyze_images.py <images_folder_path>
     python scripts/analyze_images.py projects/xxx/images
-    python scripts/analyze_images.py projects/xxx/images --canvas ppt43
 
 Output:
     - Analysis report displayed in console

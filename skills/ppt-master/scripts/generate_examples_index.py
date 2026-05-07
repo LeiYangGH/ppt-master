@@ -94,8 +94,7 @@ def generate_examples_index(examples_dir: str = 'examples') -> str:
     content.append("\n## [List] Project List\n")
 
     # Define format display order
-    format_order = ['ppt169', 'ppt43', 'wechat',
-                    'xiaohongshu', 'moments', 'story', 'banner', 'a4']
+    format_order = ['ppt169']
 
     for fmt_key in format_order:
         if fmt_key not in by_format:
@@ -165,7 +164,7 @@ def generate_examples_index(examples_dir: str = 'examples') -> str:
     content.append("Refer to existing project structures, or use the project management tool:\n")
     content.append("```powershell")
     content.append(
-        "python scripts/project_manager.py init my_project --format ppt169")
+        "python scripts/project_manager.py init my_project")
     content.append("```\n")
 
     # Contribution guidelines

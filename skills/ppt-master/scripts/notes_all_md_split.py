@@ -2,16 +2,16 @@
 """
 PPT Master - Speaker Notes Splitting Tool
 
-Splits the total.md speaker notes file into multiple individual notes files,
+Splits the notes_all.md speaker notes file into multiple individual notes files,
 each corresponding to one SVG page.
 
 Usage:
-    python scripts/total_md_split.py <project_path>
-    python scripts/total_md_split.py <project_path> -o output_dir
+    python scripts/notes_all_md_split.py <project_path>
+    python scripts/notes_all_md_split.py <project_path> -o output_dir
 
 Examples:
-    python scripts/total_md_split.py projects/<svg_title>_ppt169_YYYYMMDD
-    python scripts/total_md_split.py projects/<svg_title>_ppt169_YYYYMMDD -o notes
+    python scripts/notes_all_md_split.py projects/<svg_title>_ppt169_YYYYMMDD
+    python scripts/notes_all_md_split.py projects/<svg_title>_ppt169_YYYYMMDD -o notes
 
 Dependencies:
     None (only uses standard library)
@@ -129,16 +129,16 @@ def find_svg_files(project_path: Path) -> list[Path]:
     return sorted(svg_dir.glob('*.svg'))
 
 
-def parse_total_md(
+def parse_notes_all_md(
     md_path: Path,
     svg_stems: list[str] | None = None,
     verbose: bool = True,
 ) -> dict[str, str]:
     """
-    Parse total.md file and extract speaker notes content for each level-1 heading
+    Parse notes_all.md file and extract speaker notes content for each level-1 heading
 
     Args:
-        md_path: Path to total.md file
+        md_path: Path to notes_all.md file
 
     Returns:
         Dictionary where key is the level-1 heading (without #) and value is the notes content
@@ -282,7 +282,7 @@ Examples:
     %(prog)s projects/<svg_title>_ppt169_YYYYMMDD -q
 
 Features:
-    - Reads the total.md speaker notes file
+    - Reads the notes_all.md speaker notes file
     - Checks the mapping between SVG files and notes
     - Splits notes into multiple individual files
     - Output filenames match SVG filenames
@@ -325,10 +325,10 @@ Features:
     if verbose:
         print(f"  Found {len(svg_files)} SVG file(s)")
 
-    # Parse total.md
-    total_md_path = project_path / 'notes' / 'total.md'
+    # Parse notes_all.md
+    notes_all_md_path = project_path / 'notes' / 'notes_all.md'
     svg_stems = [p.stem for p in svg_files]
-    notes = parse_total_md(total_md_path, svg_stems, verbose)
+    notes = parse_notes_all_md(notes_all_md_path, svg_stems, verbose)
 
     if not notes:
         print("Error: No notes content found")

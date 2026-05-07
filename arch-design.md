@@ -52,7 +52,7 @@ PPT Master 是一个 AI 驱动的多格式 SVG 内容生成系统，通过多角
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   SVG 后处理层 (Step 7.1-7.2)                     │
-│  total_md_split.py → finalize_svg.py → svg_final/              │
+│  notes_all_md_split.py → finalize_svg.py → svg_final/              │
 │  (图标嵌入/图片裁剪/文本扁平化/圆角矩形转换)                       │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
@@ -85,7 +85,7 @@ PPT Master 是一个 AI 驱动的多格式 SVG 内容生成系统，通过多角
 | 角色 | 职责 | 输出 |
 |------|------|------|
 | **Strategist (策略师)** | 分析源内容，确定设计规范 | design_spec.md (人类可读), spec_lock.md (机器可读执行锁) |
-| **Executor (执行器)** | 根据 spec_lock.md 生成 SVG 页面 | svg_output/*.svg + notes/total.md |
+| **Executor (执行器)** | 根据 spec_lock.md 生成 SVG 页面 | svg_output/*.svg + notes/notes_all.md |
 
 **关键约束**：
 - **串行执行**：步骤必须按顺序执行，每步输出作为下一步输入

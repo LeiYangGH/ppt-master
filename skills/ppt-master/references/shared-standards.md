@@ -295,7 +295,7 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 
 ```powershell
 # 1. 将总备注拆分为逐页备注文件
-python scripts/total_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path>
 
 # 2. SVG 后处理（嵌入图标、裁切/嵌入图片、文字扁平化、圆角矩形转 path）
 python scripts/finalize_svg.py <project_path>
@@ -321,7 +321,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 - 绝对不要直接从 `svg_output/` 导出——**必须**从 `svg_final/` 导出（使用 `-s final`）
 - 绝对不要使用 `--only`（它会抑制两种输出中的一种）
 
-**重跑规则**：后处理之后，只要 `svg_output/` 再次发生变化，就必须重新执行第 2-3 步。第 1 步只在 `notes/total.md` 发生变化时才需要重跑。
+**重跑规则**：后处理之后，只要 `svg_output/` 再次发生变化，就必须重新执行第 2-3 步。第 1 步只在 `notes/notes_all.md` 发生变化时才需要重跑。
 
 ---
 
@@ -712,7 +712,7 @@ project/
 ├── svg_final/     # 后处理后的最终 SVG（finalize_svg.py 输出）
 ├── images/        # 图片资源（用户提供 + AI 生成）
 ├── notes/         # 演讲备注（与 SVG 文件同名的 .md 文件）
-│   └── total.md   # 完整备注文档（拆分前）
+│   └── notes_all.md   # 完整备注文档（拆分前）
 ├── templates/     # 项目模板（如有）
 └── *.pptx         # 导出的 PPT 文件
 ```
