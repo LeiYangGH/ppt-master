@@ -1,73 +1,73 @@
-# {project_name} - Design Spec
+# {project_name} - 设计规范
 
-> Human-readable design narrative — rationale, audience, style, color choices, content outline. Read once by downstream roles for context.
+> 面向人类阅读的设计叙事——阐述设计理由、受众、风格、配色选择、内容大纲。下游角色只需阅读一次以了解上下文。
 >
-> Machine-readable execution contract: `spec_lock.md` (color / typography / icon / image short form). Executor re-reads `spec_lock.md` before every SVG page to resist context-compression drift. Keep both in sync; on divergence, `spec_lock.md` wins.
+> 面向机器读取的执行契约：`spec_lock.md`（颜色 / 字体 / 图标 / 图片的简短形式）。执行器在生成每个 SVG 页面之前必须重新阅读 `spec_lock.md`，以抵抗上下文压缩漂移。两个文件需保持同步；如有冲突，以 `spec_lock.md` 为准。
 
-## I. Project Information
+## I. 项目信息
 
-| Item | Value |
+| 项目 | 值 |
 | ---- | ----- |
-| **Project Name** | {project_name} |
-| **Canvas Format** | {canvas_info['name']} ({canvas_info['dimensions']}) |
-| **Page Count** | [Filled by Strategist] |
-| **Design Style** | {design_style} |
-| **Target Audience** | [Filled by Strategist] |
-| **Use Case** | [Filled by Strategist] |
-| **Created Date** | {date_str} |
+| **项目名称** | {project_name} |
+| **画布格式** | {canvas_info['name']} ({canvas_info['dimensions']}) |
+| **页数** | [由策略师填写] |
+| **设计风格** | {design_style} |
+| **目标受众** | [由策略师填写] |
+| **使用场景** | [由策略师填写] |
+| **创建日期** | {date_str} |
 
 ---
 
-## II. Canvas Specification
+## II. 画布规格
 
-| Property | Value |
+| 属性 | 值 |
 | -------- | ----- |
-| **Format** | {canvas_info['name']} |
-| **Dimensions** | {canvas_info['dimensions']} |
+| **格式** | {canvas_info['name']} |
+| **尺寸** | {canvas_info['dimensions']} |
 | **viewBox** | `{canvas_info['viewbox']}` |
-| **Margins** | [Recommended by Strategist, e.g., left/right 60px, top/bottom 50px] |
-| **Content Area** | [Calculated from canvas] |
+| **边距** | [由策略师建议，例如：左右 60px，上下 50px] |
+| **内容区域** | [根据画布计算] |
 
 ---
 
-## III. Visual Theme
+## III. 视觉主题
 
-### Theme Style
+### 主题风格
 
-- **Style**: {design_style}
-- **Theme**: [Light theme / Dark theme]
-- **Tone**: [Filled by Strategist, e.g., tech, professional, modern, innovative]
+- **风格**: {design_style}
+- **主题**: [浅色主题 / 深色主题]
+- **调性**: [由策略师填写，例如：科技、专业、现代、创新]
 
-### Color Scheme
+### 配色方案
 
-> Strategist: determine values from project content, industry, brand colors.
+> 策略师：根据项目内容、行业、品牌色确定具体值。
 
-| Role | HEX | Purpose |
+| 角色 | HEX | 用途 |
 | ---- | --- | ------- |
-| **Background** | `#......` | Page background (light theme typically white; dark theme dark gray/navy) |
-| **Secondary bg** | `#......` | Card background, section background |
-| **Primary** | `#......` | Title decorations, key sections, icons |
-| **Accent** | `#......` | Data highlights, key information, links |
-| **Secondary accent** | `#......` | Secondary emphasis, gradient transitions |
-| **Body text** | `#......` | Main body text (dark theme uses light text) |
-| **Secondary text** | `#......` | Captions, annotations |
-| **Tertiary text** | `#......` | Supplementary info, footers |
-| **Border/divider** | `#......` | Card borders, divider lines |
-| **Success** | `#......` | Positive indicators (green family) |
-| **Warning** | `#......` | Issue markers (red family) |
+| **背景色** | `#......` | 页面背景（浅色主题通常为白色；深色主题为深灰/藏青） |
+| **次要背景** | `#......` | 卡片背景、分区背景 |
+| **主色** | `#......` | 标题装饰、关键区域、图标 |
+| **强调色** | `#......` | 数据高亮、关键信息、链接 |
+| **次要强调** | `#......` | 次级强调、渐变过渡 |
+| **正文文字** | `#......` | 主体文字（深色主题使用浅色文字） |
+| **次要文字** | `#......` | 说明文字、注释 |
+| **第三级文字** | `#......` | 补充信息、页脚 |
+| **边框/分隔线** | `#......` | 卡片边框、分隔线 |
+| **成功色** | `#......` | 正向指示（绿色系） |
+| **警告色** | `#......` | 问题标记（红色系） |
 
-> **Reference**: Industry colors in `references/strategist.md` or `scripts/config.py` under `INDUSTRY_COLORS`
+> **参考**：行业配色见 `references/strategist.md` 或 `scripts/config.py` 中的 `INDUSTRY_COLORS`
 
-### Gradient Scheme (if needed, using SVG syntax)
+### 渐变方案（如需要，使用 SVG 语法）
 
 ```xml
-<!-- Title gradient -->
+<!-- 标题渐变 -->
 <linearGradient id="titleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
   <stop offset="0%" stop-color="#[primary]"/>
   <stop offset="100%" stop-color="#[secondary accent]"/>
 </linearGradient>
 
-<!-- Background decorative gradient (note: rgba forbidden, use stop-opacity) -->
+<!-- 背景装饰渐变（注意：禁止使用 rgba，请使用 stop-opacity） -->
 <radialGradient id="bgDecor" cx="80%" cy="20%" r="50%">
   <stop offset="0%" stop-color="#[primary]" stop-opacity="0.15"/>
   <stop offset="100%" stop-color="#[primary]" stop-opacity="0"/>
@@ -76,236 +76,236 @@
 
 ---
 
-## IV. Typography System
+## IV. 字体系统
 
-### Font Plan
+### 字体方案
 
-> **Per-role families are expected, not optional.** Title / Body / Emphasis / Code may each use a different family (e.g., display serif title + geometric sans body). One family throughout is not required. See [strategist.md §g — Font Combinations](../references/strategist.md) for starting directions; you may propose a combination not listed.
+> **按角色分配字体族是必需的，不是可选项。** 标题 / 正文 / 强调 / 代码 可以各使用不同的字体族（例如：展示性衬线标题 + 几何无衬线正文）。全文使用同一字体族并非必须。详见 [strategist.md §g — 字体组合](../references/strategist.md) 获取起始方向；你也可以提出未列出的组合。
 >
-> **⚠️ PPT-safe stack discipline (HARD rule).** PPTX stores a single `typeface` per run — no runtime fallback. Every stack MUST end with a cross-platform pre-installed font: `"Microsoft YaHei", sans-serif` / `SimSun, serif` / `Arial, sans-serif` / `"Times New Roman", serif` / `Consolas, "Courier New", monospace`. Stacks led by a non-preinstalled font (Inter / Google Fonts / brand typefaces) are allowed only when this spec notes the font-install or embedding requirement.
+> **⚠️ PPT 安全栈规则（硬性规定）。** PPTX 每个文本段只存储一个 `typeface`——没有运行时回退。每个字体栈必须以跨平台预装字体结尾：`"Microsoft YaHei", sans-serif` / `SimSun, serif` / `Arial, sans-serif` / `"Times New Roman", serif` / `Consolas, "Courier New", monospace`。以非预装字体（Inter / Google Fonts / 品牌字体）开头的栈仅在设计规范注明字体安装或嵌入要求时才允许。
 
-**Typography direction**: [Fill in one phrase, e.g., "modern CJK sans" / "academic serif" / "brand-specific: McKinsey Bower (requires font install)"]
+**字体方向**: [填写一个短语，例如："现代 CJK 无衬线" / "学术衬线" / "品牌特定：McKinsey Bower（需安装字体）"]
 
-Two views on the same font decisions — fill both, keep them consistent:
+同一字体决策的两种表达——两者都需填写并保持一致：
 
-- **Role breakdown** (table below) — lists the *pieces* per role: CJK font, Latin font, CSS generic fallback. Human-readable design language.
-- **Per-role font stacks** (after the table) — the *ordered* CSS `font-family` strings that actually go into SVG `font-family=""` and `spec_lock.md`'s `*_family` lines. Order controls browser rendering (Latin-led vs. CJK-led), so this is the **actual data** — not derivable from the table alone.
+- **角色拆分表**（下表）——按角色列出字体片段：中文字体、英文字体、CSS 通用回退。面向人类阅读的设计语言。
+- **按角色的字体栈**（表后）——实际写入 SVG `font-family=""` 和 `spec_lock.md` 的 `*_family` 行的有序 CSS `font-family` 字符串。顺序控制浏览器渲染（拉丁优先 vs 中文优先），因此这是**实际数据**——无法仅从表格推导得出。
 
-| Role | Chinese | English | Fallback tail |
+| 角色 | 中文 | 英文 | 回退尾部 |
 | ---- | ------- | ------- | ------------- |
-| **Title** | [e.g., `"Microsoft YaHei"`, or `"Microsoft YaHei", "PingFang SC"` for macOS preview nicety] | [e.g., `Georgia`] | [e.g., `serif`] |
-| **Body** | [e.g., `"Microsoft YaHei", "PingFang SC"`] | [e.g., `Arial`] | [e.g., `sans-serif`] |
-| **Emphasis** | [e.g., `SimSun`, or `—` for Latin-only] | [e.g., `Georgia`] | [e.g., `serif`] |
-| **Code** | — | [e.g., `Consolas, "Courier New"`] | [e.g., `monospace`] |
+| **标题** | [例如：`"Microsoft YaHei"`，或 `"Microsoft YaHei", "PingFang SC"` 以优化 macOS 预览] | [例如：`Georgia`] | [例如：`serif`] |
+| **正文** | [例如：`"Microsoft YaHei", "PingFang SC"`] | [例如：`Arial`] | [例如：`sans-serif`] |
+| **强调** | [例如：`SimSun`，或 `—` 表示仅拉丁] | [例如：`Georgia`] | [例如：`serif`] |
+| **代码** | — | [例如：`Consolas, "Courier New"`] | [例如：`monospace`] |
 
-**Per-role font stacks** (CSS `font-family` strings, one per role — arrange the table's pieces in the order your design intends):
+**按角色的字体栈**（CSS `font-family` 字符串，每个角色一行——按你的设计意图排列表格中的片段顺序）：
 
-- Title: `[Fill in stack, e.g. Georgia, "Microsoft YaHei", serif for Latin-led; or "Microsoft YaHei", "PingFang SC", Georgia, serif for CJK-led]`
-- Body: `[Fill in stack — may be same as Title]`
-- Emphasis: `[Fill in stack, or write "same as Body" to omit the override]`
-- Code: `[Fill in monospace stack, e.g. Consolas, "Courier New", monospace]`
+- 标题: `[填写栈，例如 Georgia, "Microsoft YaHei", serif 表示拉丁优先；或 "Microsoft YaHei", "PingFang SC", Georgia, serif 表示中文优先]`
+- 正文: `[填写栈——可与标题相同]`
+- 强调: `[填写栈，或写 "与正文相同" 以省略覆盖]`
+- 代码: `[填写等宽栈，例如 Consolas, "Courier New", monospace]`
 
-> **Stack ordering — why it matters**: CSS `font-family` falls back font-by-font (not char-by-char) — the browser uses the **first installed** font for everything it can render, skipping to the next only when a glyph is missing. So:
-> - `Georgia, "Microsoft YaHei", serif` → Latin in Georgia (elegant serif), CJK falls through to Microsoft YaHei. **Use when Latin typography is the primary design statement** (academic / editorial / Latin-heavy covers).
-> - `"Microsoft YaHei", Georgia, serif` → Everything in Microsoft YaHei (Latin uses YaHei's Latin glyphs — a different design tone). **Use when the deck is CJK-primary and Latin is incidental**.
+> **栈顺序——为何重要**：CSS `font-family` 是按字体回退（而非按字符）——浏览器使用**第一个已安装**的字体来渲染它能渲染的所有内容，仅当缺少字形时才跳到下一个。因此：
+> - `Georgia, "Microsoft YaHei", serif` → 拉丁文字使用 Georgia（优雅衬线），中文回退到 Microsoft YaHei。**当拉丁排版是主要设计表达时使用**（学术 / 编辑 / 拉丁文为主封面）。
+> - `"Microsoft YaHei", Georgia, serif` → 所有文字使用 Microsoft YaHei（拉丁文字使用 YaHei 的拉丁字形——设计风格不同）。**当幻灯片以中文为主、拉丁文为辅时使用**。
 >
-> The converter (`drawingml_utils.py parse_font_family`) maps these to PPTX `<a:latin>` / `<a:ea>` regardless of order — but browser preview and SVG native rendering reflect stack order. Pick the order matching your design intent.
+> 转换器（`drawingml_utils.py parse_font_family`）无论顺序如何都会将其映射到 PPTX `<a:latin>` / `<a:ea>`——但浏览器预览和 SVG 原生渲染反映栈顺序。选择符合你设计意图的顺序。
 
-> **Why two views**: the breakdown shows role assignment at a glance; stacks carry the ordering info the breakdown can't encode. Keep both consistent — table cells should be exactly the fonts in the stacks (any order).
+> **为何需要两种视图**：拆分表可一目了然地展示角色分配；字体栈携带拆分表无法编码的顺序信息。两者需保持一致——表格中的字体应恰好是栈中的字体（顺序不限）。
 
-### Font Size Hierarchy
+### 字号层级
 
-> **Ramp discipline, not a fixed menu.** `body` is the single anchor; every other size is a ratio of it. Each row below gives the role's allowed ratio band — Executor may pick any px value inside the band (e.g., 40px hero number, 13px chart annotation, 72px cover headline) without pre-declaring intermediates in `spec_lock.md`.
-> **Unit**: px uniformly (SVG native) to avoid pt/px conversion errors.
-> **Baseline selection**: drive by **content density**, not design style.
+> **梯度纪律，不是固定菜单。** `正文` 是唯一锚点；其他所有字号都是它的比例。下表每行给出该角色允许的比例范围——执行器可在范围内任选 px 值（例如：40px  hero 数字、13px 图表注释、72px 封面标题），无需在 `spec_lock.md` 中预先声明中间值。
+> **单位**：统一使用 px（SVG 原生单位），避免 pt/px 转换错误。
+> **基线选择**：由**内容密度**驱动，而非设计风格。
 
-**Baseline**: Body font size = [fill in]px (any reasonable integer — `18` and `24` are most common; `16` for chart-heavy, `20`/`22` for medium density, `28-32` for poster / cover decks are all valid. Drive by content density.)
+**基线**: 正文字号 = [填写]px（任意合理整数——`18` 和 `24` 最常见；图表密集用 `16`，中等密度用 `20`/`22`，海报/封面用 `28-32` 均可。由内容密度决定。）
 
-| Purpose | Ratio to body | Example @ body=24 (relaxed) | Example @ body=18 (dense) | Weight |
+| 用途 | 相对正文比例 | 示例 @ 正文=24（宽松） | 示例 @ 正文=18（密集） | 字重 |
 | ------- | ------------- | --------------------------- | ------------------------- | ------ |
-| Cover title (hero headline) | 2.5-5x | 60-120px | 45-90px | Bold / Heavy |
-| Chapter / section opener | 2-2.5x | 48-60px | 36-45px | Bold |
-| Page title | 1.5-2x | 36-48px | 27-36px | Bold |
-| Hero number (consulting KPIs) | 1.5-2x | 36-48px | 27-36px | Bold |
-| Subtitle | 1.2-1.5x | 29-36px | 22-27px | SemiBold |
-| **Body content** | **1x** | **24px** | **18px** | Regular |
-| Annotation / caption | 0.7-0.85x | 17-20px | 13-15px | Regular |
-| Page number / footnote | 0.5-0.65x | 12-16px | 9-12px | Regular |
+| 封面标题（主标题） | 2.5-5x | 60-120px | 45-90px | 粗体 / 特粗 |
+| 章节/分区开篇 | 2-2.5x | 48-60px | 36-45px | 粗体 |
+| 页面标题 | 1.5-2x | 36-48px | 27-36px | 粗体 |
+| Hero 数字（咨询 KPI） | 1.5-2x | 36-48px | 27-36px | 粗体 |
+| 副标题 | 1.2-1.5x | 29-36px | 22-27px | 半粗 |
+| **正文内容** | **1x** | **24px** | **18px** | 常规 |
+| 注释/说明 | 0.7-0.85x | 17-20px | 13-15px | 常规 |
+| 页码/脚注 | 0.5-0.65x | 12-16px | 9-12px | 常规 |
 
-> The two px columns are illustrations for common baselines. For any other `body` value, multiply by each row's ratio — the checker (`svg_quality_checker._check_spec_lock_drift`) reads the live `body` from `spec_lock.md` and applies the bands, so no code change is needed for a different baseline.
+> 两列 px 值是常见基线的示例。对于其他 `正文` 值，乘以每行的比例——检查器（`svg_quality_checker._check_spec_lock_drift`）从 `spec_lock.md` 读取实时 `正文` 值并应用范围，因此不同基线无需代码变更。
 
-> Sizes outside **every** band remain forbidden — surface the need and extend `spec_lock.md typography` (e.g., `cover_title: 96`) rather than invent a one-off value.
+> 超出**所有**范围的尺寸仍被禁止——如有需要请扩展 `spec_lock.md 字体`（例如 `封面标题: 96`），而非自行发明一次性值。
 
 ---
 
-## V. Layout Principles
+## V. 布局原则
 
-### Page Structure
+### 页面结构
 
-- **Header area**: [Height and content description]
-- **Content area**: [Height and content description]
-- **Footer area**: [Height and content description]
+- **页眉区域**: [高度和内容描述]
+- **内容区域**: [高度和内容描述]
+- **页脚区域**: [高度和内容描述]
 
-### Layout Pattern Library (combine or break as content demands)
+### 布局模式库（根据内容需求组合或打破）
 
-> **Principle — proportion follows information weight, not preset ratios.** The table below is a pattern library, not a menu. Combine two patterns on one page, break the grid entirely for a `breathing` page, or propose a pattern not listed when content calls for it. Defaulting every page to a symmetric grid produces the "AI-generated" look — vary intentionally.
+> **原则——比例遵循信息权重，而非预设比例。** 下表是模式库，不是菜单。可以在一页上组合两种模式，为 `呼吸` 页完全打破网格，或在内容需要时提出未列出的模式。每页默认使用对称网格会产生"AI 生成"感——有意地变化。
 
-| Pattern | Suitable Scenarios |
+| 模式 | 适用场景 |
 | ------- | ----------------- |
-| **Single column centered** | Covers, conclusions, key points |
-| **Symmetric split (5:5)** | Comparisons where two sides carry equal weight |
-| **Asymmetric split (3:7 / 2:8)** | One side dominates — data chart vs. brief takeaway, image vs. caption |
-| **Top-bottom split** | Processes, timelines, ultra-wide image + text |
-| **Three/four column cards** | Feature lists, parallel points, team intros |
-| **Matrix grid (2×2)** | Two-axis classifications, strategic quadrants |
-| **Z-pattern / waterfall** | Storytelling, case studies — content blocks alternate left/right guiding the eye |
-| **Center-radiating** | Core concept + surrounding nodes, ecosystem / stakeholder maps |
-| **Full-bleed + floating text** | `breathing` / feature pages — image fills canvas, text floats with opacity overlay |
-| **Figure-text overlap** | Hero moments — headline / big number sits over or against an image edge instead of beside it |
-| **Negative-space-driven** | A single element in 40-60% whitespace — lets one idea land with weight |
+| **单列居中** | 封面、结论、关键要点 |
+| **对称分割 (5:5)** | 两侧权重相当的对比 |
+| **非对称分割 (3:7 / 2:8)** | 一侧主导——数据图表 vs 简要结论，图片 vs 说明 |
+| **上下分割** | 流程、时间线、超宽图片 + 文字 |
+| **三/四列卡片** | 特性列表、并列要点、团队介绍 |
+| **矩阵网格 (2×2)** | 双轴分类、战略象限 |
+| **Z 形/瀑布流** | 叙事、案例研究——内容块左右交替引导视线 |
+| **中心放射** | 核心概念 + 周围节点，生态系统/利益相关者图 |
+| **全出血 + 浮动文字** | `呼吸` / 特性页——图片铺满画布，文字以透明度遮罩浮动 |
+| **图文重叠** | 高光时刻——标题/大数字位于图片边缘之上或旁边，而非并列 |
+| **负空间驱动** | 单一元素占据 40-60% 留白——让一个观点有分量地呈现 |
 
-### Spacing Specification
+### 间距规范
 
-> Spacing defaults depend on **container type**. Cards are one option, not the universal default. Tables below split by container type; a page may consult only one set (e.g., a `breathing` page with no cards uses only universal + non-card entries).
+> 间距默认值取决于**容器类型**。卡片只是一种选择，不是通用默认值。下表按容器类型拆分；一页可能只参考一组（例如没有卡片的 `呼吸` 页仅使用通用 + 非卡片项）。
 
-**Universal** (any container type):
+**通用**（任何容器类型）：
 
-| Element | Recommended Range | Current Project |
+| 元素 | 推荐范围 | 当前项目 |
 | ------- | ---------------- | --------------- |
-| Safe margin from canvas edge | 40-60px | [fill in] |
-| Content block gap | 24-40px | [fill in] |
-| Icon-text gap | 8-16px | [fill in] |
+| 画布边缘安全边距 | 40-60px | [填写] |
+| 内容块间距 | 24-40px | [填写] |
+| 图标-文字间距 | 8-16px | [填写] |
 
-**Card-based layouts** (consult only when the page uses cards — typically `dense` pages with parallel containers):
+**基于卡片的布局**（仅在页面使用卡片时参考——通常是带并行容器的 `密集` 页）：
 
-| Element | Recommended Range | Current Project |
+| 元素 | 推荐范围 | 当前项目 |
 | ------- | ---------------- | --------------- |
-| Card gap | 20-32px | [fill in] |
-| Card padding | 20-32px | [fill in] |
-| Card border radius | 8-16px | [fill in] |
-| Single-row card height | 530-600px | [fill in] |
-| Double-row card height | 265-295px each | [fill in] |
-| Three-column card width | 360-380px each | [fill in] |
+| 卡片间距 | 20-32px | [填写] |
+| 卡片内边距 | 20-32px | [填写] |
+| 卡片圆角 | 8-16px | [填写] |
+| 单行卡片高度 | 530-600px | [填写] |
+| 双行卡片高度 | 265-295px 每张 | [填写] |
+| 三列卡片宽度 | 360-380px 每张 | [填写] |
 
-**Non-card containers** (naked text blocks / full-bleed imagery / divider-separated content — typical for `breathing` pages or minimalist designs):
+**非卡片容器**（裸文本块 / 全出血图片 / 分隔线分隔的内容——`呼吸` 页或极简设计的典型）：
 
-- Vertical rhythm carried by **whitespace**, not gutters — block gaps run wider than card gaps since there's no container edge to separate content.
-- **Line-height**: 1.4-1.6× body font size.
-- **Full-bleed text placement**: inset text away from the image's focal points; legibility over photographic backgrounds typically needs a gradient or opacity overlay.
-- **Content width** is driven by reading comfort and image composition, not a card grid slot — don't back-compute "column width" when there's no column.
+- 垂直节奏由**留白**承载，而非槽线——块间距比卡片间距更宽，因为没有容器边缘来分隔内容。
+- **行高**: 1.4-1.6× 正文字号。
+- **全出血文字放置**：将文字内嵌避开图片的焦点区域；摄影背景上的可读性通常需要渐变或透明度遮罩。
+- **内容宽度**由阅读舒适度和图片构图驱动，而非卡片网格槽——没有列时不要反推"列宽"。
 
 ---
 
-## VI. Icon Usage Specification
+## VI. 图标使用规范
 
-### Source
+### 来源
 
-- **Built-in icon library**: `templates/icons/` (11,600+ icons across five libraries; see `templates/icons/README.md`)
-- **Usage method**: SVG placeholder `<use data-icon="library/icon-name" .../>`; Design Spec should list approved `library/icon-name` entries for Executor.
+- **内置图标库**: `templates/icons/`（11,600+ 图标，横跨五个库；详见 `templates/icons/README.md`）
+- **使用方法**: SVG 占位符 `<use data-icon="library/icon-name" .../>`；设计规范应列出执行器批准的 `library/icon-name` 条目。
 
-### Recommended Icon List (fill as needed)
+### 推荐图标列表（按需填写）
 
-| Purpose | Icon Path | Page |
+| 用途 | 图标路径 | 页面 |
 | ------- | --------- | ---- |
-| [example] | `chunk-filled/circle-checkmark` | Slide XX |
+| [示例] | `chunk-filled/circle-checkmark` | 第 XX 页 |
 
 ---
 
-## VII. Visualization Reference List (if needed)
+## VII. 可视化参考列表（如需要）
 
-> When the deck includes data visualization or infographic-style structured information, Strategist selects types from `templates/charts/charts_index.json` and lists them here for Executor reference. Path stays under `templates/charts/` for backward compatibility.
+> 当幻灯片包含数据可视化或信息图风格结构化信息时，策略师从 `templates/charts/charts_index.json` 中选择类型并在此列出供执行器参考。路径保留在 `templates/charts/` 下以保持向后兼容。
 
-**Read-audit** (mandatory):
+**阅读审计**（强制）：
 
 ```
-Catalog read: <N> templates / <M> categories
-Runners-up considered: <key_A> (rejected: <reason>), <key_B> (rejected: <reason>), <key_C> (rejected: <reason>)
+已读目录: <N> 个模板 / <M> 个类别
+候选方案: <key_A> (未选: <原因>), <key_B> (未选: <原因>), <key_C> (未选: <原因>)
 ```
 
-Runners-up must be genuine second-best matches for a page in this deck. If fewer than 3 viz pages exist, list what exists and note "fewer than 3 viz pages".
+候选方案必须是该幻灯片中某页的真正次优选择。如果可视化页面少于 3 页，列出存在的并注明"少于 3 个可视化页面"。
 
-| Visualization Type | Reference Template | Used In |
+| 可视化类型 | 参考模板 | 使用于 |
 | ------------------ | ------------------ | ------- |
-| [e.g. grouped_bar_chart] | `templates/charts/grouped_bar_chart.svg` | Slide 05 |
+| [例如 grouped_bar_chart] | `templates/charts/grouped_bar_chart.svg` | 第 05 页 |
 
 ---
 
-## VIII. Image Resource List (if needed)
+## VIII. 图片资源列表（如需要）
 
-| Filename | Dimensions | Ratio | Purpose | Type | Status | Generation Description |
+| 文件名 | 尺寸 | 比例 | 用途 | 类型 | 状态 | 生成描述 |
 | -------- | --------- | ----- | ------- | ---- | ------ | --------------------- |
-| cover_bg.png | {canvas_info['dimensions']} | [ratio] | Cover background | [Background/Photography/Illustration/Diagram/Decorative] | [Pending/Existing/Placeholder] | [AI generation prompt] |
+| cover_bg.png | {canvas_info['dimensions']} | [比例] | 封面背景 | [背景/摄影/插画/图表/装饰] | [待生成/已有/占位] | [AI 生成提示词] |
 
-**Status**:
+**状态**：
 
-- **Pending** — needs AI generation, provide description
-- **Existing** — user-supplied, place in `images/`
-- **Placeholder** — not yet processed, use dashed border in SVG
+- **待生成** — 需要 AI 生成，请提供描述
+- **已有** — 用户提供，放入 `images/`
+- **占位** — 尚未处理，在 SVG 中使用虚线边框
 
-**Type** (used by Image_Generator for prompt strategy):
+**类型**（图片生成器用于提示词策略）：
 
-- **Background** — full-page (covers / chapters); reserve text area
-- **Photography** — real scenes, people, products, architecture
-- **Illustration** — flat / vector / cartoon / concept diagrams
-- **Diagram** — flowcharts, architecture diagrams, concept maps
-- **Decorative** — partial decorations, textures, borders, dividers
-
----
-
-## IX. Content Outline
-
-### Part 1: [Chapter Name]
-
-#### Slide 01 - Cover
-
-- **Layout**: Full-screen background image + centered title
-- **Title**: [Main title]
-- **Subtitle**: [Subtitle]
-- **Info**: [Author / Date / Organization]
-
-#### Slide 02 - [Page Name]
-
-- **Layout**: [Choose a pattern from §V, combine two, or break the grid as the content demands]
-- **Title**: [Page title]
-- **Visualization**: [visualization_type] (see VII. Visualization Reference List)
-- **Content**:
-  - [Point 1]
-  - [Point 2]
-  - [Point 3]
-
-> **Visualization field**: add only when the page has data visualization or structured infographic elements. Type must be listed in §VII.
+- **背景** — 全页（封面 / 章节页）；预留文字区域
+- **摄影** — 真实场景、人物、产品、建筑
+- **插画** — 扁平 / 矢量 / 卡通 / 概念图
+- **图表** — 流程图、架构图、概念图
+- **装饰** — 局部装饰、纹理、边框、分隔线
 
 ---
 
-[Strategist continues adding more pages based on source document content and page count planning...]
+## IX. 内容大纲
+
+### 第 1 部分: [章节名称]
+
+#### 第 01 页 - 封面
+
+- **布局**: 全屏背景图 + 居中标题
+- **标题**: [主标题]
+- **副标题**: [副标题]
+- **信息**: [作者 / 日期 / 组织]
+
+#### 第 02 页 - [页面名称]
+
+- **布局**: [从 §V 中选择一种模式，组合两种，或按内容需求打破网格]
+- **标题**: [页面标题]
+- **可视化**: [可视化类型]（见 VII. 可视化参考列表）
+- **内容**:
+  - [要点 1]
+  - [要点 2]
+  - [要点 3]
+
+> **可视化字段**：仅当页面包含数据可视化或结构化信息图元素时添加。类型必须在 §VII 中列出。
 
 ---
 
-## X. Speaker Notes Requirements
-
-One speaker note file per page, saved to `notes/`:
-
-- **Filename**: match SVG name (e.g., `01_cover.md`)
-- **Content**: script key points, timing cues, transition phrases
+[策略师根据源文档内容和页数规划继续添加更多页面...]
 
 ---
 
-## XI. Technical Constraints Reminder
+## X. 演讲者备注要求
 
-### SVG Generation Must Follow:
+每页一个演讲者备注文件，保存到 `notes/`：
+
+- **文件名**: 与 SVG 名称匹配（例如：`01_cover.md`）
+- **内容**: 脚本要点、时间提示、过渡语
+
+---
+
+## XI. 技术约束提醒
+
+### SVG 生成必须遵循：
 
 1. viewBox: `{canvas_info['viewbox']}`
-2. Background uses `<rect>` elements
-3. Text wrapping uses `<tspan>` (`<foreignObject>` FORBIDDEN)
-4. Transparency uses `fill-opacity` / `stroke-opacity`; `rgba()` FORBIDDEN
-5. FORBIDDEN: `mask`, `<style>`, `class`, `foreignObject`
-6. FORBIDDEN: `textPath`, `animate*`, `script`
-7. Text characters: write typography & symbols as raw Unicode (em dash `—`, en dash `–`, `©`, `®`, `→`, NBSP, etc.); HTML named entities (`&nbsp;`, `&mdash;`, `&copy;`, `&reg;` …) are FORBIDDEN. XML reserved chars in text MUST be escaped as `&amp;` `&lt;` `&gt;` `&quot;` `&apos;` (e.g. `R&amp;D`, `error &lt; 5%`). See shared-standards.md §1.0
-7. `marker-start` / `marker-end` conditionally allowed: `<marker>` must be in `<defs>`, `orient="auto"`, shape must be triangle / diamond / circle (see shared-standards.md §1.1)
-8. `clipPath` conditionally allowed **only on `<image>` elements**: `<clipPath>` in `<defs>`, single shape child (circle / ellipse / rect with rx,ry / path / polygon). Do NOT apply to shapes / groups / text — draw the target geometry directly with the matching native element (`<circle>` / `<ellipse>` / `<rect rx>` / `<polygon>` / `<path>`). See shared-standards.md §1.2
+2. 背景使用 `<rect>` 元素
+3. 文字换行使用 `<tspan>`（禁止使用 `<foreignObject>`）
+4. 透明度使用 `fill-opacity` / `stroke-opacity`；禁止使用 `rgba()`
+5. 禁止: `mask`, `<style>`, `class`, `foreignObject`
+6. 禁止: `textPath`, `animate*`, `script`
+7. 文字字符：将排版和符号写成原始 Unicode（破折号 `—`，短破折号 `–`，`©`，`®`，`→`，不间断空格等）；禁止 HTML 命名实体（`&nbsp;`, `&mdash;`, `&copy;`, `&reg;` …）。文本中的 XML 保留字符必须转义为 `&amp;` `&lt;` `&gt;` `&quot;` `&apos;`（例如 `R&amp;D`, `error &lt; 5%`）。详见 shared-standards.md §1.0
+7. `marker-start` / `marker-end` 条件允许：`<marker>` 必须在 `<defs>` 中，`orient="auto"`，形状必须是三角形 / 菱形 / 圆形（详见 shared-standards.md §1.1）
+8. `clipPath` 仅当应用于 `<image>` 元素时条件允许：`<clipPath>` 在 `<defs>` 中，单个子形状（圆形 / 椭圆 / 带 rx,ry 的矩形 / 路径 / 多边形）。不要应用于形状 / 组 / 文字——直接使用匹配的原生元素绘制目标几何形状（`<circle>` / `<ellipse>` / `<rect rx>` / `<polygon>` / `<path>`）。详见 shared-standards.md §1.2
 
-### PPT Compatibility Rules:
+### PPT 兼容规则：
 
-- `<g opacity="...">` FORBIDDEN (group opacity); set on each child element individually
-- Image transparency uses overlay mask layer (`<rect fill="bg-color" opacity="0.x"/>`)
-- Inline styles only; external CSS and `@font-face` FORBIDDEN
+- `<g opacity="...">` 禁止（组透明度）；在每个子元素上单独设置
+- 图片透明度使用覆盖遮罩层（`<rect fill="bg-color" opacity="0.x"/>`）
+- 仅使用内联样式；禁止外部 CSS 和 `@font-face`
