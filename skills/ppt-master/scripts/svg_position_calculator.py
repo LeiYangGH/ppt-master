@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG Position Calculation and Validation Tool
+PPT Master - SVG 坐标计算与校验工具
 
-Provides pre-calculation and post-validation of chart coordinates,
-outputting clear coordinate tables.
+提供图表坐标的预计算和后校验，输出清晰的坐标表。
 
 ======================================================================
-Common Commands (can be copied and used directly)
+常用命令（可直接复制使用）
 ======================================================================
 
-1. Analyze all coordinates in an SVG file:
-   python scripts/svg_position_calculator.py analyze <svg_file>
+1. 分析 SVG 文件中的所有坐标：
+   python scripts/svg_position_calculator.py analyze <svg文件>
 
-2. Interactive calculation mode:
+2. 交互式计算模式：
    python scripts/svg_position_calculator.py interactive
 
-3. Calculate from JSON config file:
+3. 从 JSON 配置文件计算：
    python scripts/svg_position_calculator.py from-json <config.json>
 
-4. Quick calculation:
+4. 快速计算：
    python scripts/svg_position_calculator.py calc bar --data "East:185,South:142"
    python scripts/svg_position_calculator.py calc pie --data "A:35,B:25,C:20"
    python scripts/svg_position_calculator.py calc line --data "0:50,10:80,20:120"
@@ -1300,90 +1299,90 @@ def from_json_config(config_file: str) -> None:
 def main() -> None:
     """Run the CLI entry point."""
     parser = argparse.ArgumentParser(
-        description='SVG Position Calculation and Validation Tool',
+        description='SVG 坐标计算与校验工具',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Common commands:
-  # Analyze SVG file
+常用命令：
+  # 分析 SVG 文件
   python svg_position_calculator.py analyze example.svg
 
-  # Interactive mode
+  # 交互模式
   python svg_position_calculator.py interactive
 
-  # Calculate from JSON config
+  # 从 JSON 配置计算
   python svg_position_calculator.py from-json config.json
 
-  # Quick calculation
+  # 快速计算
   python svg_position_calculator.py calc bar --data "East:185,South:142"
   python svg_position_calculator.py calc pie --data "A:35,B:25,C:20"
   python svg_position_calculator.py calc line --data "0:50,10:80,20:120"
         """
     )
 
-    subparsers = parser.add_subparsers(dest='command', help='Command')
+    subparsers = parser.add_subparsers(dest='command', help='命令')
 
-    # calc subcommand
-    calc_parser = subparsers.add_parser('calc', help='Calculate coordinates')
-    calc_subparsers = calc_parser.add_subparsers(dest='chart_type', help='Chart type')
+    # calc 子命令
+    calc_parser = subparsers.add_parser('calc', help='计算坐标')
+    calc_subparsers = calc_parser.add_subparsers(dest='chart_type', help='图表类型')
 
-    # Bar chart
-    bar_parser = calc_subparsers.add_parser('bar', help='Bar chart')
-    bar_parser.add_argument('--data', required=True, help='Data "label1:value1,label2:value2"')
-    bar_parser.add_argument('--canvas', default='ppt169', help='Canvas format')
-    bar_parser.add_argument('--area', help='Chart area "x_min,y_min,x_max,y_max"')
-    bar_parser.add_argument('--bar-width', type=float, default=50, help='Bar width')
-    bar_parser.add_argument('--horizontal', action='store_true', help='Horizontal bar chart')
-    bar_parser.add_argument('--value-range', help='Value axis range "min,max" (from axis tick labels; omit to auto-normalize)')
+    # 柱状图
+    bar_parser = calc_subparsers.add_parser('bar', help='柱状图')
+    bar_parser.add_argument('--data', required=True, help='数据 "标签1:值1,标签2:值2"')
+    bar_parser.add_argument('--canvas', default='ppt169', help='画布格式')
+    bar_parser.add_argument('--area', help='图表区域 "x_min,y_min,x_max,y_max"')
+    bar_parser.add_argument('--bar-width', type=float, default=50, help='柱宽')
+    bar_parser.add_argument('--horizontal', action='store_true', help='横向柱状图')
+    bar_parser.add_argument('--value-range', help='值轴范围 "min,max"（来自轴刻度标签；省略则自动归一化）')
 
-    # Pie chart
-    pie_parser = calc_subparsers.add_parser('pie', help='Pie / donut chart')
-    pie_parser.add_argument('--data', required=True, help='Data "label1:value1,label2:value2"')
-    pie_parser.add_argument('--center', default='420,400', help='Center "x,y"')
-    pie_parser.add_argument('--radius', type=float, default=200, help='Radius')
-    pie_parser.add_argument('--inner-radius', type=float, default=0, help='Inner radius (donut chart)')
-    pie_parser.add_argument('--start-angle', type=float, default=-90, help='Start angle')
+    # 饼图
+    pie_parser = calc_subparsers.add_parser('pie', help='饼图 / 环形图')
+    pie_parser.add_argument('--data', required=True, help='数据 "标签1:值1,标签2:值2"')
+    pie_parser.add_argument('--center', default='420,400', help='圆心 "x,y"')
+    pie_parser.add_argument('--radius', type=float, default=200, help='半径')
+    pie_parser.add_argument('--inner-radius', type=float, default=0, help='内半径（环形图）')
+    pie_parser.add_argument('--start-angle', type=float, default=-90, help='起始角度')
 
-    # Radar chart
-    radar_parser = calc_subparsers.add_parser('radar', help='Radar chart')
-    radar_parser.add_argument('--data', required=True, help='Data "dim1:value1,dim2:value2"')
-    radar_parser.add_argument('--center', default='640,400', help='Center "x,y"')
-    radar_parser.add_argument('--radius', type=float, default=200, help='Radius')
-    radar_parser.add_argument('--max-value', type=float, help='Maximum value')
+    # 雷达图
+    radar_parser = calc_subparsers.add_parser('radar', help='雷达图')
+    radar_parser.add_argument('--data', required=True, help='数据 "维度1:值1,维度2:值2"')
+    radar_parser.add_argument('--center', default='640,400', help='圆心 "x,y"')
+    radar_parser.add_argument('--radius', type=float, default=200, help='半径')
+    radar_parser.add_argument('--max-value', type=float, help='最大值')
 
-    # Line / scatter chart
-    line_parser = calc_subparsers.add_parser('line', help='Line / scatter chart')
-    line_parser.add_argument('--data', required=True, help='Data "x1:y1,x2:y2"')
-    line_parser.add_argument('--canvas', default='ppt169', help='Canvas format')
-    line_parser.add_argument('--area', help='Chart area "x_min,y_min,x_max,y_max"')
-    line_parser.add_argument('--x-range', help='X axis range "min,max"')
-    line_parser.add_argument('--y-range', help='Y axis range "min,max"')
+    # 折线/散点图
+    line_parser = calc_subparsers.add_parser('line', help='折线 / 散点图')
+    line_parser.add_argument('--data', required=True, help='数据 "x1:y1,x2:y2"')
+    line_parser.add_argument('--canvas', default='ppt169', help='画布格式')
+    line_parser.add_argument('--area', help='图表区域 "x_min,y_min,x_max,y_max"')
+    line_parser.add_argument('--x-range', help='X 轴范围 "min,max"')
+    line_parser.add_argument('--y-range', help='Y 轴范围 "min,max"')
 
-    # Grid layout
-    grid_parser = calc_subparsers.add_parser('grid', help='Grid layout')
-    grid_parser.add_argument('--rows', type=int, required=True, help='Number of rows')
-    grid_parser.add_argument('--cols', type=int, required=True, help='Number of columns')
-    grid_parser.add_argument('--canvas', default='ppt169', help='Canvas format')
-    grid_parser.add_argument('--area', help='Chart area "x_min,y_min,x_max,y_max"')
-    grid_parser.add_argument('--padding', type=float, default=20, help='Inner padding')
-    grid_parser.add_argument('--gap', type=float, default=20, help='Spacing')
+    # 网格布局
+    grid_parser = calc_subparsers.add_parser('grid', help='网格布局')
+    grid_parser.add_argument('--rows', type=int, required=True, help='行数')
+    grid_parser.add_argument('--cols', type=int, required=True, help='列数')
+    grid_parser.add_argument('--canvas', default='ppt169', help='画布格式')
+    grid_parser.add_argument('--area', help='图表区域 "x_min,y_min,x_max,y_max"')
+    grid_parser.add_argument('--padding', type=float, default=20, help='内边距')
+    grid_parser.add_argument('--gap', type=float, default=20, help='间距')
 
-    # validate subcommand
-    validate_parser = subparsers.add_parser('validate', help='Validate SVG')
-    validate_parser.add_argument('svg_file', help='SVG file path')
-    validate_parser.add_argument('--expected', help='Expected coordinates JSON file')
-    validate_parser.add_argument('--extract', action='store_true', help='Extract all position information')
-    validate_parser.add_argument('--tolerance', type=float, default=1.0, help='Tolerance (pixels)')
+    # validate 子命令
+    validate_parser = subparsers.add_parser('validate', help='校验 SVG')
+    validate_parser.add_argument('svg_file', help='SVG 文件路径')
+    validate_parser.add_argument('--expected', help='预期坐标 JSON 文件')
+    validate_parser.add_argument('--extract', action='store_true', help='提取所有位置信息')
+    validate_parser.add_argument('--tolerance', type=float, default=1.0, help='容差（像素）')
 
-    # analyze subcommand - analyze SVG file
-    analyze_parser = subparsers.add_parser('analyze', help='Analyze chart elements in SVG file')
-    analyze_parser.add_argument('svg_file', help='SVG file path')
+    # analyze 子命令
+    analyze_parser = subparsers.add_parser('analyze', help='分析 SVG 文件中的图表元素')
+    analyze_parser.add_argument('svg_file', help='SVG 文件路径')
 
-    # interactive subcommand - interactive mode
-    subparsers.add_parser('interactive', help='Interactive calculation mode')
+    # interactive 子命令
+    subparsers.add_parser('interactive', help='交互式计算模式')
 
-    # from-json subcommand - read from config file
-    json_parser = subparsers.add_parser('from-json', help='Calculate from JSON config file')
-    json_parser.add_argument('config_file', help='JSON config file path')
+    # from-json 子命令
+    json_parser = subparsers.add_parser('from-json', help='从 JSON 配置文件计算')
+    json_parser.add_argument('config_file', help='JSON 配置文件路径')
 
     args = parser.parse_args()
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG Quality Check Tool
+PPT Master - SVG 质量检查工具
 
-Checks whether SVG files comply with project technical specifications.
+检查 SVG 文件是否符合项目技术规范。
 
-Usage:
-    python scripts/svg_quality_checker.py <svg_file>
-    python scripts/svg_quality_checker.py <directory>
+用法：
+    python scripts/svg_quality_checker.py <svg文件>
+    python scripts/svg_quality_checker.py <目录>
     python scripts/svg_quality_checker.py --all examples
 """
 
@@ -21,7 +21,7 @@ try:
     from project_utils import CANVAS_FORMATS
     from error_helper import ErrorHelper
 except ImportError:
-    print("Warning: Unable to import dependency modules")
+    print("警告: 无法导入依赖模块")
     CANVAS_FORMATS = {}
     ErrorHelper = None
 
@@ -605,7 +605,7 @@ class SVGQualityChecker:
         dir_path = Path(directory)
 
         if not dir_path.exists():
-            print(f"[ERROR] Directory does not exist: {directory}")
+            print(f"[ERROR] 目录不存在: {directory}")
             return []
 
         # Find all SVG files
@@ -618,10 +618,10 @@ class SVGQualityChecker:
             svg_files = sorted(svg_output.glob('*.svg'))
 
         if not svg_files:
-            print(f"[WARN] No SVG files found")
+            print(f"[WARN] 未找到 SVG 文件")
             return []
 
-        print(f"\n[SCAN] Checking {len(svg_files)} SVG file(s)...\n")
+        print(f"\n[扫描] 正在检查 {len(svg_files)} 个 SVG 文件...\n")
 
         for svg_file in svg_files:
             result = self.check_file(str(svg_file), expected_format)
@@ -634,13 +634,13 @@ class SVGQualityChecker:
         if result['passed']:
             if result['warnings']:
                 icon = "[WARN]"
-                status = "Passed (with warnings)"
+                status = "通过（有警告）"
             else:
                 icon = "[OK]"
-                status = "Passed"
+                status = "通过"
         else:
             icon = "[ERROR]"
-            status = "Failed"
+            status = "未通过"
 
         print(f"{icon} {result['file']} - {status}")
 
@@ -662,26 +662,26 @@ class SVGQualityChecker:
             for warning in result['warnings'][:2]:  # Only show first 2 warnings
                 print(f"   [WARN] {warning}")
             if len(result['warnings']) > 2:
-                print(f"   ... and {len(result['warnings']) - 2} more warning(s)")
+                print(f"   ... 等 {len(result['warnings']) - 2} 个更多警告")
 
         print()
 
     def print_summary(self):
         """Print check summary"""
         print("=" * 80)
-        print("[SUMMARY] Check Summary")
+        print("[汇总] 检查汇总")
         print("=" * 80)
 
-        print(f"\nTotal files: {self.summary['total']}")
+        print(f"\n文件总数: {self.summary['total']}")
         print(
-            f"  [OK] Fully passed: {self.summary['passed']} ({self._percentage(self.summary['passed'])}%)")
+            f"  [OK] 完全通过: {self.summary['passed']} ({self._percentage(self.summary['passed'])}%)")
         print(
-            f"  [WARN] With warnings: {self.summary['warnings']} ({self._percentage(self.summary['warnings'])}%)")
+            f"  [WARN] 有警告: {self.summary['warnings']} ({self._percentage(self.summary['warnings'])}%)")
         print(
-            f"  [ERROR] With errors: {self.summary['errors']} ({self._percentage(self.summary['errors'])}%)")
+            f"  [ERROR] 有错误: {self.summary['errors']} ({self._percentage(self.summary['errors'])}%)")
 
         if self.issue_types:
-            print(f"\nIssue categories:")
+            print(f"\n问题分类:")
             for issue_type, count in sorted(self.issue_types.items(), key=lambda x: x[1], reverse=True):
                 print(f"  {issue_type}: {count}")
 
@@ -690,11 +690,11 @@ class SVGQualityChecker:
 
         # Fix suggestions
         if self.summary['errors'] > 0 or self.summary['warnings'] > 0:
-            print(f"\n[TIP] Common fixes:")
-            print(f"  1. XML well-formedness: write typography as raw Unicode (—, ©, →, NBSP); escape XML reserved chars as &amp; &lt; &gt; &quot; &apos; — never use HTML named entities like &nbsp; &mdash; &copy;")
-            print(f"  2. viewBox issues: Ensure consistency with canvas format (see references/canvas-formats.md)")
-            print(f"  3. foreignObject: Use <text> + <tspan> for manual line breaks")
-            print(f"  4. Font issues: end every font-family stack with a PPT-safe family (e.g. Microsoft YaHei / Arial / Consolas)")
+            print(f"\n[建议] 常见修复:")
+            print(f"  1. XML 格式: 将排版字符写为原始 Unicode（—, ©, →, NBSP）；转义 XML 保留字符为 &amp; &lt; &gt; &quot; &apos; — 禁止使用 HTML 命名实体如 &nbsp; &mdash; &copy;")
+            print(f"  2. viewBox 问题: 确保与画布格式一致（见 references/canvas-formats.md）")
+            print(f"  3. foreignObject: 使用 <text> + <tspan> 实现手动换行")
+            print(f"  4. 字体问题: 每个 font-family 栈末尾需为 PPT 安全字体（如 Microsoft YaHei / Arial / Consolas）")
 
     def _print_drift_summary(self):
         """Print spec_lock drift aggregation if any was observed.
@@ -708,13 +708,13 @@ class SVGQualityChecker:
             return
         has_drift = any(self._drift_summary[cat] for cat in self._drift_summary)
         if not has_drift:
-            print("\n[OK] spec_lock drift: none — all colors, fonts, and sizes are anchored to spec_lock.md")
+            print("\n[OK] spec_lock 漂移: 无 — 所有颜色、字体和字号均锚定于 spec_lock.md")
             return
 
-        print("\nspec_lock drift — values used outside spec_lock.md:")
-        labels = [('colors', 'Colors'),
-                  ('fonts', 'Font families'),
-                  ('sizes', 'Font sizes')]
+        print("\nspec_lock 漂移 — 使用了 spec_lock.md 之外的值:")
+        labels = [('colors', '颜色'),
+                  ('fonts', '字体系列'),
+                  ('sizes', '字号')]
         for category, label in labels:
             items = self._drift_summary.get(category, {})
             if not items:
@@ -723,12 +723,12 @@ class SVGQualityChecker:
             print(f"  {label}:")
             for val, files in entries:
                 n = len(files)
-                suffix = "file" if n == 1 else "files"
+                suffix = "个文件" if n == 1 else "个文件"
                 print(f"    {val}  ({n} {suffix})")
         print(
-            "Tip: frequent out-of-lock values usually mean spec_lock.md is missing\n"
-            "     entries — extend the lock (scripts/update_spec.py or manual edit).\n"
-            "     Rare ones are likely Executor drift — review the affected SVGs."
+            "提示: 频繁出现的锁外值通常意味着 spec_lock.md 缺少条目\n"
+            "     — 扩展锁文件（scripts/update_spec.py 或手动编辑）。\n"
+            "     少量出现的锁外值更可能是 Executor 漂移 — 检查受影响 SVG。"
         )
 
     def _percentage(self, count: int) -> int:
@@ -740,24 +740,24 @@ class SVGQualityChecker:
     def export_report(self, output_file: str = 'svg_quality_report.txt'):
         """Export check report"""
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("PPT Master SVG Quality Check Report\n")
+            f.write("PPT Master SVG 质量检查报告\n")
             f.write("=" * 80 + "\n\n")
 
             for result in self.results:
-                status = "[OK] Passed" if result['passed'] else "[ERROR] Failed"
+                status = "[OK] 通过" if result['passed'] else "[ERROR] 未通过"
                 f.write(f"{status} - {result['file']}\n")
-                f.write(f"Path: {result.get('path', 'N/A')}\n")
+                f.write(f"路径: {result.get('path', 'N/A')}\n")
 
                 if result['info']:
                     f.write(f"Info: {result['info']}\n")
 
                 if result['errors']:
-                    f.write(f"\nErrors:\n")
+                    f.write(f"\n错误:\n")
                     for error in result['errors']:
                         f.write(f"  - {error}\n")
 
                 if result['warnings']:
-                    f.write(f"\nWarnings:\n")
+                    f.write(f"\n警告:\n")
                     for warning in result['warnings']:
                         f.write(f"  - {warning}\n")
 
@@ -765,25 +765,25 @@ class SVGQualityChecker:
 
             # Write summary
             f.write("\n" + "=" * 80 + "\n")
-            f.write("Check Summary\n")
+            f.write("检查汇总\n")
             f.write("=" * 80 + "\n\n")
-            f.write(f"Total files: {self.summary['total']}\n")
-            f.write(f"Fully passed: {self.summary['passed']}\n")
-            f.write(f"With warnings: {self.summary['warnings']}\n")
-            f.write(f"With errors: {self.summary['errors']}\n")
+            f.write(f"文件总数: {self.summary['total']}\n")
+            f.write(f"完全通过: {self.summary['passed']}\n")
+            f.write(f"有警告: {self.summary['warnings']}\n")
+            f.write(f"有错误: {self.summary['errors']}\n")
 
-        print(f"\n[REPORT] Check report exported: {output_file}")
+        print(f"\n[报告] 检查报告已导出: {output_file}")
 
 
 def main() -> None:
     """Run the CLI entry point."""
     if len(sys.argv) < 2:
-        print("PPT Master - SVG Quality Check Tool\n")
-        print("Usage:")
-        print("  python scripts/svg_quality_checker.py <svg_file>")
-        print("  python scripts/svg_quality_checker.py <directory>")
+        print("PPT Master - SVG 质量检查工具\n")
+        print("用法:")
+        print("  python scripts/svg_quality_checker.py <svg文件>")
+        print("  python scripts/svg_quality_checker.py <目录>")
         print("  python scripts/svg_quality_checker.py --all examples")
-        print("\nExamples:")
+        print("\n示例:")
         print("  python scripts/svg_quality_checker.py examples/project/svg_output/slide_01.svg")
         print("  python scripts/svg_quality_checker.py examples/project/svg_output")
         print("  python scripts/svg_quality_checker.py examples/project")
@@ -809,7 +809,7 @@ def main() -> None:
 
         for project in projects:
             print(f"\n{'=' * 80}")
-            print(f"Checking project: {project.name}")
+            print(f"正在检查项目: {project.name}")
             print('=' * 80)
             checker.check_directory(str(project))
     else:

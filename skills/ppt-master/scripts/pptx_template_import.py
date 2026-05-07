@@ -222,38 +222,38 @@ def export_pptx_slides_to_svg_with_fallback(pptx_path: Path, output_dir: Path) -
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Prepare a PPTX reference workspace for /create-template."
+        description="为 /create-template 准备 PPTX 参考工作区。"
     )
-    parser.add_argument("pptx_file", help="Path to the source .pptx file")
+    parser.add_argument("pptx_file", help="源 .pptx 文件路径")
     parser.add_argument(
         "-o",
         "--output",
-        help="Output directory (default: <pptx_stem>_template_import beside the source file)",
+        help="输出目录（默认: 源文件旁的 <pptx_stem>_template_import）",
     )
     parser.add_argument(
         "--skip-manifest",
         action="store_true",
-        help="Skip PPTX metadata extraction and asset inventory generation",
+        help="跳过 PPTX 元数据提取和资源清单生成",
     )
     parser.add_argument(
         "--manifest-only",
         action="store_true",
-        help="Only extract manifest.json, analysis.md, and reusable assets without exporting slides to SVG",
+        help="仅提取 manifest.json、analysis.md 和可复用资源，不导出幻灯片 SVG",
     )
     parser.add_argument(
         "--keep-raw",
         action="store_true",
-        help="Keep raw PowerPoint-exported SVG files in svg_raw/",
+        help="保留 PowerPoint 导出的原始 SVG 文件到 svg_raw/",
     )
     parser.add_argument(
         "--no-externalize",
         action="store_true",
-        help="Skip inline image externalization and keep raw SVG output only",
+        help="跳过内联图片外链化，仅保留原始 SVG 输出",
     )
     parser.add_argument(
         "--no-optimize",
         action="store_true",
-        help="Skip the second-pass structural optimization for cleaned reference SVG files",
+        help="跳过已清理参考 SVG 的二次结构优化",
     )
     return parser.parse_args()
 

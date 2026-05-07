@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG Post-processing Tool (Unified Entry Point)
+PPT Master - SVG 后处理工具（统一入口）
 
-Processes SVG files from svg_output/ and outputs them to svg_final/.
-By default, all processing steps are executed. You can also specify
-individual steps via arguments.
+将 svg_output/ 中的 SVG 文件处理后输出到 svg_final/。
+默认执行所有处理步骤，也可通过参数指定单独步骤。
 
-Usage:
-    # Execute all processing steps (recommended)
-    python scripts/finalize_svg.py <project_directory>
+用法：
+    # 执行所有处理步骤（推荐）
+    python scripts/finalize_svg.py <项目目录>
 
-    # Execute only specific steps
-    python scripts/finalize_svg.py <project_directory> --only embed-icons fix-rounded
+    # 仅执行指定步骤
+    python scripts/finalize_svg.py <项目目录> --only embed-icons fix-rounded
 
-Examples:
+示例：
     python scripts/finalize_svg.py projects/my_project
     python scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
 
-Processing options:
-    embed-icons   - Replace <use data-icon="..."/> with actual icon SVG
-    crop-images   - Smart crop images based on preserveAspectRatio="slice"
-    fix-aspect    - Fix image aspect ratio (prevent stretching during PPT shape conversion)
-    embed-images  - Convert external images to Base64 embedded
-    flatten-text  - Convert <tspan> to independent <text> (for special renderers)
-    fix-rounded   - Convert <rect rx="..."/> to <path> (for PPT shape conversion)
+处理选项：
+    embed-icons   - 将 <use data-icon="..."/> 替换为实际图标 SVG
+    crop-images   - 基于 preserveAspectRatio="slice" 智能裁剪图片
+    fix-aspect    - 修正图片宽高比（防止 PPT 形状转换时拉伸）
+    embed-images  - 将外部图片转换为 Base64 嵌入
+    flatten-text  - 将 <tspan> 转为独立 <text>（用于特殊渲染器）
+    fix-rounded   - 将 <rect rx="..."/> 转为 <path>（用于 PPT 形状转换）
 """
 
 import os
@@ -71,7 +70,7 @@ def process_flatten_text(svg_file: Path, verbose: bool = False) -> bool:
         if changed:
             tree.write(str(svg_file), encoding='unicode', xml_declaration=False)
             if verbose:
-                safe_print(f"   [OK] {svg_file.name}: text flattened")
+                safe_print(f"   [OK] {svg_file.name}: 文本已展平")
         return changed
     except Exception as e:
         if verbose:
@@ -93,7 +92,7 @@ def process_rounded_rect(svg_file: Path, verbose: bool = False) -> int:
             with open(svg_file, 'w', encoding='utf-8') as f:
                 f.write(processed)
             if verbose:
-                safe_print(f"   [OK] {svg_file.name}: {count} rounded rectangle(s)")
+                safe_print(f"   [OK] {svg_file.name}: {count} 个圆角矩形")
         return count
     except Exception as e:
         if verbose:
@@ -126,22 +125,22 @@ def finalize_project(
 
     # Check if svg_output exists
     if not svg_output.exists():
-        safe_print(f"[ERROR] svg_output directory not found: {svg_output}")
+        safe_print(f"[ERROR] svg_output 目录未找到: {svg_output}")
         return False
 
     # Get list of SVG files
     svg_files = list(svg_output.glob('*.svg'))
     if not svg_files:
-        safe_print(f"[ERROR] No SVG files in svg_output")
+        safe_print(f"[ERROR] svg_output 中无 SVG 文件")
         return False
 
     if not quiet:
         print()
-        safe_print(f"[DIR] Project: {project_dir.name}")
-        safe_print(f"[FILE] {len(svg_files)} SVG file(s)")
+        safe_print(f"[DIR] 项目: {project_dir.name}")
+        safe_print(f"[FILE] {len(svg_files)} 个 SVG 文件")
 
     if dry_run:
-        safe_print("[PREVIEW] Preview mode, no operations will be performed")
+        safe_print("[预览] 预览模式，不执行任何操作")
         return True
 
     # Step 1: Copy directory
@@ -155,21 +154,21 @@ def finalize_project(
     # Step 2: Embed icons
     if options.get('embed_icons'):
         if not quiet:
-            safe_print("[1/6] Embedding icons...")
+            safe_print("[1/6] 嵌入图标...")
         icons_count = 0
         for svg_file in svg_final.glob('*.svg'):
             count = embed_icons_in_file(svg_file, icons_dir, dry_run=False, verbose=False)
             icons_count += count
         if not quiet:
             if icons_count > 0:
-                safe_print(f"      {icons_count} icon(s) embedded")
+                safe_print(f"      已嵌入 {icons_count} 个图标")
             else:
-                safe_print("      No icons")
+                safe_print("      无图标")
 
     # Step 3: Smart crop images (based on preserveAspectRatio="slice")
     if options.get('crop_images'):
         if not quiet:
-            safe_print("[2/6] Smart cropping images...")
+            safe_print("[2/6] 智能裁剪图片...")
         crop_count = 0
         crop_errors = 0
         for svg_file in svg_final.glob('*.svg'):
@@ -178,28 +177,28 @@ def finalize_project(
             crop_errors += errors
         if not quiet:
             if crop_count > 0:
-                safe_print(f"      {crop_count} image(s) cropped")
+                safe_print(f"      已裁剪 {crop_count} 张图片")
             else:
-                safe_print("      No cropping needed (no images with slice attribute)")
+                safe_print("      无需裁剪（无 slice 属性图片）")
 
     # Step 4: Fix image aspect ratio (prevent stretching during PPT shape conversion)
     if options.get('fix_aspect'):
         if not quiet:
-            safe_print("[3/6] Fixing image aspect ratios...")
+            safe_print("[3/6] 修正图片宽高比...")
         aspect_count = 0
         for svg_file in svg_final.glob('*.svg'):
             count = fix_image_aspect_in_svg(str(svg_file), dry_run=False, verbose=False)
             aspect_count += count
         if not quiet:
             if aspect_count > 0:
-                safe_print(f"      {aspect_count} image(s) fixed")
+                safe_print(f"      已修正 {aspect_count} 张图片")
             else:
-                safe_print("      No images")
+                safe_print("      无图片")
 
     # Step 5: Embed images
     if options.get('embed_images'):
         if not quiet:
-            safe_print("[4/6] Embedding images...")
+            safe_print("[4/6] 嵌入图片...")
         images_count = 0
         for svg_file in svg_final.glob('*.svg'):
             count, _ = embed_images_in_svg(str(svg_file), dry_run=False,
@@ -208,44 +207,44 @@ def finalize_project(
             images_count += count
         if not quiet:
             if images_count > 0:
-                safe_print(f"      {images_count} image(s) embedded")
+                safe_print(f"      已嵌入 {images_count} 张图片")
             else:
-                safe_print("      No images")
+                safe_print("      无图片")
 
     # Step 6: Flatten text
     if options.get('flatten_text'):
         if not quiet:
-            safe_print("[5/6] Flattening text...")
+            safe_print("[5/6] 展平文本...")
         flatten_count = 0
         for svg_file in svg_final.glob('*.svg'):
             if process_flatten_text(svg_file, verbose=False):
                 flatten_count += 1
         if not quiet:
             if flatten_count > 0:
-                safe_print(f"      {flatten_count} file(s) processed")
+                safe_print(f"      已处理 {flatten_count} 个文件")
             else:
-                safe_print("      No processing needed")
+                safe_print("      无需处理")
 
     # Step 7: Convert rounded rects to Path
     if options.get('fix_rounded'):
         if not quiet:
-            safe_print("[6/6] Converting rounded rects to Path...")
+            safe_print("[6/6] 将圆角矩形转为 Path...")
         rounded_count = 0
         for svg_file in svg_final.glob('*.svg'):
             count = process_rounded_rect(svg_file, verbose=False)
             rounded_count += count
         if not quiet:
             if rounded_count > 0:
-                safe_print(f"      {rounded_count} rounded rectangle(s) converted")
+                safe_print(f"      已转换 {rounded_count} 个圆角矩形")
             else:
-                safe_print("      No rounded rectangles")
+                safe_print("      无圆角矩形")
 
     # Done
     if not quiet:
         print()
-        safe_print("[OK] Done!")
+        safe_print("[OK] 完成！")
         print()
-        print("Next steps:")
+        print("下一步:")
         print(f"  python scripts/svg_to_pptx.py \"{project_dir}\" -s final")
 
     return True
@@ -254,41 +253,41 @@ def finalize_project(
 def main() -> None:
     """Run the CLI entry point."""
     parser = argparse.ArgumentParser(
-        description='PPT Master - SVG Post-processing Tool',
+        description='PPT Master - SVG 后处理工具',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
-Examples:
-  %(prog)s projects/my_project           # Execute all processing (default)
+示例：
+  %(prog)s projects/my_project           # 执行所有处理（默认）
   %(prog)s projects/my_project --only embed-icons fix-rounded
-  %(prog)s projects/my_project -q        # Quiet mode
+  %(prog)s projects/my_project -q        # 安静模式
 
-Processing options (for --only):
-  embed-icons   Embed icons
-  crop-images   Smart crop images (based on preserveAspectRatio)
-  fix-aspect    Fix image aspect ratio (prevent stretching during PPT shape conversion)
-  embed-images  Embed images
-  flatten-text  Flatten text
-  fix-rounded   Convert rounded rects to Path
+处理选项（用于 --only）：
+  embed-icons   嵌入图标
+  crop-images   智能裁剪图片（基于 preserveAspectRatio）
+  fix-aspect    修正图片宽高比（防止 PPT 形状转换时拉伸）
+  embed-images  嵌入图片
+  flatten-text  展平文本
+  fix-rounded   将圆角矩形转为 Path
         '''
     )
 
-    parser.add_argument('project_dir', type=Path, help='Project directory path')
+    parser.add_argument('project_dir', type=Path, help='项目目录路径')
     parser.add_argument('--only', nargs='+', metavar='OPTION',
                         choices=['embed-icons', 'crop-images', 'fix-aspect', 'embed-images', 'flatten-text', 'fix-rounded'],
-                        help='Execute only specified processing steps (default: all)')
+                        help='仅执行指定处理步骤（默认: 全部）')
     parser.add_argument('--dry-run', '-n', action='store_true',
-                        help='Preview only, do not execute')
+                        help='仅预览，不执行')
     parser.add_argument('--quiet', '-q', action='store_true',
-                        help='Quiet mode, reduce output')
+                        help='安静模式，减少输出')
     parser.add_argument('--compress', action='store_true',
-                        help='Compress images before embedding (JPEG quality=85, PNG optimize)')
+                        help='嵌入前压缩图片（JPEG quality=85，PNG 优化）')
     parser.add_argument('--max-dimension', type=int, default=None,
-                        help='Downscale images exceeding this dimension on either axis (e.g., 2560)')
+                        help='缩放超过此尺寸的图片（如 2560）')
 
     args = parser.parse_args()
 
     if not args.project_dir.exists():
-        safe_print(f"[ERROR] Project directory does not exist: {args.project_dir}")
+        safe_print(f"[ERROR] 项目目录不存在: {args.project_dir}")
         sys.exit(1)
 
     # Determine processing options

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-"""
-PPT Master - Error Message Helper
+"""PPT Master - 错误信息助手
 
-Provides user-friendly error messages and specific fix suggestions.
+提供用户友好的错误信息和具体修复建议。
 """
 
 from typing import Dict, List, Optional
@@ -406,14 +405,14 @@ class ErrorHelper:
     @classmethod
     def print_help(cls):
         """Print all error types and solutions."""
-        print("PPT Master - Error Types and Solutions\n")
+        print("PPT Master - 错误类型与解决方案\n")
         print("=" * 80)
 
         for error_type, info in cls.ERROR_SOLUTIONS.items():
             print(f"\n[{error_type}]")
-            print(f"Message: {info['message']}")
-            print(f"Severity: {info['severity']}")
-            print("Solutions:")
+            print(f"信息: {info['message']}")
+            print(f"严重性: {info['severity']}")
+            print("解决方案:")
             for i, sol in enumerate(info['solutions'], 1):
                 print(f"  {i}. {sol}")
             print("-" * 80)

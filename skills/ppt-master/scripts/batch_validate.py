@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
-PPT Master - Batch Project Validation Tool
+PPT Master - 批量项目校验工具
 
-Checks the structural integrity and compliance of multiple projects at once.
+一次性检查多个项目的结构完整性和合规性。
 
-Usage:
+用法：
     python scripts/batch_validate.py examples
     python scripts/batch_validate.py projects
     python scripts/batch_validate.py --all
@@ -24,8 +24,8 @@ try:
         CANVAS_FORMATS
     )
 except ImportError:
-    print("Error: Unable to import project_utils module")
-    print("Please ensure project_utils.py is in the same directory")
+    print("错误: 无法导入 project_utils 模块")
+    print("请确保 project_utils.py 在同一目录下")
     sys.exit(1)
 
 
@@ -57,19 +57,19 @@ class BatchValidator:
         """
         dir_path = Path(directory)
         if not dir_path.exists():
-            print(f"[ERROR] Directory does not exist: {directory}")
+            print(f"[ERROR] 目录不存在: {directory}")
             return []
 
-        print(f"\n[SCAN] Scanning directory: {directory}")
+        print(f"\n[扫描] 正在扫描目录: {directory}")
         print("=" * 80)
 
         projects = find_all_projects(directory)
 
         if not projects:
-            print(f"[WARN] No projects found")
+            print(f"[WARN] 未找到项目")
             return []
 
-        print(f"Found {len(projects)} project(s)\n")
+        print(f"找到 {len(projects)} 个项目\n")
 
         for project_path in projects:
             self.validate_project(str(project_path))
@@ -138,22 +138,22 @@ class BatchValidator:
 
         # Print result
         print(f"{status} {info['name']}")
-        print(f"   Path: {project_path}")
+        print(f"   路径: {project_path}")
         print(
-            f"   Format: {info['format_name']} | SVG: {info['svg_count']} file(s) | Date: {info['date_formatted']}")
+            f"   格式: {info['format_name']} | SVG: {info['svg_count']} 个文件 | 日期: {info['date_formatted']}")
 
         if errors:
-            print(f"   [ERROR] Errors ({len(errors)}):")
+            print(f"   [ERROR] 错误 ({len(errors)}):")
             for error in errors:
                 print(f"      - {error}")
 
         if warnings or svg_warnings:
             all_warnings = warnings + svg_warnings
-            print(f"   [WARN] Warnings ({len(all_warnings)}):")
+            print(f"   [WARN] 警告 ({len(all_warnings)}):")
             for warning in all_warnings[:3]:  # Only show first 3 warnings
                 print(f"      - {warning}")
             if len(all_warnings) > 3:
-                print(f"      ... and {len(all_warnings) - 3} more warning(s)")
+                print(f"      ... 等 {len(all_warnings) - 3} 个更多警告")
 
         print()
 
@@ -162,21 +162,21 @@ class BatchValidator:
     def print_summary(self) -> None:
         """Print a summary of validation results."""
         print("\n" + "=" * 80)
-        print("[Summary] Validation Summary")
+        print("[汇总] 校验汇总")
         print("=" * 80)
 
-        print(f"\nTotal projects: {self.summary['total']}")
+        print(f"\n项目总数: {self.summary['total']}")
         print(
-            f"  [OK] Fully valid: {self.summary['valid']} ({self._percentage(self.summary['valid'])}%)")
+            f"  [OK] 完全有效: {self.summary['valid']} ({self._percentage(self.summary['valid'])}%)")
         print(
-            f"  [WARN] With warnings: {self.summary['has_warnings']} ({self._percentage(self.summary['has_warnings'])}%)")
+            f"  [WARN] 有警告: {self.summary['has_warnings']} ({self._percentage(self.summary['has_warnings'])}%)")
         print(
-            f"  [ERROR] With errors: {self.summary['has_errors']} ({self._percentage(self.summary['has_errors'])}%)")
+            f"  [ERROR] 有错误: {self.summary['has_errors']} ({self._percentage(self.summary['has_errors'])}%)")
 
-        print(f"\nCommon issues:")
-        print(f"  Missing README.md: {self.summary['missing_readme']} project(s)")
-        print(f"  Missing design spec: {self.summary['missing_spec']} project(s)")
-        print(f"  SVG format issues: {self.summary['svg_issues']} project(s)")
+        print(f"\n常见问题:")
+        print(f"  缺少 README.md: {self.summary['missing_readme']} 个项目")
+        print(f"  缺少设计规范: {self.summary['missing_spec']} 个项目")
+        print(f"  SVG 格式问题: {self.summary['svg_issues']} 个项目")
 
         # Group statistics by format
         format_stats = defaultdict(int)
@@ -184,25 +184,25 @@ class BatchValidator:
             format_stats[result['format']] += 1
 
         if format_stats:
-            print(f"\nCanvas format distribution:")
+            print(f"\n画布格式分布:")
             for fmt, count in sorted(format_stats.items(), key=lambda x: x[1], reverse=True):
-                print(f"  {fmt}: {count} project(s)")
+                print(f"  {fmt}: {count} 个项目")
 
         # Provide fix suggestions
         if self.summary['has_errors'] > 0 or self.summary['has_warnings'] > 0:
-            print(f"\n[TIP] Fix suggestions:")
+            print(f"\n[建议] 修复建议:")
 
             if self.summary['missing_readme'] > 0:
-                print(f"  1. Create documentation for projects missing README")
+                print(f"  1. 为缺少 README 的项目创建文档")
                 print(
-                    f"     Reference: examples/google_annual_report_ppt169_20251116/README.md")
+                    f"     参考: examples/google_annual_report_ppt169_20251116/README.md")
 
             if self.summary['svg_issues'] > 0:
-                print(f"  2. Check and fix SVG viewBox settings")
-                print(f"     Ensure consistency with canvas format")
+                print(f"  2. 检查并修正 SVG viewBox 设置")
+                print(f"     确保与画布格式一致")
 
             if self.summary['missing_spec'] > 0:
-                print(f"  3. Add design specification files")
+                print(f"  3. 添加设计规范文件")
 
     def _percentage(self, count: int) -> int:
         """Calculate percentage"""
@@ -218,25 +218,25 @@ class BatchValidator:
             output_file: Output file path
         """
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("PPT Master Project Validation Report\n")
+            f.write("PPT Master 项目校验报告\n")
             f.write("=" * 80 + "\n\n")
 
             for result in self.results:
-                status = "[OK] Valid" if result['is_valid'] and not result['warnings'] else \
-                    "[ERROR] Error" if result['errors'] else "[WARN] Warning"
+                status = "[OK] 有效" if result['is_valid'] and not result['warnings'] else \
+                    "[ERROR] 错误" if result['errors'] else "[WARN] 警告"
 
                 f.write(f"{status} - {result['name']}\n")
-                f.write(f"Path: {result['path']}\n")
+                f.write(f"路径: {result['path']}\n")
                 f.write(
-                    f"Format: {result['format']} | SVG: {result['svg_count']} file(s)\n")
+                    f"格式: {result['format']} | SVG: {result['svg_count']} 个文件\n")
 
                 if result['errors']:
-                    f.write(f"\nErrors:\n")
+                    f.write(f"\n错误:\n")
                     for error in result['errors']:
                         f.write(f"  - {error}\n")
 
                 if result['warnings']:
-                    f.write(f"\nWarnings:\n")
+                    f.write(f"\n警告:\n")
                     for warning in result['warnings']:
                         f.write(f"  - {warning}\n")
 
@@ -244,25 +244,25 @@ class BatchValidator:
 
             # Write summary
             f.write("\n" + "=" * 80 + "\n")
-            f.write("Validation Summary\n")
+            f.write("校验汇总\n")
             f.write("=" * 80 + "\n\n")
-            f.write(f"Total projects: {self.summary['total']}\n")
-            f.write(f"Fully valid: {self.summary['valid']}\n")
-            f.write(f"With warnings: {self.summary['has_warnings']}\n")
-            f.write(f"With errors: {self.summary['has_errors']}\n")
+            f.write(f"项目总数: {self.summary['total']}\n")
+            f.write(f"完全有效: {self.summary['valid']}\n")
+            f.write(f"有警告: {self.summary['has_warnings']}\n")
+            f.write(f"有错误: {self.summary['has_errors']}\n")
 
-        print(f"\n[REPORT] Validation report exported: {output_file}")
+        print(f"\n[报告] 校验报告已导出: {output_file}")
 
 
 def main() -> None:
     """Run the CLI entry point."""
     if len(sys.argv) < 2:
-        print("PPT Master - Batch Project Validation Tool\n")
-        print("Usage:")
-        print("  python scripts/batch_validate.py <directory>")
-        print("  python scripts/batch_validate.py <dir1> <dir2> ...")
+        print("PPT Master - 批量项目校验工具\n")
+        print("用法:")
+        print("  python scripts/batch_validate.py <目录>")
+        print("  python scripts/batch_validate.py <目录1> <目录2> ...")
         print("  python scripts/batch_validate.py --all")
-        print("\nExamples:")
+        print("\n示例:")
         print("  python scripts/batch_validate.py examples")
         print("  python scripts/batch_validate.py projects")
         print("  python scripts/batch_validate.py examples projects")
@@ -282,7 +282,7 @@ def main() -> None:
         if Path(directory).exists():
             validator.validate_directory(directory)
         else:
-            print(f"[WARN] Skipping non-existent directory: {directory}\n")
+            print(f"[WARN] 跳过不存在的目录: {directory}\n")
 
     # Print summary
     validator.print_summary()

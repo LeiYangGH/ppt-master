@@ -1,24 +1,21 @@
 #!/usr/bin/env python
-"""Propagate a spec_lock.md value change to both the lock file and svg_output/*.svg.
+"""将 spec_lock.md 的值变更同步到锁文件和 svg_output/*.svg。
 
-Examples:
-    python update_spec.py <project_path> primary=#0066AA
-    python update_spec.py <project_path> colors.text=#111111
-    python update_spec.py <project_path> typography.font_family='"PingFang SC", "Microsoft YaHei", sans-serif'
+示例：
+    python update_spec.py <项目路径> primary=#0066AA
+    python update_spec.py <项目路径> colors.text=#111111
+    python update_spec.py <项目路径> typography.font_family='"PingFang SC", "Microsoft YaHei", sans-serif'
 
-v2 scope:
-- `colors.*` — HEX value replacement across svg_output/*.svg (case-insensitive match).
-- `typography.font_family` — replaces the inner value of every `font-family="..."`
-  / `font-family='...'` attribute in svg_output/*.svg. This is a global replace:
-  every text element becomes the new family, regardless of role.
+v2 支持范围：
+- `colors.*` — 在 svg_output/*.svg 中替换 HEX 值（不区分大小写）。
+- `typography.font_family` — 替换每个 `font-family="..."` / `font-family='...'` 属性的内部值。
+  这是全局替换：所有文本元素统一使用新字体，不论角色。
 
-Bare `key=value` (no dot) is treated as `colors.key=value` for backward compat.
+省略点的裸 `key=value` 视为 `colors.key=value`，保持向后兼容。
 
-Other keys (typography sizes, per-role `typography.*_family` overrides, icons,
-images, canvas, forbidden) are intentionally NOT supported — they involve
-attribute-scoped or semantic replacements whose risk/benefit does not warrant
-bulk propagation. For per-role family changes, edit spec_lock.md and re-author
-the affected pages.
+其他键（字号、角色级 `typography.*_family` 覆盖、图标、图片、画布、禁用项）
+故意不支持——它们涉及属性级或语义级替换，批量传播的风险收益不成比例。
+如需角色级字体变更，请编辑 spec_lock.md 并重新生成受影响页面。
 """
 from __future__ import annotations
 
@@ -151,17 +148,17 @@ def replace_font_family_in_svgs(
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("project_path", type=Path, help="project folder containing spec_lock.md and svg_output/")
+    ap.add_argument("project_path", type=Path, help="包含 spec_lock.md 和 svg_output/ 的项目目录")
     ap.add_argument(
         "assignment",
-        help="section.key=value (e.g. colors.primary=#0066AA, typography.font_family='\"Inter\", Arial, sans-serif'). "
-        "Bare key=value is treated as colors.key=value.",
+        help="section.key=value（如 colors.primary=#0066AA, typography.font_family='\"Inter\", Arial, sans-serif'）。"
+        "裸 key=value 视为 colors.key=value。",
     )
     ap.add_argument(
         "--dry-run",
         "-n",
         action="store_true",
-        help="preview which SVGs would change; do not write anything to disk.",
+        help="预览哪些 SVG 会变更；不写入磁盘。",
     )
     args = ap.parse_args()
 
@@ -170,14 +167,14 @@ def main() -> int:
     svg_dir = project / "svg_output"
 
     if not lock.exists():
-        print(f"error: spec_lock.md not found at {lock}", file=sys.stderr)
+        print(f"错误: spec_lock.md 未找到: {lock}", file=sys.stderr)
         return 2
     if not svg_dir.exists():
-        print(f"error: svg_output/ not found at {svg_dir}", file=sys.stderr)
+        print(f"错误: svg_output/ 未找到: {svg_dir}", file=sys.stderr)
         return 2
 
     if "=" not in args.assignment:
-        print("error: assignment must be [section.]key=value", file=sys.stderr)
+        print("错误: 赋值格式必须为 [section.]key=value", file=sys.stderr)
         return 2
     lhs, new_value = args.assignment.split("=", 1)
     lhs = lhs.strip()
@@ -194,8 +191,8 @@ def main() -> int:
     if key not in section_map:
         known = {s: sorted(v) for s, v in sections.items()}
         print(
-            f"error: {key!r} not found under `## {section}` in spec_lock.md.\n"
-            f"known keys: {known}",
+            f"错误: {key!r} 在 spec_lock.md 的 `## {section}` 下未找到。\n"
+            f"已知键: {known}",
             file=sys.stderr,
         )
         return 2
@@ -204,10 +201,10 @@ def main() -> int:
 
     if section == "colors":
         if not HEX_RE.match(new_value):
-            print(f"error: new value for colors.{key} must be a HEX color (got {new_value!r})", file=sys.stderr)
+            print(f"错误: colors.{key} 的新值必须是 HEX 颜色（得到 {new_value!r}）", file=sys.stderr)
             return 2
         if old_value == new_value:
-            print(f"no change: colors.{key} already = {new_value}")
+            print(f"无变更: colors.{key} 已为 {new_value}")
             return 0
         # SVGs first (may raise on bad HEX), then lock. Writing lock last
         # avoids a state where lock claims new_value but SVGs still hold
@@ -218,32 +215,32 @@ def main() -> int:
             rewrite_lock(lock, "colors", key, new_value)
     elif section == "typography" and key == "font_family":
         if old_value == new_value:
-            print(f"no change: typography.font_family already = {new_value}")
+            print(f"无变更: typography.font_family 已为 {new_value}")
             return 0
         try:
             changed = replace_font_family_in_svgs(svg_dir, new_value, dry_run=args.dry_run)
         except ValueError as e:
-            print(f"error: {e}", file=sys.stderr)
+            print(f"错误: {e}", file=sys.stderr)
             return 2
         if not args.dry_run:
             rewrite_lock(lock, "typography", key, new_value)
     else:
         print(
-            f"error: {section}.{key} is not supported by update_spec.py.\n"
-            f"v2 supports: colors.* (HEX), typography.font_family.\n"
-            f"Edit spec_lock.md and the affected SVGs by hand for other changes.",
+            f"错误: {section}.{key} 不被 update_spec.py 支持。\n"
+            f"v2 支持: colors.* (HEX), typography.font_family。\n"
+            f"其他变更请手动编辑 spec_lock.md 和受影响 SVG。",
             file=sys.stderr,
         )
         return 2
 
     if args.dry_run:
-        print(f"[dry-run] spec_lock.md: {section}.{key}  {old_value} → {new_value}")
-        print(f"[dry-run] svg_output/:  {len(changed)} file(s) would be updated")
+        print(f"[预览] spec_lock.md: {section}.{key}  {old_value} → {new_value}")
+        print(f"[预览] svg_output/:  {len(changed)} 个文件将更新")
     else:
         print(f"spec_lock.md: {section}.{key}  {old_value} → {new_value}")
-        print(f"svg_output/:  {len(changed)} file(s) updated")
+        print(f"svg_output/:  {len(changed)} 个文件已更新")
     for p, n in changed:
-        suffix = "replacement" if n == 1 else "replacements"
+        suffix = "处替换" if n == 1 else "处替换"
         print(f"  - {p.name} ({n} {suffix})")
     return 0
 

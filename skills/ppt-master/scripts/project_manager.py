@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""PPT Master project management helpers.
+"""PPT Master 项目管理工具。
 
-Usage:
-    python scripts/project_manager.py init <project_name> [--dir projects]
-    python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...] [--move | --copy]
-    python scripts/project_manager.py validate <project_path>
-    python scripts/project_manager.py info <project_path>
+用法：
+    python scripts/project_manager.py init <项目名称> [--dir projects]
+    python scripts/project_manager.py import-sources <项目路径> <源文件1> [<源文件2> ...] [--move | --copy]
+    python scripts/project_manager.py validate <项目路径>
+    python scripts/project_manager.py info <项目路径>
 """
 
 from __future__ import annotations
@@ -82,8 +82,8 @@ class ProjectManager:
         if normalized_format not in self.CANVAS_FORMATS:
             available = ", ".join(sorted(self.CANVAS_FORMATS.keys()))
             raise ValueError(
-                f"Unsupported canvas format: {canvas_format} "
-                f"(available: {available})"
+                f"不支持的画布格式: {canvas_format} "
+                f"(可用: {available})"
             )
 
         date_str = datetime.now().strftime("%Y%m%d")
@@ -91,7 +91,7 @@ class ProjectManager:
         project_path = base_path / project_dir_name
 
         if project_path.exists():
-            raise FileExistsError(f"Project directory already exists: {project_path}")
+            raise FileExistsError(f"项目目录已存在: {project_path}")
 
         for rel_path in (
             "svg_output",
@@ -112,20 +112,20 @@ class ProjectManager:
                 f"- Canvas format: {normalized_format}\n"
                 f"- Created: {date_str}\n\n"
                 "## Directories\n\n"
-                "- `svg_output/`: raw SVG output\n"
-                "- `svg_final/`: finalized SVG output\n"
-                "- `images/`: presentation assets\n"
-                "- `notes/`: speaker notes\n"
-                "- `templates/`: project templates\n"
-                "- `sources/`: source materials and normalized markdown\n"
-                "- `exports/`: main native pptx (timestamped)\n"
-                "- `backup/<timestamp>/`: SVG snapshot pptx + svg_output/ archive (auto-created on export; safe to delete old timestamps)\n"
+                "- `svg_output/`: 原始 SVG 输出\n"
+                "- `svg_final/`: 后处理后的 SVG 输出\n"
+                "- `images/`: 演示素材\n"
+                "- `notes/`: 演讲备注\n"
+                "- `templates/`: 项目模板\n"
+                "- `sources/`: 源材料与规范化 Markdown\n"
+                "- `exports/`: 原生 PPTX 导出（带时间戳）\n"
+                "- `backup/<timestamp>/`: SVG 快照 + svg_output/ 归档（导出时自动创建，旧时间戳可安全删除）\n"
             ),
             encoding="utf-8",
         )
 
-        print(f"Project created: {project_path}")
-        print(f"Canvas: {canvas_info['name']} ({canvas_info['dimensions']})")
+        print(f"项目已创建: {project_path}")
+        print(f"画布: {canvas_info['name']} ({canvas_info['dimensions']})")
         return str(project_path)
 
     def _source_dir(self, project_path: Path) -> Path:
@@ -186,10 +186,10 @@ class ProjectManager:
                 errors="replace",
             )
         except FileNotFoundError as exc:
-            raise RuntimeError(f"Missing executable: {args[0]}") from exc
+            raise RuntimeError(f"可执行文件未找到: {args[0]}") from exc
         except subprocess.CalledProcessError as exc:
             details = (exc.stderr or exc.stdout or "").strip()
-            raise RuntimeError(details or "tool execution failed") from exc
+            raise RuntimeError(details or "工具执行失败") from exc
 
         if result.stdout.strip():
             print(result.stdout.strip())
@@ -276,8 +276,8 @@ class ProjectManager:
         note = None
         if archived_markdown.stem != source_path.stem:
             note = (
-                f"{source_path}: renamed imported markdown to {archived_markdown.name} "
-                f"and rewrote asset references to {imported_asset_dir.name}/"
+                f"{source_path}: 导入的 Markdown 已重命名为 {archived_markdown.name}，"
+                f"资源引用已改写为 {imported_asset_dir.name}/"
             )
         return archived_markdown, imported_asset_dir, note
 
@@ -289,12 +289,12 @@ class ProjectManager:
         copy: bool = False,
     ) -> dict[str, list[str]]:
         if move and copy:
-            raise ValueError("--move and --copy are mutually exclusive")
+            raise ValueError("--move 和 --copy 互斥")
         project_dir = Path(project_path)
         if not project_dir.exists() or not project_dir.is_dir():
-            raise FileNotFoundError(f"Project directory not found: {project_dir}")
+            raise FileNotFoundError(f"项目目录未找到: {project_dir}")
         if not source_items:
-            raise ValueError("At least one source path is required")
+            raise ValueError("至少需要一个源文件路径")
 
         sources_dir = self._source_dir(project_dir)
         summary: dict[str, list[str]] = {
@@ -308,10 +308,10 @@ class ProjectManager:
         for item in source_items:
             source_path = Path(item)
             if not source_path.exists():
-                summary["skipped"].append(f"{item}: path not found")
+                summary["skipped"].append(f"{item}: 路径未找到")
                 continue
             if source_path.is_dir():
-                summary["skipped"].append(f"{item}: directories are not supported")
+                summary["skipped"].append(f"{item}: 不支持目录")
                 continue
 
             if copy:
@@ -321,8 +321,8 @@ class ProjectManager:
             elif is_within_path(source_path, REPO_ROOT):
                 effective_move = True
                 print(
-                    f"note: {source_path} is inside the ppt-master repo; moved "
-                    f"(not copied) to avoid accidental commit. Pass --copy to override.",
+                    f"注意: {source_path} 位于 ppt-master 仓库内，已移动（非复制）以避免误提交。"
+                    f"使用 --copy 可覆盖此行为。",
                     file=sys.stderr,
                 )
             else:
@@ -334,7 +334,7 @@ class ProjectManager:
                 if duplicate_markdown is not None:
                     summary["markdown"].append(str(duplicate_markdown))
                     summary["notes"].append(
-                        f"{item}: skipped duplicate markdown import because equivalent content already exists as {duplicate_markdown.name}"
+                        f"{item}: 跳过重复 Markdown 导入，等效内容已存在: {duplicate_markdown.name}"
                     )
                     continue
 
@@ -362,7 +362,7 @@ class ProjectManager:
                 markdown_path = self._normalize_text_source(archived_path, sources_dir)
                 summary["markdown"].append(str(markdown_path))
             else:
-                summary["notes"].append(f"{item}: archived only")
+                summary["notes"].append(f"{item}: 已归档（未转换）")
 
         return summary
 
@@ -404,7 +404,7 @@ def print_usage() -> None:
 def parse_init_args(argv: list[str]) -> tuple[str, str]:
     """Parse arguments for the `init` subcommand."""
     if len(argv) < 3:
-        raise ValueError("Project name is required")
+        raise ValueError("项目名称为必填项")
 
     project_name = argv[2]
     base_dir = "projects"
@@ -423,7 +423,7 @@ def parse_init_args(argv: list[str]) -> tuple[str, str]:
 def parse_import_args(argv: list[str]) -> tuple[str, list[str], bool, bool]:
     """Parse arguments for the `import-sources` subcommand."""
     if len(argv) < 4:
-        raise ValueError("Project path and at least one source are required")
+        raise ValueError("项目路径和至少一个源文件为必填项")
 
     project_path = argv[2]
     move = False
@@ -439,7 +439,7 @@ def parse_import_args(argv: list[str]) -> tuple[str, list[str], bool, bool]:
             sources.append(arg)
 
     if move and copy:
-        raise ValueError("--move and --copy are mutually exclusive")
+        raise ValueError("--move 和 --copy 互斥")
 
     return project_path, sources, move, copy
 
@@ -457,47 +457,47 @@ def main() -> None:
         if command == "init":
             project_name, base_dir = parse_init_args(sys.argv)
             project_path = manager.init_project(project_name, base_dir=base_dir)
-            print(f"[OK] Project initialized: {project_path}")
-            print("Next:")
-            print("1. Put source files into sources/ (or use import-sources)")
-            print("2. Save your design spec to the project root")
-            print("3. Generate SVG files into svg_output/")
+            print(f"[OK] 项目已初始化: {project_path}")
+            print("下一步:")
+            print("1. 将源文件放入 sources/（或使用 import-sources）")
+            print("2. 将设计规范保存到项目根目录")
+            print("3. 生成 SVG 文件到 svg_output/")
             return
 
         if command == "import-sources":
             project_path, sources, move, copy = parse_import_args(sys.argv)
             summary = manager.import_sources(project_path, sources, move=move, copy=copy)
-            print(f"[OK] Imported sources into: {project_path}")
+            print(f"[OK] 源文件已导入: {project_path}")
             if summary["archived"]:
-                print("\nArchived originals / URL records:")
+                print("\n归档的原始文件 / URL 记录:")
                 for item in summary["archived"]:
                     print(f"  - {item}")
             if summary["markdown"]:
-                print("\nNormalized markdown:")
+                print("\n规范化 Markdown:")
                 for item in summary["markdown"]:
                     print(f"  - {item}")
             if summary["assets"]:
-                print("\nImported asset directories:")
+                print("\n导入的资源目录:")
                 for item in summary["assets"]:
                     print(f"  - {item}")
             if summary["notes"]:
-                print("\nNotes:")
+                print("\n备注:")
                 for item in summary["notes"]:
                     print(f"  - {item}")
             if summary["skipped"]:
-                print("\nSkipped:")
+                print("\n跳过:")
                 for item in summary["skipped"]:
                     print(f"  - {item}")
             return
 
         if command == "validate":
             if len(sys.argv) < 3:
-                raise ValueError("Project path is required")
+                raise ValueError("项目路径为必填项")
 
             project_path = sys.argv[2]
             is_valid, errors, warnings = manager.validate_project(project_path)
 
-            print(f"\nProject validation: {project_path}")
+            print(f"\n项目校验: {project_path}")
             print("=" * 60)
 
             if errors:
@@ -511,34 +511,34 @@ def main() -> None:
                     print(f"  - {warning}")
 
             if is_valid and not warnings:
-                print("\n[OK] Project structure is complete.")
+                print("\n[OK] 项目结构完整。")
             elif is_valid:
-                print("\n[OK] Project structure is valid, with warnings.")
+                print("\n[OK] 项目结构有效，但有警告。")
             else:
-                print("\n[ERROR] Project structure is invalid.")
+                print("\n[ERROR] 项目结构无效。")
                 sys.exit(1)
             return
 
         if command == "info":
             if len(sys.argv) < 3:
-                raise ValueError("Project path is required")
+                raise ValueError("项目路径为必填项")
 
             project_path = sys.argv[2]
             info = manager.get_project_info(project_path)
 
-            print(f"\nProject info: {info['name']}")
+            print(f"\n项目信息: {info['name']}")
             print("=" * 60)
-            print(f"Path: {info['path']}")
-            print(f"Exists: {'Yes' if info['exists'] else 'No'}")
-            print(f"SVG files: {info['svg_count']}")
-            print(f"Design spec: {'Yes' if info['has_spec'] else 'No'}")
-            print(f"Source materials: {'Yes' if info['has_source'] else 'No'}")
-            print(f"Source count: {info['source_count']}")
-            print(f"Canvas format: {info['canvas_format']}")
-            print(f"Created: {info['create_date']}")
+            print(f"路径: {info['path']}")
+            print(f"存在: {'是' if info['exists'] else '否'}")
+            print(f"SVG 文件数: {info['svg_count']}")
+            print(f"设计规范: {'有' if info['has_spec'] else '无'}")
+            print(f"源材料: {'有' if info['has_source'] else '无'}")
+            print(f"源文件数: {info['source_count']}")
+            print(f"画布格式: {info['canvas_format']}")
+            print(f"创建日期: {info['create_date']}")
             return
 
-        raise ValueError(f"Unknown command: {command}")
+        raise ValueError(f"未知命令: {command}")
     except Exception as exc:
         print(f"[ERROR] {exc}")
         print_usage()

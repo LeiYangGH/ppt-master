@@ -1,4 +1,4 @@
-"""CLI entry point for svg_to_pptx."""
+"""svg_to_pptx 命令行入口。"""
 
 from __future__ import annotations
 
@@ -33,106 +33,106 @@ def main() -> None:
     )
 
     parser = argparse.ArgumentParser(
-        description='PPT Master - SVG to PPTX Tool (Office Compatibility Mode)',
+        description='PPT Master - SVG 转 PPTX 工具（Office 兼容模式）',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f'''
-Examples:
-    %(prog)s examples/ppt169_demo -s final    # Default: main pptx -> exports/, SVG snapshot + svg_output -> backup/<ts>/
-    %(prog)s examples/ppt169_demo --only native   # Only native shapes version
-    %(prog)s examples/ppt169_demo --only legacy   # Only SVG image version
-    %(prog)s examples/ppt169_demo -o out.pptx     # Explicit path (SVG ref -> out_svg.pptx)
+示例：
+    %(prog)s examples/ppt169_demo -s final    # 默认: 主 pptx -> exports/，SVG 快照 + svg_output -> backup/<ts>/
+    %(prog)s examples/ppt169_demo --only native   # 仅生成原生形状版
+    %(prog)s examples/ppt169_demo --only legacy   # 仅生成 SVG 图片版
+    %(prog)s examples/ppt169_demo -o out.pptx     # 指定路径（SVG 参考 -> out_svg.pptx）
 
-    # Disable transition / change transition effect
+    # 禁用/切换页面转场效果
     %(prog)s examples/ppt169_demo -t none
     %(prog)s examples/ppt169_demo -t push --transition-duration 1.0
 
-SVG source directory (-s):
-    output   - svg_output (original version)
-    final    - svg_final (post-processed, recommended)
-    <any>    - Specify a subdirectory name directly
+SVG 源目录 (-s)：
+    output   - svg_output（原始版本）
+    final    - svg_final（后处理版本，推荐）
+    <任意>    - 直接指定子目录名
 
-Transition effects (-t/--transition):
+页面转场效果 (-t/--transition)：
     {', '.join(transition_choices)}
 
-Per-element entrance animation (-a/--animation, native shapes mode):
+元素入场动画 (-a/--animation，原生形状模式)：
     {', '.join(animation_choices)}
-    Notes: applied to top-level <g id="..."> SVG groups in z-order. Default is
-           "mixed" (auto-vary effects per group). Start mode set by
-           --animation-trigger, matching PowerPoint's Start dropdown:
-             on-click              one presenter click per group
-             with-previous         all groups start together on slide entry
-             after-previous (default)  cascade on slide entry;
-                                       gap = --animation-stagger seconds
-           mixed uses a curated visible-effect sequence across the deck; random samples
-           from the same visible-effect pool. Use "-a none" to disable.
+    说明：作用于顶层 <g id="..."> SVG 组，按 z 轴顺序执行。默认为
+         "mixed"（自动为每个组变换效果）。启动模式由
+         --animation-trigger 设置，对应 PowerPoint 的"开始"下拉框：
+           on-click              每个组一次点击
+           with-previous         幻灯片进入时所有组同时启动
+           after-previous (默认)  幻灯片进入时级联启动；
+                                 间隔 = --animation-stagger 秒
+         mixed 使用精选可见效果序列；random 从同一效果池随机采样。
+         使用 "-a none" 禁用。
 
-Compatibility mode (enabled by default):
-    - Automatically generates PNG fallback images, SVG embedded as extension
-    - Compatible with all Office versions (including Office LTSC 2021)
-    - Newer Office still displays SVG (editable), older versions display PNG
-    - Requires svglib: pip install svglib reportlab
-    - Use --no-compat to disable (only Office 2019+ supported)
+兼容模式（默认启用）：
+    - 自动生成 PNG 回退图片，SVG 作为扩展嵌入
+    - 兼容所有 Office 版本（包括 Office LTSC 2021）
+    - 较新 Office 显示 SVG（可编辑），较旧版本显示 PNG
+    - 需要 svglib: pip install svglib reportlab
+    - 使用 --no-compat 禁用（仅支持 Office 2019+）
 
-Speaker notes (enabled by default):
-    - Automatically reads Markdown notes files from the notes/ directory
-    - Supports two naming conventions:
-      1. Match by filename (recommended): 01_cover.md corresponds to 01_cover.svg
-      2. Match by index: slide01.md corresponds to the 1st SVG (backward compatible)
-    - Use --no-notes to disable
+演讲备注（默认启用）：
+    - 自动从 notes/ 目录读取 Markdown 备注文件
+    - 支持两种命名方式：
+      1. 按文件名匹配（推荐）: 01_cover.md 对应 01_cover.svg
+      2. 按序号匹配: slide01.md 对应第 1 个 SVG（向后兼容）
+    - 使用 --no-notes 禁用
 ''',
     )
 
-    parser.add_argument('project_path', type=str, help='Project directory path')
-    parser.add_argument('-o', '--output', type=str, default=None, help='Output file path')
+    parser.add_argument('project_path', type=str, help='项目目录路径')
+    parser.add_argument('-o', '--output', type=str, default=None, help='输出文件路径')
     parser.add_argument('-s', '--source', type=str, default='output',
-                        help='SVG source: output/final or any subdirectory name (recommended: final)')
+                        help='SVG 源: output/final 或任意子目录名（推荐: final）')
     parser.add_argument('-f', '--format', type=str,
                         choices=list(CANVAS_FORMATS.keys()), default=None,
-                        help='Specify canvas format')
-    parser.add_argument('-q', '--quiet', action='store_true', help='Quiet mode')
+                        help='指定画布格式')
+    parser.add_argument('-q', '--quiet', action='store_true', help='安静模式')
 
     parser.add_argument('--no-compat', action='store_true',
-                        help='Disable Office compatibility mode (pure SVG only, requires Office 2019+)')
+                        help='禁用 Office 兼容模式（纯 SVG，需要 Office 2019+）')
 
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument('--only', type=str, choices=['native', 'legacy'], default=None,
-                            help='Only generate one version: native (editable shapes) or legacy (SVG image)')
+                            help='仅生成一个版本: native（可编辑形状）或 legacy（SVG 图片）')
     mode_group.add_argument('--native', action='store_true', default=False,
-                            help='(Deprecated, now default) Convert SVG to native DrawingML shapes')
+                            help='（已弃用，现为默认）将 SVG 转为原生 DrawingML 形状')
 
     parser.add_argument('-t', '--transition', type=str, choices=transition_choices, default='fade',
-                        help='Page transition effect (default: fade, use "none" to disable)')
+                        help='页面转场效果（默认: fade，使用 "none" 禁用）')
     parser.add_argument('--transition-duration', type=float, default=0.4,
-                        help='Transition duration in seconds (default: 0.4)')
+                        help='转场时长（秒，默认: 0.4）')
     parser.add_argument('--auto-advance', type=float, default=None,
-                        help='Auto-advance interval in seconds (default: manual advance)')
+                        help='自动翻页间隔（秒，默认: 手动翻页）')
 
     parser.add_argument('-a', '--animation', type=str, choices=animation_choices,
                         default='mixed',
-                        help='Per-element entrance animation (native shapes mode '
-                             'only). Pick a single effect, "mixed" (auto-vary per '
-                             'element, default), "random", or "none" to disable.')
+                        help='元素入场动画（仅原生形状模式）。'
+                             '选择单一效果、"mixed"（自动变换，默认）、'
+                             '"random" 或 "none" 禁用。')
     parser.add_argument('--animation-duration', type=float, default=0.3,
-                        help='Per-element entrance duration in seconds (default: 0.3)')
+                        help='元素入场时长（秒，默认: 0.3）')
     parser.add_argument('--animation-trigger', type=str,
                         choices=['on-click', 'with-previous', 'after-previous'],
                         default='after-previous',
-                        help='Per-element Start mode (matches PowerPoint Start dropdown): '
-                             '"on-click" (one click per element), '
-                             '"with-previous" (all start together on slide entry), '
-                             '"after-previous" (default, cascade after the previous element).')
+                        help='元素启动模式（对应 PowerPoint "开始"下拉框）：'
+                             '"on-click"（每元素一次点击），'
+                             '"with-previous"（幻灯片进入时同时启动），'
+                             '"after-previous"（默认，级联启动）。')
     parser.add_argument('--animation-stagger', type=float, default=0.4,
-                        help='Delay between elements in --animation-trigger=after-previous '
-                             '(seconds, default 0.4). Ignored in other modes.')
+                        help='after-previous 模式下元素间延迟'
+                             '（秒，默认 0.4）。其他模式忽略。')
 
     parser.add_argument('--no-notes', action='store_true',
-                        help='Disable speaker notes embedding (enabled by default)')
+                        help='禁用演讲备注嵌入（默认启用）')
 
     args = parser.parse_args()
 
     project_path = Path(args.project_path)
     if not project_path.exists():
-        print(f"Error: Path does not exist: {project_path}")
+        print(f"错误: 路径不存在: {project_path}")
         sys.exit(1)
 
     try:
@@ -150,7 +150,7 @@ Speaker notes (enabled by default):
     svg_files, source_dir_name = find_svg_files(project_path, args.source)
 
     if not svg_files:
-        print("Error: No SVG files found")
+        print("错误: 未找到 SVG 文件")
         sys.exit(1)
 
     # Determine which versions to generate
@@ -213,11 +213,11 @@ Speaker notes (enabled by default):
     # --- Native shapes version (primary) ---
     if gen_native:
         if verbose:
-            print("PPT Master - SVG to PPTX Tool")
+            print("PPT Master - SVG 转 PPTX 工具")
             print("=" * 50)
-            print(f"  Project path: {project_path}")
-            print(f"  SVG directory: {source_dir_name}")
-            print(f"  Output file: {native_path}")
+            print(f"  项目路径: {project_path}")
+            print(f"  SVG 目录: {source_dir_name}")
+            print(f"  输出文件: {native_path}")
             print()
 
         ok = create_pptx_with_native_svg(
@@ -233,11 +233,11 @@ Speaker notes (enabled by default):
             if gen_native:
                 print()
                 print("-" * 50)
-            print("PPT Master - SVG to PPTX Tool (SVG Reference)")
+            print("PPT Master - SVG 转 PPTX 工具（SVG 参考）")
             print("=" * 50)
-            print(f"  Project path: {project_path}")
-            print(f"  SVG directory: {source_dir_name}")
-            print(f"  Output file: {legacy_path}")
+            print(f"  项目路径: {project_path}")
+            print(f"  SVG 目录: {source_dir_name}")
+            print(f"  输出文件: {legacy_path}")
             print()
 
         ok = create_pptx_with_native_svg(
@@ -254,11 +254,11 @@ Speaker notes (enabled by default):
                 try:
                     shutil.copytree(svg_output_src, svg_output_dst)
                     if verbose:
-                        print(f"  svg_output backup: {svg_output_dst}")
+                        print(f"  svg_output 备份: {svg_output_dst}")
                 except Exception as exc:
                     if verbose:
-                        print(f"  [warn] svg_output backup skipped: {exc}")
+                        print(f"  [警告] svg_output 备份跳过: {exc}")
             elif verbose:
-                print(f"  [info] svg_output/ not found, backup skipped")
+                print(f"  [信息] svg_output/ 未找到，跳过备份")
 
     sys.exit(0 if success else 1)

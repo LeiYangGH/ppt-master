@@ -394,16 +394,16 @@ if __name__ == '__main__':
         project_path = sys.argv[1]
         info = get_project_info(project_path)
 
-        print(f"\nProject Info: {info['dir_name']}")
+        print(f"\n项目信息: {info['dir_name']}")
         print("=" * 60)
-        print(f"Project Name: {info['name']}")
-        print(f"Canvas Format: {info['format_name']} ({info['format']})")
-        print(f"Created: {info['date_formatted']}")
-        print(f"SVG Files: {info['svg_count']}")
-        print(f"README: {'Yes' if info['has_readme'] else 'No'}")
-        print(f"Design Spec: {'Yes' if info['has_spec'] else 'No'}")
+        print(f"项目名称: {info['name']}")
+        print(f"画布格式: {info['format_name']} ({info['format']})")
+        print(f"创建日期: {info['date_formatted']}")
+        print(f"SVG 文件数: {info['svg_count']}")
+        print(f"README: {'有' if info['has_readme'] else '无'}")
+        print(f"设计规范: {'有' if info['has_spec'] else '无'}")
 
-        print("\nValidation Results:")
+        print("\n校验结果:")
         print("-" * 60)
         is_valid, errors, warnings = validate_project_structure(project_path)
 
@@ -418,6 +418,6 @@ if __name__ == '__main__':
                 print(f"  - {warning}")
 
         if is_valid and not warnings:
-            print("[OK] Project structure is complete, no issues found")
+            print("[OK] 项目结构完整，无问题")
     else:
-        print("Usage: python project_utils.py <project_path>")
+        print("用法: python project_utils.py <项目路径>")

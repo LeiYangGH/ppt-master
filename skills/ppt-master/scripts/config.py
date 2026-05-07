@@ -468,7 +468,7 @@ class Config:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(config_data, f, ensure_ascii=False, indent=2)
 
-        print(f"Configuration exported to: {output_file}")
+        print(f"配置已导出至: {output_file}")
 
 
 # ============================================================
@@ -480,32 +480,32 @@ def main() -> None:
     import sys
 
     if len(sys.argv) < 2:
-        print("PPT Master - Configuration Management Tool\n")
-        print("Usage:")
-        print("  python scripts/config.py list-formats     # List all canvas formats")
-        print("  python scripts/config.py list-colors      # List all color schemes")
-        print("  python scripts/config.py list-industries  # List all industry colors")
-        print("  python scripts/config.py export           # Export configuration to JSON")
-        print("  python scripts/config.py format <key>     # View a specific canvas format")
+        print("PPT Master - 配置管理工具\n")
+        print("用法:")
+        print("  python scripts/config.py list-formats     # 列出所有画布格式")
+        print("  python scripts/config.py list-colors      # 列出所有配色方案")
+        print("  python scripts/config.py list-industries  # 列出所有行业配色")
+        print("  python scripts/config.py export           # 导出配置为 JSON")
+        print("  python scripts/config.py format <key>     # 查看指定画布格式")
         return
 
     command = sys.argv[1]
 
     if command == 'list-formats':
-        print("\nCanvas Format List:\n")
+        print("\n画布格式列表:\n")
         for key, info in CANVAS_FORMATS.items():
             print(
                 f"  {key:15} | {info['name']:15} | {info['dimensions']:12} | {info['use_case']}")
 
     elif command == 'list-colors':
-        print("\nColor Scheme List:\n")
+        print("\n配色方案列表:\n")
         for key, info in DESIGN_COLORS.items():
-            print(f"  {key:12} | {info['name']:15} | Primary: {info['primary']}")
+            print(f"  {key:12} | {info['name']:15} | 主色: {info['primary']}")
 
     elif command == 'list-industries':
-        print("\nIndustry Color List:\n")
+        print("\n行业配色列表:\n")
         for key, info in INDUSTRY_COLORS.items():
-            print(f"  {key:15} | {info['name']:15} | Primary: {info['primary']}")
+            print(f"  {key:15} | {info['name']:15} | 主色: {info['primary']}")
 
     elif command == 'export':
         output_file = sys.argv[2] if len(
@@ -516,15 +516,15 @@ def main() -> None:
         format_key = sys.argv[2]
         info = Config.get_canvas_format(format_key)
         if info:
-            print(f"\nCanvas Format: {format_key}\n")
+            print(f"\n画布格式: {format_key}\n")
             for key, value in info.items():
                 print(f"  {key}: {value}")
         else:
-            print(f"[ERROR] Format not found: {format_key}")
-            print(f"   Available formats: {', '.join(CANVAS_FORMATS.keys())}")
+            print(f"[ERROR] 格式未找到: {format_key}")
+            print(f"   可用格式: {', '.join(CANVAS_FORMATS.keys())}")
 
     else:
-        print(f"[ERROR] Unknown command: {command}")
+        print(f"[ERROR] 未知命令: {command}")
 
 
 if __name__ == '__main__':

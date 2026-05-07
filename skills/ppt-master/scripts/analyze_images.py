@@ -1,23 +1,21 @@
 #!/usr/bin/env python
 """
-Image Size Analysis Tool
-========================
-Reports objective parameters (width, height, aspect ratio, category) for all
-images in a folder. Intentionally does NOT prescribe a layout — the Strategist
-decides narrative intent (hero / atmosphere / side-by-side / accent) per
-references/strategist.md §h; this tool only supplies the numbers.
+图片尺寸分析工具
+================
+报告文件夹中所有图片的客观参数（宽、高、宽高比、类别）。
+本工具不预设布局——叙事意图（hero / atmosphere / side-by-side / accent）由 Strategist
+根据 references/strategist.md §h 决定；本工具仅提供数值。
 
-When a canvas is specified, also reports the reference image/text area sizes
-that would apply *if* an image is placed side-by-side with body text. Those
-numbers are conditional on the Strategist picking the side-by-side intent.
+指定画布时，还会报告若图片与正文并排放置时的参考图片/文本区域尺寸。
+这些数值仅在 Strategist 选择 side-by-side 意图时适用。
 
-Usage:
-    python scripts/analyze_images.py <images_folder_path>
+用法：
+    python scripts/analyze_images.py <图片目录路径>
     python scripts/analyze_images.py projects/xxx/images
 
-Output:
-    - Analysis report displayed in console
-    - Generates image_analysis.csv in the parent directory of the images folder
+输出：
+    - 控制台显示分析报告
+    - 在图片目录的父目录生成 image_analysis.csv
 """
 
 import argparse
@@ -28,7 +26,7 @@ from pathlib import Path
 try:
     from PIL import Image
 except ImportError:
-    print("Error: PIL/Pillow not installed. Run: pip install Pillow")
+    print("错误: 未安装 PIL/Pillow，请运行: pip install Pillow")
     sys.exit(1)
 
 try:
@@ -70,15 +68,15 @@ def classify_ratio(aspect_ratio: float) -> str:
       0.8-1.2 square, <0.8 portrait.
     """
     if aspect_ratio > 2.0:
-        return "Ultra-wide"
+        return "超宽幅"
     elif aspect_ratio > 1.5:
-        return "Wide landscape"
+        return "宽幅横版"
     elif aspect_ratio > 1.2:
-        return "Standard landscape"
+        return "标准横版"
     elif aspect_ratio > 0.8:
-        return "Near square"
+        return "近正方形"
     else:
-        return "Portrait"
+        return "竖版"
 
 
 def compute_layout_dimensions(
@@ -185,7 +183,7 @@ def analyze_images(images_dir: str) -> list[ImageAnalysis]:
                         'filesize_kb': os.path.getsize(filepath) / 1024
                     })
             except Exception as e:
-                print(f"[WARN] Cannot read {filename}: {e}")
+                print(f"[WARN] 无法读取 {filename}: {e}")
 
     return results
 
@@ -199,7 +197,7 @@ def enrich_with_layout(
     margins = LAYOUT_MARGINS.get(canvas_key)
 
     if not margins:
-        print(f"[WARN] No layout margins for canvas '{canvas_key}', skipping dimension calculation")
+        print(f"[WARN] 画布 '{canvas_key}' 无布局边距，跳过尺寸计算")
         return
 
     content_w = margins['content_width']
@@ -214,18 +212,17 @@ def print_results(results: list[ImageAnalysis]) -> None:
     """Print the analysis report to stdout."""
 
     print("\n" + "=" * REPORT_WIDTH)
-    print("Image Size Analysis Report")
+    print("图片尺寸分析报告")
     print("=" * REPORT_WIDTH)
 
     has_layout = 'layout_type' in results[0] if results else False
 
     if has_layout:
-        print("\nNote: 'Img (SxS)' shows the image area *if* the Strategist chooses the")
-        print("side-by-side intent for this image. Decide narrative intent first — see")
-        print("references/strategist.md §h. Hero / atmosphere / accent intents ignore it.\n")
-        print(f"{'No.':<4} {'Width':<7} {'Height':<7} {'Ratio':<7} {'Size':<10} {'Category':<20} {'Img (SxS)':<14} {'Filename'}")
+        print("\n注意: '图片(并排)' 仅在 Strategist 为该图选择 side-by-side 意图时适用。")
+        print("请先决定叙事意图——见 references/strategist.md §h。Hero / atmosphere / accent 意图忽略此列。\n")
+        print(f"{'序号':<4} {'宽度':<7} {'高度':<7} {'宽高比':<7} {'大小':<10} {'类别':<16} {'图片(并排)':<14} {'文件名'}")
     else:
-        print(f"\n{'No.':<4} {'Width':<7} {'Height':<7} {'Ratio':<7} {'Size':<10} {'Category':<20} {'Filename'}")
+        print(f"\n{'序号':<4} {'宽度':<7} {'高度':<7} {'宽高比':<7} {'大小':<10} {'类别':<16} {'文件名'}")
     print("-" * REPORT_WIDTH)
 
     for i, img in enumerate(results, 1):
@@ -237,63 +234,62 @@ def print_results(results: list[ImageAnalysis]) -> None:
             print(f"{base} {img['filename'][:40]}")
 
     print("-" * REPORT_WIDTH)
-    print(f"Total: {len(results)} images\n")
+    print(f"合计: {len(results)} 张图片\n")
 
     # Group statistics by aspect ratio (aligned with image-layout-spec.md thresholds)
-    print("\nGroup by Aspect Ratio:")
+    print("\n按宽高比分组:")
     print("-" * CATEGORY_WIDTH)
 
     categories = {
-        "Ultra-wide (>2.0)": [],
-        "Wide (1.5-2.0)": [],
-        "Standard (1.2-1.5)": [],
-        "Square (0.8-1.2)": [],
-        "Portrait (<0.8)": [],
+        "超宽幅 (>2.0)": [],
+        "宽幅 (1.5-2.0)": [],
+        "标准横版 (1.2-1.5)": [],
+        "正方形 (0.8-1.2)": [],
+        "竖版 (<0.8)": [],
     }
 
     for img in results:
         ar = img['aspect_ratio']
         if ar > 2.0:
-            categories["Ultra-wide (>2.0)"].append(img)
+            categories["超宽幅 (>2.0)"].append(img)
         elif ar > 1.5:
-            categories["Wide (1.5-2.0)"].append(img)
+            categories["宽幅 (1.5-2.0)"].append(img)
         elif ar > 1.2:
-            categories["Standard (1.2-1.5)"].append(img)
+            categories["标准横版 (1.2-1.5)"].append(img)
         elif ar > 0.8:
-            categories["Square (0.8-1.2)"].append(img)
+            categories["正方形 (0.8-1.2)"].append(img)
         else:
-            categories["Portrait (<0.8)"].append(img)
+            categories["竖版 (<0.8)"].append(img)
 
     for cat, imgs in categories.items():
         if imgs:
-            print(f"\n{cat}: {len(imgs)} images")
+            print(f"\n{cat}: {len(imgs)} 张")
             for img in imgs[:5]:  # Show only the first 5
-                print(f"  - {img['width']}x{img['height']} (ratio {img['aspect_ratio']:.2f}) - {img['filename'][:35]}...")
+                print(f"  - {img['width']}x{img['height']} (宽高比 {img['aspect_ratio']:.2f}) - {img['filename'][:35]}...")
             if len(imgs) > 5:
-                print(f"  ... and {len(imgs) - 5} more")
+                print(f"  ... 等 {len(imgs) - 5} 张更多")
 
 
 def generate_markdown(results: list[ImageAnalysis], canvas_key: str) -> None:
     """Print a Markdown-ready image inventory section."""
     print("\n" + "=" * REPORT_WIDTH)
-    print("Markdown Snippet for Strategist (Copy & Paste)")
+    print("Markdown 代码片段（供 Strategist 复制粘贴）")
     print("=" * REPORT_WIDTH)
 
     has_layout = 'layout_type' in results[0] if results else False
     fmt_name = CANVAS_FORMATS.get(canvas_key, {}).get('name', canvas_key)
 
-    print(f"\n## Image Resource Inventory (Auto-scan Results — {fmt_name})\n")
+    print(f"\n## 图片资源清单（自动扫描结果 — {fmt_name}）\n")
 
-    print("> Decide narrative intent per image (hero / atmosphere / side-by-side /")
-    print("> accent) per `references/strategist.md` §h before filling the table. The")
-    print("> `Img Area (SxS)` / `Text Area (SxS)` columns only apply if the chosen")
-    print("> intent is side-by-side; ignore them for hero / atmosphere / accent intents.\n")
+    print("> 请先根据 `references/strategist.md` §h 为每张图决定叙事意图（hero / atmosphere /")
+    print("> side-by-side / accent），再填写下表。`图片区域(并排)` / `文本区域(并排)` 列")
+    print("> 仅在 side-by-side 意图时适用；hero / atmosphere / accent 意图请忽略。\n")
 
     if has_layout:
-        print("| Filename | Size | Ratio | Category | Img Area (SxS) | Text Area (SxS) | Intent | Usage | Type |")
+        print("| 文件名 | 尺寸 | 宽高比 | 类别 | 图片区域(并排) | 文本区域(并排) | 意图 | 用途 | 类型 |")
         print("|----------|------|-------|----------|----------------|-----------------|--------|-------|------|")
     else:
-        print("| Filename | Size | Ratio | Category | Intent | Usage | Type |")
+        print("| 文件名 | 尺寸 | 宽高比 | 类别 | 意图 | 用途 | 类型 |")
         print("|----------|------|-------|----------|--------|-------|------|")
 
     for img in results:
@@ -302,9 +298,9 @@ def generate_markdown(results: list[ImageAnalysis], canvas_key: str) -> None:
         if has_layout:
             img_area = f"{img['image_w']}x{img['image_h']}"
             text_area = f"{img['text_w']}x{img['text_h']}"
-            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | {img_area} | {text_area} | (to be filled) | (to be filled) | |")
+            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | {img_area} | {text_area} | (待填写) | (待填写) | |")
         else:
-            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | (to be filled) | (to be filled) | |")
+            print(f"| {img['filename']} | {img['width']}x{img['height']} | {ratio_str} | {img['layout_hint']} | (待填写) | (待填写) | |")
 
     print("\n" + "=" * REPORT_WIDTH + "\n")
 
@@ -325,22 +321,22 @@ def save_csv(results: list[ImageAnalysis], csv_path: str) -> None:
             f.write("No,Filename,Width,Height,AspectRatio,SizeKB,Category\n")
             for i, img in enumerate(results, 1):
                 f.write(f"{i},{img['filename']},{img['width']},{img['height']},{img['aspect_ratio']:.2f},{img['filesize_kb']:.1f},{img['layout_hint']}\n")
-    print(f"\nCSV saved to: {csv_path}")
+    print(f"\nCSV 已保存: {csv_path}")
 
 
 def main() -> None:
     """Run the CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="Analyze image sizes and compute PPT layout dimensions"
+        description="分析图片尺寸并计算 PPT 布局尺寸"
     )
     parser.add_argument(
         "images_dir",
-        help="Path to the images directory"
+        help="图片目录路径"
     )
     parser.add_argument(
         "--canvas",
         default="ppt169",
-        help=f"Canvas format key (default: ppt169). Available: {', '.join(sorted(CANVAS_FORMATS.keys()))}"
+        help=f"画布格式键（默认: ppt169）。可用: {', '.join(sorted(CANVAS_FORMATS.keys()))}"
     )
 
     args = parser.parse_args()
@@ -348,21 +344,21 @@ def main() -> None:
     images_dir = os.path.abspath(args.images_dir)
 
     if not os.path.exists(images_dir):
-        print(f"Error: Directory not found: {images_dir}")
+        print(f"错误: 目录未找到: {images_dir}")
         sys.exit(1)
 
     if not os.path.isdir(images_dir):
-        print(f"Error: Not a directory: {images_dir}")
+        print(f"错误: 不是目录: {images_dir}")
         sys.exit(1)
 
     canvas_key = args.canvas
     if canvas_key not in CANVAS_FORMATS:
-        print(f"Error: Unknown canvas format '{canvas_key}'. Available: {', '.join(sorted(CANVAS_FORMATS.keys()))}")
+        print(f"错误: 未知画布格式 '{canvas_key}'。可用: {', '.join(sorted(CANVAS_FORMATS.keys()))}")
         sys.exit(1)
 
     fmt = CANVAS_FORMATS[canvas_key]
-    print(f"Analyzing: {images_dir}")
-    print(f"Canvas: {fmt.get('name', canvas_key)} ({fmt.get('width', '?')}x{fmt.get('height', '?')})")
+    print(f"正在分析: {images_dir}")
+    print(f"画布: {fmt.get('name', canvas_key)} ({fmt.get('width', '?')}x{fmt.get('height', '?')})")
 
     results = analyze_images(images_dir)
 
@@ -376,7 +372,7 @@ def main() -> None:
         csv_path = os.path.join(parent_dir, "image_analysis.csv")
         save_csv(results, csv_path)
     else:
-        print("No image files found in the directory.")
+        print("目录中未找到图片文件。")
 
 
 if __name__ == "__main__":
