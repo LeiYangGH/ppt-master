@@ -297,7 +297,7 @@ python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 - `--animation-trigger {on-click,with-previous,after-previous}` —— 启动模式（对应 PowerPoint 动画窗格的启动下拉菜单）。默认 `after-previous`（无需点击的级联播放；通过 `--animation-stagger` 控制节奏）。使用 `on-click` 让演讲者手动控制，或使用 `with-previous` 同时入场。
 - `--auto-advance <seconds>` —— 展台式的自动播放时间。
 
-完整效果列表、锚点逻辑及限制见：[`references/animations.md`](references/animations.md)。
+完整效果列表、锚点逻辑及限制见：`references/animations.md`。
 
 > ❌ **绝不要**用 `cp` 替代 `finalize_svg.py` —— finalize 执行多个关键处理步骤
 > ❌ **绝不要**从 `svg_output/` 目录导出 —— **必须**使用 `-s final`（从 `svg_final/` 导出）

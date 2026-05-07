@@ -6,7 +6,7 @@
 
 统一的图像生成入口。
 
-```bash
+```powershell
 python scripts/image_gen.py "A modern futuristic workspace"
 python scripts/image_gen.py "Abstract tech background" --aspect_ratio 16:9 --image_size 4K
 python scripts/image_gen.py "Concept car" -o projects/demo/images
@@ -18,7 +18,7 @@ python scripts/image_gen.py --list-backends
 
 后端选择：
 
-```bash
+```powershell
 python scripts/image_gen.py "A cat" --backend openai
 python scripts/image_gen.py "A cinematic portrait" --backend minimax
 python scripts/image_gen.py "A product launch hero image" --backend qwen
@@ -44,7 +44,7 @@ OPENAI_MODEL=gpt-image-2
 
 进程环境示例：
 
-```bash
+```powershell
 export IMAGE_BACKEND=openai
 export OPENAI_API_KEY=sk-xxx
 export OPENAI_MODEL=gpt-image-2
@@ -78,7 +78,7 @@ MINIMAX_API_KEY=your-api-key
 
 在编写设计规格或排版前，分析项目目录中的图像。
 
-```bash
+```powershell
 python scripts/analyze_images.py <project_path>/images
 ```
 
@@ -88,7 +88,7 @@ python scripts/analyze_images.py <project_path>/images
 
 手动下载后去除 Gemini 水印资源。
 
-```bash
+```powershell
 python scripts/gemini_watermark_remover.py <image_path>
 python scripts/gemini_watermark_remover.py <image_path> -o output_path.png
 python scripts/gemini_watermark_remover.py <image_path> -q
@@ -100,6 +100,6 @@ python scripts/gemini_watermark_remover.py <image_path> -q
 
 依赖：
 
-```bash
+```powershell
 pip install Pillow numpy
 ```

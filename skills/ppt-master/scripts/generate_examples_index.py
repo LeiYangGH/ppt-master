@@ -148,14 +148,14 @@ def generate_examples_index(examples_dir: str = 'examples') -> str:
     content.append("- `svg_output/` - SVG output files\n")
 
     content.append("**Method 1: Using an HTTP server (recommended)**\n")
-    content.append("```bash")
+    content.append("```powershell")
     content.append(
         "python -m http.server --directory examples/<project_name>/svg_output 8000")
     content.append("# Visit http://localhost:8000")
     content.append("```\n")
 
     content.append("**Method 2: Open SVG directly**\n")
-    content.append("```bash")
+    content.append("```powershell")
     content.append(
         "open examples/<project_name>/svg_output/slide_01_cover.svg")
     content.append("```\n")
@@ -163,7 +163,7 @@ def generate_examples_index(examples_dir: str = 'examples') -> str:
     # Create new project
     content.append("### Create a New Project\n")
     content.append("Refer to existing project structures, or use the project management tool:\n")
-    content.append("```bash")
+    content.append("```powershell")
     content.append(
         "python scripts/project_manager.py init my_project --format ppt169")
     content.append("```\n")

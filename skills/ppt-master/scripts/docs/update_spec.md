@@ -4,7 +4,7 @@
 
 ## 用法
 
-```bash
+```powershell
 python skills/ppt-master/scripts/update_spec.py <project_path> <section>.<key>=<value>
 ```
 
@@ -19,7 +19,7 @@ python skills/ppt-master/scripts/update_spec.py <project_path> <section>.<key>=<
 
 ## 示例
 
-```bash
+```powershell
 # 全演示文稿换主色（裸 key → colors.primary）
 python skills/ppt-master/scripts/update_spec.py projects/acme_ppt169_20260301 primary=#0066AA
 

@@ -85,7 +85,7 @@
 
 浏览器直接打开 SVG 时会拦截外部图片。应从项目根目录启动 HTTP 服务：
 
-```bash
+```powershell
 python -m http.server -d <project_path> 8000
 # Visit http://localhost:8000/svg_output/your_file.svg
 ```
@@ -116,7 +116,7 @@ python -m http.server -d <project_path> 8000
 
 使用 [shared-standards.md §5](shared-standards.md) 中的统一流程。`finalize_svg.py` 会在导出前把 `svg_output/` 中的图片引用嵌入到 `svg_final/`。
 
-```bash
+```powershell
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
 ```
@@ -125,7 +125,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 
 如果只想处理指定 SVG，而不跑完整流程：
 
-```bash
+```powershell
 python scripts/svg_finalize/embed_images.py <svg_file>                         # 单文件
 python scripts/svg_finalize/embed_images.py <project_path>/svg_output/*.svg    # 批量
 python scripts/svg_finalize/embed_images.py --dry-run <project_path>/svg_output/*.svg  # 预览
@@ -139,7 +139,7 @@ python scripts/svg_finalize/embed_images.py --dry-run <project_path>/svg_output/
 
 嵌入前先压缩，减少文件体积：
 
-```bash
+```powershell
 convert input.png -quality 85 -resize 1920x1080\> output.png  # ImageMagick
 pngquant --quality=65-80 input.png -o output.png               # pngquant（推荐）
 ```
@@ -172,6 +172,6 @@ project/
 压缩源图、改用 JPEG，或把分辨率降到与实际显示尺寸一致。
 
 **Q：如何把 Base64 图片反解出来？**
-```bash
+```powershell
 base64 -d image.b64 > image.png
 ```

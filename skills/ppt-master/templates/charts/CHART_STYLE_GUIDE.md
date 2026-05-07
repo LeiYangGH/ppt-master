@@ -442,7 +442,7 @@ font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Micr
 - [ ] 坐标值与轴线的实际 SVG 坐标一致
 
 ### 验证命令
-```bash
+```powershell
 # 一键校验
 f="your_chart.svg"
 xmllint --noout "skills/ppt-master/templates/charts/$f" && echo "XML OK" || echo "XML FAIL"

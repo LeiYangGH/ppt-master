@@ -184,7 +184,7 @@ cell_height = (600 - 20) / 2 = 290
 
 ## 交接字段
 
-本规范只定义布局计算。请把计算结果写入 [`svg-image-embedding.md`](svg-image-embedding.md) 中定义的图片资源清单：
+本规范只定义布局计算。请把计算结果写入 `svg-image-embedding.md` 中定义的图片资源清单：
 
 | 字段 | 含义 |
 |-------|---------|
@@ -193,7 +193,7 @@ cell_height = (600 - 20) / 2 = 290
 | `Image area` | 计算得到的图片显示区域 |
 | `Text area` | 计算得到的剩余文字区域 |
 
-关于 SVG `<image>` 语法、路径规则、`preserveAspectRatio`、外部引用和 Base64 嵌入，见 [`svg-image-embedding.md`](svg-image-embedding.md)。
+关于 SVG `<image>` 语法、路径规则、`preserveAspectRatio`、外部引用和 Base64 嵌入，见 `svg-image-embedding.md`。
 
 ### SVG 图片嵌入示例
 
@@ -217,7 +217,7 @@ cell_height = (600 - 20) / 2 = 290
 
 ## 自动化工具
 
-```bash
+```powershell
 python scripts/analyze_images.py <project_path>/images                       # 默认：PPT 16:9
 python scripts/analyze_images.py <project_path>/images --canvas ppt43        # PPT 4:3
 python scripts/analyze_images.py <project_path>/images --canvas xiaohongshu  # 小红书

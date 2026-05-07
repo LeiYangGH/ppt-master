@@ -4,7 +4,7 @@
 
 1. 运行：
 
-```bash
+```powershell
 python scripts/project_manager.py validate <project_path>
 ```
 
@@ -17,7 +17,7 @@ python scripts/project_manager.py validate <project_path>
 2. 确认命名规范一致。
 3. 若浏览器直接打开文件不一致，通过本地服务器预览：
 
-```bash
+```powershell
 python -m http.server --directory <svg_output_path> 8000
 ```
 
@@ -30,7 +30,7 @@ python -m http.server --directory <svg_output_path> 8000
 
 然后重新运行：
 
-```bash
+```powershell
 python scripts/total_md_split.py <project_path>
 ```
 
@@ -38,7 +38,7 @@ python scripts/total_md_split.py <project_path>
 
 推荐顺序：
 
-```bash
+```powershell
 python scripts/total_md_split.py <project_path>
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
@@ -50,7 +50,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 
 大部分工具仅使用标准库。按需安装额外依赖：
 
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 

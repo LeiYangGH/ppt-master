@@ -13,4 +13,4 @@
 | 运行环境 | 跨平台 Shell | **Windows PowerShell**——终端操作默认使用 PowerShell 命令 |
 | 执行纪律 | 原版串行流程 | 在原版基础上强化了虚拟环境使用、文件直读直写等约束 |
 
-> 完整的工作流、架构设计与脚本用法，请参阅 [`skills/ppt-master/SKILL.md`](skills/ppt-master/SKILL.md) 与 [`arch-design.md`](arch-design.md)。
+> 完整的工作流、架构设计与脚本用法，请参阅 `skills/ppt-master/SKILL.md` 与 `arch-design.md`。

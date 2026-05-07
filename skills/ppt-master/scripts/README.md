@@ -15,7 +15,7 @@ This directory contains user-facing scripts for conversion, project setup, SVG p
 
 Typical end-to-end workflow:
 
-```bash
+```powershell
 python scripts/project_manager.py init <project_name> --format ppt169
 python scripts/project_manager.py import-sources <project_path> <source_files...> --move
 python scripts/total_md_split.py <project_path>
@@ -25,7 +25,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 
 Repository update:
 
-```bash
+```powershell
 python scripts/update_repo.py
 ```
 
@@ -44,7 +44,7 @@ python scripts/update_repo.py
 
 Project setup:
 
-```bash
+```powershell
 python scripts/project_manager.py init <project_name> --format ppt169
 python scripts/project_manager.py import-sources <project_path> <source_files...> --move
 python scripts/project_manager.py validate <project_path>
@@ -52,14 +52,14 @@ python scripts/project_manager.py validate <project_path>
 
 Template source import:
 
-```bash
+```powershell
 python scripts/pptx_template_import.py <template.pptx>
 python scripts/pptx_template_import.py <template.pptx> --manifest-only
 ```
 
 Post-processing and export:
 
-```bash
+```powershell
 python scripts/total_md_split.py <project_path>
 python scripts/finalize_svg.py <project_path>
 python scripts/svg_to_pptx.py <project_path> -s final
@@ -67,7 +67,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 
 Image generation:
 
-```bash
+```powershell
 python scripts/image_gen.py "A modern futuristic workspace"
 python scripts/image_gen.py --list-backends
 python scripts/analyze_images.py <project_path>/images
@@ -75,7 +75,7 @@ python scripts/analyze_images.py <project_path>/images
 
 Repository update:
 
-```bash
+```powershell
 python scripts/update_repo.py
 python scripts/update_repo.py --skip-pip
 ```

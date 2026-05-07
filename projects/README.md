@@ -4,7 +4,7 @@
 
 ## 新建项目
 
-```bash
+```powershell
 python skills/ppt-master/scripts/project_manager.py init my_project --format ppt169
 ```
 

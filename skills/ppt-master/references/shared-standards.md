@@ -161,7 +161,7 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 
 ## 3. 画布格式速查
 
-> 完整格式表（演示 / 社交 / 营销）及格式选择决策树见 [`canvas-formats.md`](canvas-formats.md)。
+> 完整格式表（演示 / 社交 / 营销）及格式选择决策树见 `canvas-formats.md`。
 
 ---
 
@@ -174,7 +174,7 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 - **样式**：只能写行内样式（如 `fill=""`、`font-size=""`）；`<style>` / `class` **禁止**（`<defs>` 内的 `id` 合法）
 - **颜色**：只用 HEX；透明度通过 `fill-opacity` / `stroke-opacity`
 - **图片**：`<image href="../images/xxx.png" preserveAspectRatio="xMidYMid slice"/>`
-- **图标**：`<use data-icon="<library>/<name>" x="" y="" width="48" height="48" fill="#HEX"/>`（后处理自动嵌入）。必须始终带图标库前缀。每套 deck 只能用一种风格库（`chunk-filled` / `tabler-filled` / `tabler-outline` / `phosphor-duotone`）；`simple-icons` 只用于真实品牌标识。详见 [`../templates/icons/README.md`](../templates/icons/README.md)。
+- **图标**：`<use data-icon="<library>/<name>" x="" y="" width="48" height="48" fill="#HEX"/>`（后处理自动嵌入）。必须始终带图标库前缀。每套 deck 只能用一种风格库（`chunk-filled` / `tabler-filled` / `tabler-outline` / `phosphor-duotone`）；`simple-icons` 只用于真实品牌标识。详见 `../templates/icons/README.md`。
 
 ### 行内文字分段（单个逻辑行 = 单个 `<text>`）
 
@@ -293,7 +293,7 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 
 必须按顺序执行——禁止跳步，也禁止额外乱加参数：
 
-```bash
+```powershell
 # 1. 将总备注拆分为逐页备注文件
 python scripts/total_md_split.py <project_path>
 
@@ -314,7 +314,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 - `--animation-trigger {on-click,with-previous,after-previous}` —— 对应 PowerPoint 动画面板里的 Start 模式。默认 `after-previous`（页面进入后自动串联播放，节奏由 `--animation-stagger <seconds>` 控制）；`on-click` 逐次点击推进；`with-previous` 为全部组同时播放。
 - `--auto-advance <seconds>` —— 展台 / 轮播式自动播放
 
-完整说明见 [`animations.md`](animations.md)。
+完整说明见 `animations.md`。
 
 **禁止事项**：
 - 绝对不要用 `cp` 替代 `finalize_svg.py`

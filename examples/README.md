@@ -422,7 +422,7 @@ Each example project follows this standard structure:
 
 **Method 1: Using an HTTP Server (Recommended)**
 
-```bash
+```powershell
 # Preview the final version
 python -m http.server --directory examples/<project_name>/svg_final 8000
 
@@ -434,7 +434,7 @@ python -m http.server --directory examples/<project_name>/svg_output 8000
 
 **Method 2: Open SVG Directly**
 
-```bash
+```powershell
 # macOS
 open examples/<project_name>/svg_final/slide_01_cover.svg
 

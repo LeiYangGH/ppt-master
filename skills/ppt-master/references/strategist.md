@@ -14,7 +14,7 @@
 
 ## 画布格式速查
 
-> 完整格式表（演示 / 社交 / 营销）及格式选择决策树见 [`canvas-formats.md`](canvas-formats.md)。
+> 完整格式表（演示 / 社交 / 营销）及格式选择决策树见 `canvas-formats.md`。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### a. 画布格式确认
 
-根据使用场景推荐格式（见 [`canvas-formats.md`](canvas-formats.md)）。
+根据使用场景推荐格式（见 `canvas-formats.md`）。
 
 ### b. 页数确认
 
@@ -86,7 +86,7 @@
 
 内置图标库包含多种风格库，以及一个品牌 logo 库：
 
-当前图标库清单、数量、前缀和 SVG 占位细节见 [`../templates/icons/README.md`](../templates/icons/README.md)。
+当前图标库清单、数量、前缀和 SVG 占位细节见 `../templates/icons/README.md`。
 
 > **选择 C 时的强制规则**：
 >
@@ -175,7 +175,7 @@
 | Layout suggestion | 例如 `Wide landscape (suitable for full-screen/illustration)` |
 | Purpose | 例如 `Cover background` |
 | Type | Background / Photography / Illustration / Diagram / Decorative pattern |
-| Status | 初始状态必须是 `Pending`、`Existing` 或 `Placeholder`；完整状态枚举见 [`svg-image-embedding.md`](svg-image-embedding.md) |
+| Status | 初始状态必须是 `Pending`、`Existing` 或 `Placeholder`；完整状态枚举见 `svg-image-embedding.md` |
 | Generation description | 填写用于 AI 生成的详细描述 |
 
 **Generation description 的质量要求**——它会直接喂给 Image_Generator 生成 prompt；需要明确主体、数量、场景、光线、颜色（HEX）、构图。不要只写 “team photo” / “tech background” / “chart” 这种单词级描述。
@@ -223,7 +223,7 @@
 
 > **多图页面**：若一页中包含多张图片，请使用 `references/image-layout-spec.md` 中 “Multi-Image Layout” 的网格公式。
 
-> **流程交接**：若选择 C) AI generation，则 Image_Generator 会处理 `Pending` 行，并在 Executor 接手前把状态更新为 `Generated` 或 `Needs-Manual`。状态名称见 [`svg-image-embedding.md`](svg-image-embedding.md)。
+> **流程交接**：若选择 C) AI generation，则 Image_Generator 会处理 `Pending` 行，并在 Executor 接手前把状态更新为 `Generated` 或 `Needs-Manual`。状态名称见 `svg-image-embedding.md`。
 
 ### 可视化参考（非阻塞——Strategist 直接推荐，无需用户确认）
 
@@ -391,7 +391,7 @@
 1. 读取参考模板：`templates/design_spec_reference.md`
 2. 基于分析结果，从零生成完整 spec
 3. 保存到：`projects/<project_name>.../design_spec.md`
-4. **生成执行锁文件**：读取 `templates/spec_lock_reference.md`，并生成 `projects/<project_name>.../spec_lock.md`——它是上方配色 / 字体 / 图标 / 图片 / **page_rhythm** 决策的精简、机器可读版本。Executor 在生成每一页前都会重新读取它（见 [executor-base.md](executor-base.md) §2.1）。`spec_lock.md` 中的值**必须**与 `design_spec.md` 中记录的决策完全一致；若两者发生冲突，以 `spec_lock.md` 为准，`design_spec.md` 视为历史叙述。
+4. **生成执行锁文件**：读取 `templates/spec_lock_reference.md`，并生成 `projects/<project_name>.../spec_lock.md`——它是上方配色 / 字体 / 图标 / 图片 / **page_rhythm** 决策的精简、机器可读版本。Executor 在生成每一页前都会重新读取它（见 executor-base.md §2.1）。`spec_lock.md` 中的值**必须**与 `design_spec.md` 中记录的决策完全一致；若两者发生冲突，以 `spec_lock.md` 为准，`design_spec.md` 视为历史叙述。
    - **page_rhythm 是强制项**：根据第 IX 节内容大纲中的页面列表，为每页分配 `anchor` / `dense` / `breathing` 之一（完整词汇见 `spec_lock_reference.md`）。这正是打破“每页都像卡片网格”统一感的关键——若缺少它，Executor 会默认所有页面都是 `dense`。
    - **节奏服从叙事，而不是配额**：`breathing` 页面用于自然停顿——如章节过渡、独立强调页（hero quote / big number）、SCQA 过桥页。高密度 deck 完全可以全部是 `dense`。**不要为了凑节奏而发明空页面**（如“Thank you”、纯空分隔页）；每个 `breathing` 页面都必须表达独立信息。
 

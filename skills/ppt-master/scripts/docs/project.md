@@ -6,7 +6,7 @@
 
 项目初始化和验证的主入口。
 
-```bash
+```powershell
 python scripts/project_manager.py init <project_name> --format ppt169
 python scripts/project_manager.py import-sources <project_path> <source1> [<source2> ...]
 python scripts/project_manager.py validate <project_path>
@@ -31,7 +31,7 @@ python scripts/project_manager.py info <project_path>
 
 示例：
 
-```bash
+```powershell
 python scripts/project_manager.py init my_presentation --format ppt169
 python scripts/project_manager.py validate projects/my_presentation_ppt169_20251116
 python scripts/project_manager.py info projects/my_presentation_ppt169_20251116
@@ -49,7 +49,7 @@ from project_utils import get_project_info, validate_project_structure
 
 也可直接运行做快速检查：
 
-```bash
+```powershell
 python scripts/project_utils.py <project_path>
 ```
 
@@ -57,7 +57,7 @@ python scripts/project_utils.py <project_path>
 
 批量检查项目结构与合规性。
 
-```bash
+```powershell
 python scripts/batch_validate.py examples
 python scripts/batch_validate.py examples projects
 python scripts/batch_validate.py --all
@@ -70,7 +70,7 @@ python scripts/batch_validate.py examples --export
 
 自动重建 `examples/README.md`。
 
-```bash
+```powershell
 python scripts/generate_examples_index.py
 python scripts/generate_examples_index.py examples
 ```
@@ -79,7 +79,7 @@ python scripts/generate_examples_index.py examples
 
 `/create-template` 的统一 PPTX 预处理入口。
 
-```bash
+```powershell
 python scripts/pptx_template_import.py <template.pptx>
 python scripts/pptx_template_import.py <template.pptx> -o <output_dir>
 python scripts/pptx_template_import.py <template.pptx> --manifest-only
@@ -107,7 +107,7 @@ python scripts/pptx_template_import.py <template.pptx> --skip-manifest
 
 显示常见项目错误的标准修复方案。
 
-```bash
+```powershell
 python scripts/error_helper.py
 python scripts/error_helper.py missing_readme
 python scripts/error_helper.py missing_readme project_path=my_project
