@@ -65,7 +65,7 @@ P11 11_share_split.svg   type=pie
 4. **读取轴刻度标签（仅柱状图）。** 定位数值轴上的 `<text>` 元素 — 水平柱状图为X轴标签，垂直柱状图为Y轴标签。提取首尾刻度值确定轴范围（如 `0%` 到 `120%` → 范围 `0,120`）。将此范围作为 `--value-range "0,120"` 传给计算器。如SVG无显式刻度标签（仅有数据标签，无网格线），省略 `--value-range` 让计算器自动归一化 — 但在回执中标注 `scale=auto (no ticks)`。
 5. 运行对应的计算器命令：
 
-   ```powershell
+   ```bash
    # bar_chart / horizontal_bar_chart（后者加 --horizontal）
    # 重要：始终从轴刻度标签传递 --value-range（步骤4）
    python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
@@ -99,7 +99,7 @@ P11 11_share_split.svg   type=pie
 
 更新任何页面后，重新运行质量检查器确认未引入问题：
 
-```powershell
+```bash
 python skills/ppt-master/scripts/svg_quality_checker.py <project_path>
 ```
 
@@ -111,7 +111,7 @@ python skills/ppt-master/scripts/svg_quality_checker.py <project_path>
 
 **堆叠柱状图** — 对N个堆叠系列在同一x类别上，运行 `calc bar` N次。传入每个段的**高度**作为数据值，并将该类别下方所有段的像素高度之和从 `--area` 的 `y_max` 中减去。将每个段的 `(x, y, width, height)` 与SVG对比。
 
-```powershell
+```bash
 # 示例：类别"Q1"处双系列堆叠，底部=30，顶部=20，绑图区y从100到500
 # 运行1 — 底部段（原点 = 基线）
 python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
@@ -147,7 +147,7 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 
 继续后处理与导出（[SKILL.md 步骤7](../SKILL.md)）：
 
-```powershell
+```bash
 python skills/ppt-master/scripts/notes_all_md_split.py <project_path>
 python skills/ppt-master/scripts/finalize_svg.py <project_path>
 python skills/ppt-master/scripts/svg_to_pptx.py <project_path> -s final

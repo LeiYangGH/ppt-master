@@ -116,7 +116,7 @@ description: >
 
 🚧 **GATE**：第 1 步完成；源内容准备就绪（Markdown 文件或对话中描述的需求均有效）。
 
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 ```
 
@@ -153,7 +153,7 @@ python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 
 触发时：读取 `${SKILL_DIR}/templates/layouts/layouts_index.json`，匹配模板（对于触发条件 3 则列出选项），并复制：
 
-```powershell
+```bash
 Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.svg" -Destination "<project_path>\templates\"
 Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\design_spec.md" -Destination "<project_path>\templates\"
 Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.png" -Destination "<project_path>\images\" -ErrorAction SilentlyContinue
@@ -199,7 +199,7 @@ Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.jpg" -Destination "<
 8. 图片使用方式 (Image usage approach)
 
 如果用户提供了图片，**在输出设计规范之前**进行分析：
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 ```
 
@@ -251,7 +251,7 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 **每页更新页进度（强制）**：每完成一页 SVG 写入后，立即更新 `projects/task_plan.md` 的“当前页进度”字段（如 P03/12），以便会话中断后可从该页恢复。
 
 **质量检查门控（强制）** —— 在所有 SVG 生成后，生成演讲备注之前：
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 ```
 - 任何 `error`（使用了禁用的 SVG 特性、viewBox 不匹配、偏离 spec_lock 等）**必须**在继续前修复 —— 返回视觉构建阶段，重新生成该页，再次运行检查。
@@ -289,17 +289,17 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 标准三命令流程（参考 `references/shared-standards.md` §5）：
 
 **第 7.1 步** —— 拆分演讲备注：
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/notes_all_md_split.py <project_path>
 ```
 
 **第 7.2 步** —— SVG 后处理（图标嵌入 / 图片裁剪与嵌入 / 文本扁平化 / 圆角矩形转路径）：
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/finalize_svg.py <project_path>
 ```
 
 **第 7.3 步** —— 导出 PPTX（默认嵌入演讲备注）：
-```powershell
+```bash
 python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 # 输出：
 #   exports/<project_name>_<timestamp>.pptx           ← 最终原生 pptx

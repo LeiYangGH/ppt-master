@@ -147,7 +147,7 @@ projects/<topic_name>.md
 
 ### 3.3 下载流程
 
-```powershell
+```bash
 # 在projects/下创建图片文件夹（与文档同名）
 New-Item -ItemType Directory -Force -Path "projects/<topic_name>"
 

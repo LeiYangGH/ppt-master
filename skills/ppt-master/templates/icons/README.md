@@ -43,7 +43,7 @@ Use placeholder syntax **during SVG generation**:
 
 `finalize_svg.py` auto-embeds all placeholders during post-processing. To run manually:
 
-```powershell
+```bash
 python scripts/svg_finalize/embed_icons.py svg_output/*.svg
 ```
 
@@ -53,7 +53,7 @@ python scripts/svg_finalize/embed_icons.py svg_output/*.svg
 
 Use `ls | grep` — zero token cost:
 
-```powershell
+```bash
 Get-ChildItem skills\ppt-master	emplates\icons\chunk-filled\*home*
 Get-ChildItem skills\ppt-master	emplates\icons	abler-filled\*home*
 Get-ChildItem skills\ppt-master	emplates\icons	abler-outline\*chart*

@@ -15,4 +15,4 @@ _（如：tspan 内联样式不能带 x/y/dy；圆角矩形必须转 path...）_
 _（如：spec_lock 漂移常见原因；quality checker 误报模式...）_
 
 ### 工具与脚本
-_（如：finalize_svg.py 执行顺序不可颠倒；PowerShell 路径中有空格必须加引号...）_
+_（如：finalize_svg.py 执行顺序不可颠倒；）_

@@ -219,7 +219,7 @@ page_rhythm:
 
 `finalize_svg.py` 是统一入口，按顺序执行以下步骤：
 
-```powershell
+```bash
 python scripts/finalize_svg.py <project_path>
 ```
 

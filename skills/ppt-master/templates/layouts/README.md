@@ -197,7 +197,7 @@ Templates use `{{PLACEHOLDER}}` format to mark replaceable content:
 
 ### Copy from Template Library to Project
 
-```powershell
+```bash
 # Copy exhibit style template to project
 Copy-Item "templates/layouts/exhibit/*" -Destination "projects/<project>/templates/"
 

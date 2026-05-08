@@ -45,13 +45,13 @@ description: 基于现有项目文件或参考模板生成新的PPT布局模板
 
 **如提供了参考来源**，先分析其结构：
 
-```powershell
+```bash
 Get-ChildItem -Force "<reference_source_path>"
 ```
 
 如参考来源为 `.pptx` 模板文件，使用统一准备助手：
 
-```powershell
+```bash
 python skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pptx>"
 ```
 
@@ -134,7 +134,7 @@ python skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pp
 
 ## 步骤 3：创建模板目录
 
-```powershell
+```bash
 New-Item -ItemType Directory -Force -Path "skills/ppt-master/templates/layouts/<template_id>"
 ```
 
@@ -184,13 +184,13 @@ New-Item -ItemType Directory -Force -Path "skills/ppt-master/templates/layouts/<
 
 ## 步骤 5：验证模板资产
 
-```powershell
+```bash
 Get-ChildItem -Force "skills/ppt-master/templates/layouts/<template_id>"
 ```
 
 对模板目录运行SVG验证：
 
-```powershell
+```bash
 python skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templates/layouts/<template_id>" --format <canvas_format>
 ```
 

@@ -256,7 +256,7 @@ To adapt to other medical institution branding, replace the corresponding values
 
 ### 1. Copy Template to Project
 
-```powershell
+```bash
 cp templates/layouts/medical_university/* projects/<project>/templates/
 ```
 
