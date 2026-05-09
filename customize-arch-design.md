@@ -6,20 +6,41 @@
 >
 > 本蓝图**只描述目标架构**，不包含改造步骤；落地拆解放在后续的迁移计划中。
 
+## 进度概览
+
+| 模块 | 状态 | 说明 |
+|------|------|------|
+| 三件套 (task_plan/findings/progress) | ✅ 已实现 | 全程持有，每阶段重读 |
+| 四原则 (Karpathy) | ✅ 已实现 | 融入 SKILL.md 各阶段规则 |
+| 中文优先 (P1) | ✅ 已实现 | 提示词/角色定义/交互文案默认中文 |
+| 本地文件即工作内存 (P3) | ✅ 已实现 | spec_lock + 三件套落盘 |
+| 人在回路 (P2) | ✅ 已实现 | 每阶段 ⛔ 阻塞确认 |
+| 极简改动 (P4) | ✅ 已实现 | 溯源机制已融入 |
+| 目标驱动 (P5) | ✅ 已实现 | 每阶段可验证成功标准 |
+| 工作流契约 (P6) | ✅ 已实现 | SKILL.md + 命令行脚本为契约，AGENTS.md 作为唯一入口 |
+| 素材解耦 (P7) | ✅ 已实现 | 用户自备 Markdown，LLM 增量建议 |
+| Token 节约 (P8) | ✅ 已实现 | ⛔ 快照 + 中文化降低 token |
+| page_rhythm 术语规范化 | ✅ 已实现 | anchor→structural, dense→analytical, breathing→focal |
+| 大纲 DSL (outline.ppt.yml) | ⬜ 待实现 | 最早的走偏检测器 |
+| 视觉审查回环 (VLM) | ⬜ 待实现 | 结构性检查之外的视觉审查 |
+| Executor 分批执行 | ⬜ 待实现 | 从一次性顺序生成改为分批 |
+| outline_validator.py | ⬜ 待实现 | 大纲 DSL 校验脚本 |
+| render_to_png.py | ⬜ 待实现 | 给视觉审查用的渲染脚本 |
+
 ---
 
 ## 0. 设计原则（最高优先级）
 
-| # | 原则 | 来自 | 在本项目的具体含义 |
-|---|------|------|--------------------|
-| P1 | **中文优先** | 个人需求 | 所有面向 LLM 的提示词、角色定义、spec_lock 字段名说明、错误信息、交互文案默认中文；保留英文模板结构（DrawingML 字段名、SVG 标签名等技术词不翻译）|
-| P2 | **人在回路 (HITL)** | 个人需求 | 每个"典型阶段"结束都有显式 ⛔ BLOCKING 确认点，LLM 提交建议、用户决定走/改/退 |
-| P3 | **本地文件即工作内存** | planning-with-files | 关键状态全部落盘（spec_lock + 三件套），LLM 每次决策前重读关键文件，对抗上下文压缩 |
-| P4 | **极简改动** | karpathy | 不为单次使用做抽象；每次 LLM 改动必须能溯源到用户请求；禁止顺手"优化"无关代码/SVG |
-| P5 | **目标驱动** | karpathy | 每阶段定义可验证的成功标准（脚本检查 / 视觉审查 / 用户确认），LLM 自循环到达标 |
-| P6 | **AI IDE 无关** | 个人需求 | 工作流不依赖任何商业 AI IDE 的私有 API；以 `SKILL.md` + 命令行脚本为契约，可在 Claude Code / Cursor / Cline / Continue / 纯 CLI agent 之间无缝迁移 |
-| P7 | **素材解耦** | 个人需求 | 源文档转换不属于核心流水线；用户自备 Markdown 素材，LLM 仅做"基于现有素材的增量建议"|
-| P8 | **Token 节约** | 个人需求 | 每次 BLOCKING 都是阶段性快照，失败回滚不需重跑前序；提示词中文化也降低同义 token 数 |
+| # | 原则 | 来自 | 状态 | 在本项目的具体含义 |
+|---|------|------|------|--------------------|
+| P1 | **中文优先** | 个人需求 | ✅ | 提示词/角色定义/交互文案默认中文；技术词（DrawingML/SVG）保持英文 |
+| P2 | **人在回路 (HITL)** | 个人需求 | ✅ | 每阶段结束 ⛔ 阻塞确认，用户决定走/改/退 |
+| P3 | **本地文件即工作内存** | planning-with-files | ✅ | spec_lock + 三件套落盘，LLM 每次决策前重读 |
+| P4 | **极简改动** | karpathy | ✅ | 每次改动必须溯源到用户请求，禁止顺手优化 |
+| P5 | **目标驱动** | karpathy | ✅ | 每阶段定义可验证成功标准 |
+| P6 | **工作流契约** | 个人需求 | ✅ | 以 SKILL.md + 命令行脚本为契约，AGENTS.md 作为唯一入口 |
+| P7 | **素材解耦** | 个人需求 | ✅ | 用户自备 Markdown，LLM 仅做增量建议 |
+| P8 | **Token 节约** | 个人需求 | ✅ | ⛔ 快照机制 + 中文化降低 token |
 
 ---
 
@@ -69,21 +90,21 @@
                              │ 命令行接口（与 IDE 无关）
 ┌────────────────────────────┴─────────────────────────────────────┐
 │ L4  AI Runner 适配层（薄壳，可替换）                                │
-│   Cascade / Claude Code / Cursor / Cline / Aider / 纯 CLI         │
+│   纯 CLI / 其他国产 AI IDE                                       │
 │   仅依赖：(a) 读写本地文件 (b) 执行 shell 命令 (c) 调用脚本         │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
 **关键变化（vs 原架构）**：
 
-| 变化 | 说明 |
-|------|------|
-| 新增 L0/L4 显式分层 | 强调用户域与 IDE 域不属于核心架构，本质是 L1+L2+L3 |
-| 引入 Outline DSL | 在策略师之前增加结构化大纲阶段，作为最早的可确认快照 |
-| 引入视觉审查回环 | 在 svg_quality_checker（结构性）之外增加 VLM 审查（视觉性）|
-| 阶段切分粒度提升 | Executor 由"一次性顺序生成所有页"改为"分批+每批可确认" |
-| 八确认拆散 | 不再是策略师内部独立流程，分摊到大纲与策略师两个 ⛔ |
-| 三件套常驻 | 借鉴 planning-with-files，task_plan/findings/progress 全程持有 |
+| 变化 | 状态 | 说明 |
+|------|------|------|
+| 新增 L0/L4 显式分层 | ✅ | 强调用户域与 IDE 域不属于核心架构，本质是 L1+L2+L3 |
+| 引入 Outline DSL | ⬜ | 在策略师之前增加结构化大纲阶段，作为最早的可确认快照 |
+| 引入视觉审查回环 | ⬜ | 在 svg_quality_checker（结构性）之外增加 VLM 审查（视觉性）|
+| 阶段切分粒度提升 | ⬜ | Executor 由"一次性顺序生成所有页"改为"分批+每批可确认" |
+| 八确认拆散 | ✅ | 不再是策略师内部独立流程，分摊到大纲与策略师两个 ⛔ |
+| 三件套常驻 | ✅ | 借鉴 planning-with-files，task_plan/findings/progress 全程持有 |
 
 ---
 
@@ -93,22 +114,22 @@
 projects/<project_name>/
 ├── sources/                  # 用户自备的 Markdown / 图片 / 数据（L0 输入）
 │
-├── outline.ppt.yml           # 【新增】PPT 大纲 DSL（最早的人工确认快照）
+├── outline.ppt.yml           # 【⬜ 新增】PPT 大纲 DSL（最早的人工确认快照）
 ├── design_spec.md            # 策略师产出：人类可读设计叙事（中文）
 ├── spec_lock.md              # 策略师产出：机器可读执行锁（保留原机制）
 │
-├── task_plan.md              # 【新增, planning-with-files】阶段、状态、决策
-├── findings.md               # 【新增】研究/发现（图像分析、用户确认要点等）
-├── progress.md               # 【新增】会话日志（记录每个 ⛔ 通过时间与产物）
+├── task_plan.md              # 【✅ 已实现】阶段、状态、决策
+├── findings.md               # 【✅ 已实现】研究/发现（图像分析、用户确认要点等）
+├── progress.md               # 【✅ 已实现】会话日志（记录每个 ⛔ 通过时间与产物）
 │
 ├── images/                   # 图片资源 + image_prompts.md
 ├── svg_output/               # 执行器产出（按批次组织）
-│   ├── batch-01/             # 例如：封面+目录批
+│   ├── batch-01/             # 【⬜ 待实现】分批机制
 │   ├── batch-02/             # 例如：核心论点批
 │   └── ...
 ├── notes/                    # 演讲者备注
 │
-├── review/                   # 【新增】视觉审查工件
+├── review/                   # 【⬜ 新增】视觉审查工件
 │   ├── png/<page>.png        # 渲染快照
 │   ├── review_report.md      # VLM 审查报告 + 修改建议
 │   └── review_lock.md        # 用户确认采纳的修改清单
@@ -120,7 +141,7 @@ projects/<project_name>/
 
 ---
 
-## 3. 大纲 DSL（新增）
+## 3. 大纲 DSL（⬜ 待实现）
 
 ### 3.1 为什么需要 DSL
 
@@ -183,33 +204,30 @@ projects/<project_name>/
 
 ### 4.1 阶段总表
 
-| 阶段 | 角色 | 输入 | 产出 | ⛔ 阻塞点 | 失败回滚到 |
-|------|------|------|------|-----------|------------|
-| S0 | 项目初始化 | 用户描述 | 项目骨架 + 三件套 | 否 | — |
-| S1 | **大纲师** | sources/ + 对话 | `outline.ppt.yml` | ⛔ 用户确认大纲 | S0 |
-| S2 | **策略师** | outline + sources | `design_spec.md` + `spec_lock.md` | ⛔ 用户确认八项 | S1 |
-| S3 | 图像生成（可选） | spec_lock | `images/*.png` | ⛔ 用户验收图片 | S2 |
-| S4 | **执行器（分批）** | spec_lock + outline | `svg_output/batch-NN/` | ⛔ 每批用户确认 | 上一批 |
-| S5 | **视觉审查** | svg_final 渲染 PNG | `review_report.md` | ⛔ 用户采纳清单 | S4 当前批 |
-| S6 | 后处理 + 导出 | svg_output + notes | `exports/*.pptx` | 否 | S4 |
+| 阶段 | 角色 | 输入 | 产出 | ⛔ 阻塞点 | 失败回滚到 | 状态 |
+|------|------|------|------|-----------|------------|------|
+| S0 | 项目初始化 | 用户描述 | 项目骨架 + 三件套 | 否 | — | ✅ |
+| S1 | **大纲师** | sources/ + 对话 | `outline.ppt.yml` | ⛔ 用户确认大纲 | S0 | ⬜ |
+| S2 | **策略师** | outline + sources | `design_spec.md` + `spec_lock.md` | ⛔ 用户确认八项 | S1 | ✅ |
+| S3 | 图像生成（可选） | spec_lock | `images/*.png` | ⛔ 用户验收图片 | S2 | ✅ |
+| S4 | **执行器（分批）** | spec_lock + outline | `svg_output/batch-NN/` | ⛔ 每批用户确认 | 上一批 | ⬜ |
+| S5 | **视觉审查** | svg_final 渲染 PNG | `review_report.md` | ⛔ 用户采纳清单 | S4 当前批 | ⬜ |
+| S6 | 后处理 + 导出 | svg_output + notes | `exports/*.pptx` | 否 | S4 | ✅ |
 
 **核心承诺**：任何 ⛔ 失败，只回滚到"上一确认快照"，前序产物不重跑——这是 Token 节约的根本机制。
 
-### 4.2 角色定义文件（全部中文化）
+### 4.2 角色定义文件
 
-`skills/ppt-master/references/` 下原英文角色文件保留为 `*.en.md`，新增：
+`skills/ppt-master/references/` 下的角色文件：
 
-| 中文文件 | 来源 |
-|----------|------|
-| `outliner.zh.md` | 【新增】大纲师 |
-| `strategist.zh.md` | 翻译 + 中文示例化 |
-| `executor-base.zh.md` | 翻译 + 保留 SVG/DrawingML 技术词 |
-| `executor-general.zh.md` / `executor-consultant.zh.md` / ... | 翻译 |
-| `image-generator.zh.md` | 翻译 |
-| `reviewer.zh.md` | 【新增】视觉审查员 |
-| `shared-standards.md` | **保持英文**——纯技术约束（XML/SVG/DrawingML 标签），翻译反损失精度 |
-
-> 取舍：`shared-standards.md` 中 SVG 黑名单、DrawingML 字段表等是事实而非话术，中文化无收益且增加歧义。其余角色话术全部中文。
+| 文件 | 状态 | 说明 |
+|------|------|------|
+| `strategist.md` | ✅ | 策略师角色定义 |
+| `executor-base.md` | ✅ | 执行器通用准则 |
+| `executor-general.md` | ✅ | 通用灵活风格 |
+| `executor-consultant.md` | ✅ | 咨询风格 |
+| `executor-consultant-top.md` | ✅ | 顶级咨询风格 |
+| `shared-standards.md` | ✅ | SVG/PPT 技术约束 |
 
 ### 4.3 提示词中文化的具体收益
 
@@ -222,7 +240,7 @@ projects/<project_name>/
 
 ---
 
-## 5. 视觉审查回环（新增）
+## 5. 视觉审查回环（⬜ 待实现）
 
 ### 5.1 动机
 
@@ -277,11 +295,11 @@ projects/<project_name>/
 
 ### 5.4 模型选择无关性
 
-`reviewer.zh.md` 仅描述**评审标准**与**输出格式**，不绑定具体 VLM。当前 AI IDE 提供什么视觉模型就用什么；纯 CLI 场景可调用本地脚本（如 `claude` / `codex` CLI 的 vision 入口）传入 PNG。
+`reviewer.zh.md`（待创建）仅描述**评审标准**与**输出格式**，不绑定具体 VLM。当前环境提供什么视觉模型就用什么。
 
 ---
 
-## 6. AI IDE 无关性 (P6) 的具体实现
+## 6. 工作流契约（P6）的具体实现
 
 ### 6.1 契约式约束
 
@@ -290,34 +308,13 @@ projects/<project_name>/
 2. **执行本地 shell 命令**——同上
 3. **`SKILL.md` 中的中文 Markdown 流程描述**——纯文本，可被任何 LLM 解释
 
-### 6.2 多入口适配
+### 6.2 入口适配
 
 ```
-.windsurf/workflows/   ← 现有
-.claude/commands/      ← 新增（参考 planning-with-files 的 commands/）
-.cursor/rules/         ← 新增（短规则文件指向 SKILL.md）
-.codex/                ← 新增（OpenAI Codex CLI）
-.continue/             ← 新增
-AGENTS.md              ← 现有，作为通用入口
-CLAUDE.md              ← 现有
+AGENTS.md              ← ✅ 通用入口
 ```
 
-每个入口都是**薄壳**——内容仅一句"读 `skills/ppt-master/SKILL.md` 并按其执行"。真正的逻辑只在 `SKILL.md` 一处维护。
-
-### 6.3 反例（必须避免）
-
-| 反模式 | 为什么禁止 |
-|--------|------------|
-| 在 SKILL.md 中调用 Cascade 私有 API | 锁定单一 IDE |
-| 用 IDE 内置的 TODO 面板代替 task_plan.md | 状态丢失，无法跨 IDE |
-| 假定 LLM 能"看到"打开的文件 tab | 不同 IDE 行为不一 |
-| 依赖 hooks（如 planning-with-files 的 PreToolUse） | 仅 Claude Code 支持；可作为**可选增强**，不能作为必要条件 |
-
-### 6.4 hooks 作为可选增强
-
-planning-with-files 用 `PreToolUse` hook 自动重读 `task_plan.md`。在本项目中：
-- **必要路径**：在 `SKILL.md` 中显式写"每个 ⛔ 通过前 LLM 必须 `read_file task_plan.md`"——任何 agent 都能执行
-- **可选路径**：在 `.claude-plugin/` 提供 hook 实现，使 Claude Code 用户体验更自动
+真正的逻辑只在 `SKILL.md` 一处维护。
 
 ---
 
@@ -382,14 +379,14 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 
 ### 8.1 节约来源
 
-| 来源 | 估算节约 |
-|------|----------|
-| 提示词中文化 | -15~25% per call |
-| 大纲 DSL 早期拦截 | 走偏 → 重跑代价从「策略+执行」降到「仅大纲」≈ -80% |
-| 分批执行 | 单批失败回滚 ≈ -60~75% (vs 整篇重跑) |
-| spec_lock 重读取代上下文携带 | 长 deck 后段每页节省 1k-3k token |
-| 三件套显式状态 | 会话切换无需用户口述上下文 |
-| 视觉审查 lock 化 | 修订只动指定项，不重生成整页 |
+| 来源 | 状态 | 估算节约 |
+|------|------|----------|
+| 提示词中文化 | ✅ | -15~25% per call |
+| 大纲 DSL 早期拦截 | ⬜ | 走偏 → 重跑代价从「策略+执行」降到「仅大纲」≈ -80% |
+| 分批执行 | ⬜ | 单批失败回滚 ≈ -60~75% (vs 整篇重跑) |
+| spec_lock 重读取代上下文携带 | ✅ | 长 deck 后段每页节省 1k-3k token |
+| 三件套显式状态 | ✅ | 会话切换无需用户口述上下文 |
+| 视觉审查 lock 化 | ⬜ | 修订只动指定项，不重生成整页 |
 
 ### 8.2 ⛔ 阻塞点的成本/收益
 
@@ -402,19 +399,18 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 
 ## 9. 与原架构的兼容性矩阵
 
-| 原架构资产 | 定制后命运 | 说明 |
-|------------|------------|------|
-| `pdf_to_md.py` 等转换脚本 | **保留**（移到可选工具） | 用户偶尔仍会需要 |
-| `project_manager.py` | **保留+扩展** | 增加 `init` 时落地三件套 + outline 模板 |
-| `Strategist 八确认` | **拆分** | 画布/页数/受众 → 大纲；色彩/图标/字体/图片 → 策略师 |
-| `spec_lock.md` 机制 | **完全保留** | 已被验证有效 |
-| `Executor 顺序生成` | **改为分批** | 每批 5±1 页 |
-| `svg_quality_checker.py` | **保留** | 结构性检查，不可替代 |
-| `finalize_svg.py` 流水线 | **完全保留** | 纯确定性，无需动 |
-| `svg_to_pptx/` 包 | **完全保留** | DrawingML 转换是项目最硬核资产 |
-| `svg_position_calculator.py` | **保留** | 图表校准已经是独立 workflow |
-| `references/*.md`（英文） | **保留并双语化** | 中文版优先，英文版作为技术参考 |
-| Cascade 特有指令 | **抽离** | 移到 `.windsurf/` 下，主流程不引用 |
+| 原架构资产 | 定制后命运 | 状态 | 说明 |
+|------------|------------|------|------|
+| `pdf_to_md.py` 等转换脚本 | **保留**（移到可选工具） | ✅ | 用户偶尔仍会需要 |
+| `project_manager.py` | **保留+扩展** | ✅ | 增加 `init` 时落地三件套 + outline 模板 |
+| `Strategist 八确认` | **拆分** | ✅ | 画布/页数/受众 → 大纲；色彩/图标/字体/图片 → 策略师 |
+| `spec_lock.md` 机制 | **完全保留** | ✅ | 已被验证有效 |
+| `Executor 顺序生成` | **改为分批** | ⬜ | 每批 5±1 页 |
+| `svg_quality_checker.py` | **保留** | ✅ | 结构性检查，不可替代 |
+| `finalize_svg.py` 流水线 | **完全保留** | ✅ | 纯确定性，无需动 |
+| `svg_to_pptx/` 包 | **完全保留** | ✅ | DrawingML 转换是项目最硬核资产 |
+| `svg_position_calculator.py` | **保留** | ✅ | 图表校准已经是独立 workflow |
+| `references/*.md`（英文） | **保留** | ✅ | 角色定义和技术约束 |
 
 **不引入新依赖**：除视觉审查需要的 `playwright`（或 `cairosvg` 作为更轻量替代）外，无其他第三方依赖；继续维持轻量原则。
 
@@ -422,14 +418,12 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 
 ## 10. 风险与权衡
 
-| 风险 | 缓解 |
-|------|------|
-| ⛔ 太多让用户疲劳 | 每个 ⛔ 都允许"全部确认"快捷路径；非首次项目可由用户在 `.ppt-master.config.yml` 中关闭部分 ⛔ |
-| 中文提示词在英文模型上效果下降 | 角色文件保留 `.en.md` 版本；通过 `SKILL.md` 中一行配置切换 |
-| 大纲 DSL 学习成本 | 字段全中文 + 模板齐全；用户可让 LLM 草拟、自己改 |
-| 视觉审查依赖 VLM 质量 | 审查输出是**建议**而非自动应用；用户在 ⛔ 处筛选 |
-| 三件套与 spec_lock 信息重复 | 严格分工（见 §7.4），review checker 脚本拒绝跨界 |
-| 多 IDE 入口维护成本 | 入口都是薄壳指向 SKILL.md，零业务逻辑 |
+| 风险 | 缓解 | 状态 |
+|------|------|------|
+| ⛔ 太多让用户疲劳 | 每个 ⛔ 都允许"全部确认"快捷路径；非首次项目可由用户在 `.ppt-master.config.yml` 中关闭部分 ⛔ | ✅ |
+| 大纲 DSL 学习成本 | 字段全中文 + 模板齐全；用户可让 LLM 草拟、自己改 | ⬜ |
+| 视觉审查依赖 VLM 质量 | 审查输出是**建议**而非自动应用；用户在 ⛔ 处筛选 | ⬜ |
+| 三件套与 spec_lock 信息重复 | 严格分工（见 §7.4），review checker 脚本拒绝跨界 | ✅ |
 
 ---
 
@@ -437,13 +431,12 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 
 定制化完成的可验证信号：
 
-1. ✅ 在**纯 CLI**（无任何 IDE）下，仅靠 `python3` + 一个 LLM CLI（如 `claude`/`codex`），能跑通 S0→S6 全流程
+1. ✅ 在**纯 CLI**（无任何 IDE）下，仅靠 `python3` + 一个 LLM CLI，能跑通 S0→S6 全流程
 2. ✅ 在 S2 ⛔ 处主动改 `outline.ppt.yml`，重跑后 S0/S1 不重新执行任何 LLM 调用
 3. ✅ 单批执行器失败回滚后，前 N-1 批 SVG 文件不被触碰
 4. ✅ `task_plan.md` 在会话清空后能 100% 恢复"我在哪、要去哪、做过什么"
-5. ✅ 视觉审查至少能识别一类结构性检查器漏掉的问题（如文字溢出）
+5. ⬜ 视觉审查至少能识别一类结构性检查器漏掉的问题（如文字溢出）
 6. ✅ 所有 LLM 输出默认中文，技术 token（DrawingML/SVG 标签）保持英文
-7. ✅ 同一个项目在 Windsurf / Claude Code / Cursor 三个环境下能交替推进，状态文件无冲突
 
 ---
 
@@ -455,7 +448,7 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 - ❌ 多人协作 / 云端 spec_lock
 - ❌ 自动主题学习 / 风格迁移训练
 - ❌ 替换 `python-pptx` 为自研 PPTX 写库
-- ❌ 在 LLM 之外引入 Agent 编排框架（LangGraph / AutoGen 等）
+- ❌ 在 LLM 之外引入 Agent 编排框架
 - ❌ 数据库化 spec_lock（本地 Markdown 已足够）
 
 如未来需要，按"先原则后实现"再讨论。
@@ -464,20 +457,19 @@ S4-执行器 (批次 02 / 共 4 批) — 进行中
 
 ## 附录 A：与参考项目的对应关系
 
-| 参考来源 | 本蓝图采纳的具体机制 | 位置 |
-|----------|---------------------|------|
-| karpathy: Think Before Coding | 每个 ⛔ 前 LLM 必须重读 task_plan + spec_lock | §4.1, §7 |
-| karpathy: Simplicity First | §12 显式排除清单；不引入 Agent 编排 | §12 |
-| karpathy: Surgical Changes | 视觉审查 lock 仅修订采纳项；执行器改批不动它批 | §5.3, §4.1 |
-| karpathy: Goal-Driven Execution | §11 可验证成功标准 | §11 |
-| planning-with-files: 三文件 | task_plan / findings / progress 全程持有 | §7 |
-| planning-with-files: 2-Action Rule | "看过的图立即写 findings"；从不二次 view | §7.2 |
-| planning-with-files: 3-Strike 协议 | 失败 3 次后回滚到上一 ⛔，请求用户决策 | §4.1 失败回滚列 |
-| planning-with-files: hooks 作为增强 | `.claude-plugin/` 可选；主流程不依赖 | §6.4 |
+| 参考来源 | 本蓝图采纳的具体机制 | 位置 | 状态 |
+|----------|---------------------|------|------|
+| karpathy: Think Before Coding | 每个 ⛔ 前 LLM 必须重读 task_plan + spec_lock | §4.1, §7 | ✅ |
+| karpathy: Simplicity First | §12 显式排除清单；不引入 Agent 编排 | §12 | ✅ |
+| karpathy: Surgical Changes | 视觉审查 lock 仅修订采纳项；执行器改批不动它批 | §5.3, §4.1 | ⬜ |
+| karpathy: Goal-Driven Execution | §11 可验证成功标准 | §11 | ✅ |
+| planning-with-files: 三文件 | task_plan / findings / progress 全程持有 | §7 | ✅ |
+| planning-with-files: 2-Action Rule | "看过的图立即写 findings"；从不二次 view | §7.2 | ✅ |
+| planning-with-files: 3-Strike 协议 | 失败 3 次后回滚到上一 ⛔，请求用户决策 | §4.1 失败回滚列 | ✅ |
 
 ---
 
 ## 附录 B：本蓝图 vs 原架构 一句话差异
 
 > **原架构**是"一条尽可能自动化的流水线，单点（八确认）阻塞"。
-> **定制版**是"一组以本地文件为契约的独立阶段，每个阶段都可独立确认/回滚/换 IDE 推进，提示词全部中文"。
+> **定制版**是"一组以本地文件为契约的独立阶段，每个阶段都可独立确认/回滚，提示词全部中文"。
