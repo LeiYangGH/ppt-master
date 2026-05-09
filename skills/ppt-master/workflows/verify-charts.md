@@ -59,7 +59,7 @@ P11 11_share_split.svg   type=pie
 
 1. 读取 `<project_path>/svg_output/<page>.svg`。
 2. 定位绑图区定义：
-   - 首选：Executor放置的 `<!-- chart-plot-area: ... -->` 标记（见 [executor-base.md §3.1](../references/executor-base.md)）。直接读取坐标。
+   - 首选：Executor放置的 `<!-- chart-plot-area: ... -->` 标记（见 [executor.md §4.1](../references/executor.md)）。直接读取坐标。
    - 如缺失：从SVG的轴线（矩形图表）或中心/半径元素（径向图表）推导绑图区。然后**将标记回写到SVG**，避免后续运行重复此开销。
 3. 从SVG的 `<text>` 标签/值元素读取数据系列。
 4. **读取轴刻度标签（仅柱状图）。** 定位数值轴上的 `<text>` 元素 — 水平柱状图为X轴标签，垂直柱状图为Y轴标签。提取首尾刻度值确定轴范围（如 `0%` 到 `120%` → 范围 `0,120`）。将此范围作为 `--value-range "0,120"` 传给计算器。如SVG无显式刻度标签（仅有数据标签，无网格线），省略 `--value-range` 让计算器自动归一化 — 但在回执中标注 `scale=auto (no ticks)`。
