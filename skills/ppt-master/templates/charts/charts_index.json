@@ -281,7 +281,7 @@
     },
     "comparison_table": {
       "label": "Comparison Table",
-      "summary": "Pick for 2-4 plans/products compared across many feature rows (dense matrix). Skip for pricing-tier marketing layout (use comparison_columns).",
+      "summary": "Pick for 2-4 plans/products compared across many feature rows (analytical matrix). Skip for pricing-tier marketing layout (use comparison_columns).",
       "keywords": ["comparison matrix", "feature comparison", "evaluation", "product selection", "scoring"]
     },
     "snake_flow": {
@@ -311,7 +311,7 @@
     },
     "comparison_columns": {
       "label": "Comparison Columns",
-      "summary": "Pick for 2-4 pricing/service tier cards in side-by-side columns (marketing layout). Skip for dense feature comparison (use comparison_table).",
+      "summary": "Pick for 2-4 pricing/service tier cards in side-by-side columns (marketing layout). Skip for analytical feature comparison (use comparison_table).",
       "keywords": ["pricing", "columns", "service tiers", "membership", "subscription"]
     },
     "fishbone_diagram": {

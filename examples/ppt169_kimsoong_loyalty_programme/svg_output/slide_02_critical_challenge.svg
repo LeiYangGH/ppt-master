@@ -23,7 +23,7 @@
     The cost of acquiring a new customer is 5-7x retaining an existing one. With only 15% repeat purchases, Kimsoong is leaving significant lifetime value on the table.
   </text>
 
-  <!-- Three hero numbers — breathing layout, large numbers with ample whitespace -->
+  <!-- Three hero numbers — focal layout, large numbers with ample whitespace -->
   <!-- Hero 1: Repeat buyer rate -->
   <text x="220" y="260" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="72" font-weight="bold" fill="#E74C3C">15%</text>
   <text x="220" y="300" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#2C3E50">Repeat Buyer Rate</text>
@@ -45,7 +45,7 @@
   <!-- Divider line -->
   <line x1="60" y1="430" x2="1220" y2="430" stroke="#D5DDE5" stroke-width="1"/>
 
-  <!-- Core insight text block — single column, breathing -->
+  <!-- Core insight text block — single column, focal -->
   <text x="640" y="490" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#1A3A5C" font-style="italic">
     "With 85% of customers not returning, every lost buyer represents
   </text>

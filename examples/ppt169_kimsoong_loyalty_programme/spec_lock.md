@@ -40,16 +40,16 @@
 - roadmap_bg: images/roadmap_bg.png
 
 ## page_rhythm
-- P01: anchor
-- P02: breathing
-- P03: dense
-- P04: dense
-- P05: dense
-- P06: dense
-- P07: breathing
-- P08: dense
-- P09: dense
-- P10: anchor
+- P01: structural
+- P02: focal
+- P03: analytical
+- P04: analytical
+- P05: analytical
+- P06: analytical
+- P07: focal
+- P08: analytical
+- P09: analytical
+- P10: structural
 
 ## forbidden
 - Mixing icon libraries

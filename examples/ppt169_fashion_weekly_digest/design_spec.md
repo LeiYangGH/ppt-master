@@ -100,7 +100,7 @@
 
 ### Font Size Hierarchy
 
-**Baseline**: Body font size = 18px (dense — accommodating 16 brand stories across 16 pages)
+**Baseline**: Body font size = 18px (analytical — accommodating 16 brand stories across 16 pages)
 
 | Purpose | Ratio to body | Size | Weight |
 | ------- | ------------- | ---- | ------ |

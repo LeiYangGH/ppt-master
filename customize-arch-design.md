@@ -145,19 +145,19 @@ projects/<project_name>/
 页面:
   - 序号: 1
     类型: 封面               # 封面|目录|章节扉页|论点|论据|图表|引用|结尾
-    节奏: anchor             # anchor|dense|breathing （沿用原 page_rhythm）
+    节奏: structural             # structural|analytical|focal （沿用原 page_rhythm）
     标题: 高效能产品方法论
     要点: []
     素材: []                 # 引用 sources/ 下的文件或片段锚点
   - 序号: 2
     类型: 目录
-    节奏: breathing
+    节奏: focal
     标题: 我们将讨论的四件事
     要点: ["问题定义", "用户访谈", "MVP 设计", "复盘机制"]
     素材: []
   - 序号: 3
     类型: 论点
-    节奏: dense
+    节奏: analytical
     标题: 80% 的失败源于问题定义不清
     要点:
       - 数据: McKinsey 2023, 失败项目根因分析
@@ -169,7 +169,7 @@ projects/<project_name>/
 
 **约束**（由 `outline_validator.py` 强制）：
 - `预计页数` ≤ `页面[]` 长度的 +/-2
-- `节奏` 分布合理：`anchor` 不超过 20%，连续 ≥3 页 `dense` 触发警告
+- `节奏` 分布合理：`structural` 不超过 20%，连续 ≥3 页 `analytical` 触发警告
 - 每页 `要点` ≤ 6 项
 - `素材` 引用必须能在 `sources/` 解析到
 

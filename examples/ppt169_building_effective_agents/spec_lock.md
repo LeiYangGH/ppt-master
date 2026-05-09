@@ -41,18 +41,18 @@
 - image_7: images/image_7.png
 
 ## page_rhythm
-- P01: anchor
-- P02: breathing
-- P03: dense
-- P04: breathing
-- P05: dense
-- P06: dense
-- P07: dense
-- P08: dense
-- P09: dense
-- P10: breathing
-- P11: dense
-- P12: anchor
+- P01: structural
+- P02: focal
+- P03: analytical
+- P04: focal
+- P05: analytical
+- P06: analytical
+- P07: analytical
+- P08: analytical
+- P09: analytical
+- P10: focal
+- P11: analytical
+- P12: structural
 
 ## forbidden
 - Mixing icon libraries

@@ -23,7 +23,7 @@
     <text x="78" y="108" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#9CA3AF">The key architectural distinction in agentic systems</text>
   </g>
 
-  <!-- Central concept — breathing layout: two large blocks separated by vertical divider -->
+  <!-- Central concept — focal layout: two large blocks separated by vertical divider -->
 
   <!-- Left block: Workflows -->
   <g id="concept-workflows">

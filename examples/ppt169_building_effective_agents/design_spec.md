@@ -100,7 +100,7 @@
 
 ### Font Size Hierarchy
 
-**Baseline**: Body font size = 18px (dense — multiple technical points per page, architectural diagrams)
+**Baseline**: Body font size = 18px (analytical — multiple technical points per page, architectural diagrams)
 
 | Purpose | Ratio to body | Actual Size | Weight |
 | ------- | ------------- | ----------- | ------ |
@@ -126,9 +126,9 @@
 The deck uses a variety of patterns to avoid the "every page is a card grid" monotony:
 
 - **Cover**: Full-bleed dark background + centered title with gradient accent
-- **Concept pages** (breathing): Asymmetric split with hero diagram + key text; generous whitespace
-- **Pattern pages** (dense): Top-bottom split — ultra-wide workflow diagram above, structured content below
-- **Summary pages** (anchor): Single column centered with key principles
+- **Concept pages** (focal): Asymmetric split with hero diagram + key text; generous whitespace
+- **Pattern pages** (analytical): Top-bottom split — ultra-wide workflow diagram above, structured content below
+- **Summary pages** (structural): Single column centered with key principles
 
 ### Spacing Specification
 
@@ -140,7 +140,7 @@ The deck uses a variety of patterns to avoid the "every page is a card grid" mon
 | Content block gap | 30px |
 | Icon-text gap | 12px |
 
-**Card-based layouts** (dense pages):
+**Card-based layouts** (analytical pages):
 
 | Element | Value |
 | ------- | ----- |

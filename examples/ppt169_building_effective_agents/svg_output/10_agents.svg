@@ -16,7 +16,7 @@
     <text x="78" y="80" font-family="'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="bold" fill="#E8E8EC">Agents: Autonomous LLM Systems</text>
   </g>
 
-  <!-- Diagram: centered, breathing-style hero -->
+  <!-- Diagram: centered, focal-style hero -->
   <g id="diagram">
     <image href="../images/image_6.png" x="200" y="110" width="880" height="367" preserveAspectRatio="xMidYMid meet"/>
   </g>
@@ -42,7 +42,7 @@
     <text x="1080" y="544" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#D4845A">Human Checkpoints</text>
   </g>
 
-  <!-- Bottom insight text — breathing style, no cards -->
+  <!-- Bottom insight text — focal style, no cards -->
   <g id="insight">
     <text x="640" y="596" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#E8E8EC">Implementation is often straightforward: <tspan font-weight="bold" fill="#E8B87D">LLMs using tools in a loop.</tspan></text>
     <text x="640" y="628" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#9CA3AF">Higher costs + compounding errors → extensive testing in sandboxed environments + guardrails.</text>

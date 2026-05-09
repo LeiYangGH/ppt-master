@@ -57,22 +57,22 @@
 - crocs_molly: images/crocs_molly.jpg
 
 ## page_rhythm
-- P01: anchor
-- P02: dense
-- P03: breathing
-- P04: dense
-- P05: breathing
-- P06: dense
-- P07: dense
-- P08: dense
-- P09: dense
-- P10: dense
-- P11: dense
-- P12: dense
-- P13: dense
-- P14: dense
-- P15: dense
-- P16: anchor
+- P01: structural
+- P02: analytical
+- P03: focal
+- P04: analytical
+- P05: focal
+- P06: analytical
+- P07: analytical
+- P08: analytical
+- P09: analytical
+- P10: analytical
+- P11: analytical
+- P12: analytical
+- P13: analytical
+- P14: analytical
+- P15: analytical
+- P16: structural
 
 ## forbidden
 - Mixing icon libraries

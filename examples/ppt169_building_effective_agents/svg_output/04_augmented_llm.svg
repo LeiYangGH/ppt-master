@@ -17,12 +17,12 @@
     <text x="78" y="108" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#9CA3AF">The foundational unit of all agentic systems</text>
   </g>
 
-  <!-- Diagram image — top full-width (ultra-wide, breathing layout) -->
+  <!-- Diagram image — top full-width (ultra-wide, focal layout) -->
   <g id="diagram">
     <image href="../images/image.png" x="140" y="135" width="1000" height="417" preserveAspectRatio="xMidYMid meet"/>
   </g>
 
-  <!-- Key points below diagram — naked text, no cards (breathing) -->
+  <!-- Key points below diagram — naked text, no cards (focal) -->
   <g id="key-points">
     <rect x="60" y="570" width="1160" height="1" fill="#2D3348" fill-opacity="0.3"/>
 
