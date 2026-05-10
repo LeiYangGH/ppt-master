@@ -72,7 +72,10 @@ description: >
 |--------|---------|
 | `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理（含三件套状态文件初始化） |
 | `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析 |
+| `${SKILL_DIR}/scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询，带缓存和域名黑名单） |
 | `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
+| `${SKILL_DIR}/scripts/render_svg.py` | SVG → PNG 预览渲染（用于逐页视觉复检） |
+| `${SKILL_DIR}/scripts/svg_repair.py` | SVG XML 自动修复（基于 sloppy-xml，修复 LLM 输出的不规范 XML） |
 | `${SKILL_DIR}/scripts/notes_all_md_split.py` | 演讲备注拆分 |
 | `${SKILL_DIR}/scripts/finalize_svg.py` | SVG 后处理（统一入口） |
 | `${SKILL_DIR}/scripts/svg_to_pptx.py` | 导出为 PPTX |

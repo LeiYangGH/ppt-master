@@ -17,6 +17,7 @@ PPT Master - SVG 后处理工具（统一入口）
     python scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
 
 处理选项：
+    repair-xml    - 使用 sloppy-xml 修复格式错误的 XML（先于其他基于 XML 的步骤）
     embed-icons   - 将 <use data-icon="..."/> 替换为实际图标 SVG
     crop-images   - 基于 preserveAspectRatio="slice" 智能裁剪图片
     fix-aspect    - 修正图片宽高比（防止 PPT 形状转换时拉伸）
@@ -37,6 +38,12 @@ from svg_finalize.crop_images import process_svg_images as crop_images_in_svg
 from svg_finalize.embed_icons import process_svg_file as embed_icons_in_file
 from svg_finalize.embed_images import embed_images_in_svg
 from svg_finalize.fix_image_aspect import fix_image_aspect_in_svg
+
+try:
+    from svg_repair import repair_svg_file as _repair_svg_file
+    _HAS_REPAIR = True
+except ImportError:
+    _HAS_REPAIR = False
 
 
 def safe_print(text: str) -> None:
@@ -151,6 +158,27 @@ def finalize_project(
     if not quiet:
         print()
 
+    # Step 0: Repair malformed XML (must run before any XML-based step)
+    if options.get('repair_xml'):
+        if not quiet:
+            safe_print("[0/6] 修复格式错误的 XML...")
+        if not _HAS_REPAIR:
+            if not quiet:
+                safe_print("      [跳过] 未安装 sloppy-xml（可 pip install sloppy-xml 启用）")
+        else:
+            repair_count = 0
+            for svg_file in svg_final.glob('*.svg'):
+                report = _repair_svg_file(svg_file, dry_run=dry_run, verbose=False)
+                if report.repaired:
+                    repair_count += 1
+                    if not quiet:
+                        safe_print(f"      [已修复] {svg_file.name}: {report.summary_line}")
+            if not quiet:
+                if repair_count > 0:
+                    safe_print(f"      共修复 {repair_count} 个文件")
+                else:
+                    safe_print("      无需修复")
+
     # Step 2: Embed icons
     if options.get('embed_icons'):
         if not quiet:
@@ -262,6 +290,7 @@ def main() -> None:
   %(prog)s projects/my_project -q        # 安静模式
 
 处理选项（用于 --only）：
+  repair-xml    修复格式错误的 XML（sloppy-xml）
   embed-icons   嵌入图标
   crop-images   智能裁剪图片（基于 preserveAspectRatio）
   fix-aspect    修正图片宽高比（防止 PPT 形状转换时拉伸）
@@ -273,7 +302,7 @@ def main() -> None:
 
     parser.add_argument('project_dir', type=Path, help='项目目录路径')
     parser.add_argument('--only', nargs='+', metavar='OPTION',
-                        choices=['embed-icons', 'crop-images', 'fix-aspect', 'embed-images', 'flatten-text', 'fix-rounded'],
+                        choices=['repair-xml', 'embed-icons', 'crop-images', 'fix-aspect', 'embed-images', 'flatten-text', 'fix-rounded'],
                         help='仅执行指定处理步骤（默认: 全部）')
     parser.add_argument('--dry-run', '-n', action='store_true',
                         help='仅预览，不执行')
@@ -294,6 +323,7 @@ def main() -> None:
     if args.only:
         # Execute only specified steps
         options = {
+            'repair_xml': 'repair-xml' in args.only,
             'embed_icons': 'embed-icons' in args.only,
             'crop_images': 'crop-images' in args.only,
             'fix_aspect': 'fix-aspect' in args.only,
@@ -304,6 +334,7 @@ def main() -> None:
     else:
         # Execute all by default
         options = {
+            'repair_xml': True,
             'embed_icons': True,
             'crop_images': True,
             'fix_aspect': True,

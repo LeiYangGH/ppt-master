@@ -167,11 +167,30 @@ class SVGQualityChecker:
             ET.fromstring(content)
             return True
         except ET.ParseError as e:
+            # Suggest auto-repair via sloppy-xml
+            repair_hint = (
+                " Auto-repair available: run "
+                "\"python scripts/svg_repair.py <project>\" or "
+                "\"python scripts/finalize_svg.py <project>\" (includes repair step)."
+            )
+            try:
+                from svg_repair import repair_svg_text
+                _, report = repair_svg_text(content)
+                if report.repaired:
+                    repair_hint = (
+                        f" Auto-repairable via sloppy-xml "
+                        f"({len(report.recovery_actions)} issue(s)). "
+                        f"Run \"python scripts/svg_repair.py <project>\" to fix."
+                    )
+            except ImportError:
+                pass
+
             result['errors'].append(
                 f"Invalid XML: {e} — SVG must be well-formed XML. "
                 f"Use raw Unicode for typography (—, ©, →, NBSP); "
                 f"escape XML reserved chars as &amp; &lt; &gt; &quot; &apos; "
                 f"(see references/shared-standards.md §1)."
+                f"{repair_hint}"
             )
             return False
 
