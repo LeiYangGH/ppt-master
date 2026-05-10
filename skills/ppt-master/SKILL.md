@@ -71,7 +71,8 @@ description: >
 | 脚本 | 用途 |
 |--------|---------|
 | `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理（含三件套状态文件初始化） |
-| `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析 |
+| `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析（单张精查） |
+| `${SKILL_DIR}/scripts/image_montage.py` | **图片批量缩略图墙**（将 `images/` 下所有图片拼接为 `montage_NN_of_MM.jpg`，每张 4×5=20 格且每格底部带文件名标签）——供 LLM **一次视觉读图批量判定保留 / 删除 / 重命名**，避免对数十张图通过 `analyze_images.py` 逐张读取的高成本。 |
 | `${SKILL_DIR}/scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询，**搜索后自动并发下载图片到当前项目 `images/` 目录**，5 秒/张超时，无缓存（每次调用实时请求 API，重试可真正拿到新结果），带域名黑名单；⚠ **搜索关键字必须用中文**，下载后需逐张审阅并重命名，详见 `workflows/topic-research.md` 顶部约束） |
 | `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
 | `${SKILL_DIR}/scripts/render_svg.py` | SVG → PNG 预览渲染（用于逐页视觉复检） |
