@@ -12,8 +12,8 @@ Features:
       auto-filtered from results.  Blacklist decays after 30 days.
     - **Domain stats**: tracks per-domain image-download success rate so LLM
       or downstream tools can prefer reliable sources.
-    - **Result cache**: identical queries reuse cached results within a
-      configurable TTL (default 6 h), saving API calls.
+    - **No result cache**: every call hits the live API so that retries
+      genuinely re-fetch (prevents LLM from looping on stale wrong images).
 
 Free quotas (as of 2026-05):
     Tavily  — 1 000 calls / month
@@ -108,13 +108,11 @@ except ImportError:
 
 PROVIDERS = ("tavily", "baidu")
 
-_CACHE_TTL_SECONDS = 6 * 3600  # 6 hours
 _BLACKLIST_THRESHOLD = 3        # failures before a domain is blacklisted
 _BLACKLIST_DECAY_DAYS = 30      # days after which a blacklisted domain is retried
 
 _DATA_DIR = _SCRIPTS_DIR / "web_search_data"
 
-CACHE_PATH = _DATA_DIR / "search_cache.json"
 BLACKLIST_PATH = _DATA_DIR / "domain_blacklist.csv"
 DOMAIN_STATS_PATH = _DATA_DIR / "domain_stats.csv"
 ROTATION_STATE_PATH = _DATA_DIR / "rotation_state.json"
@@ -202,7 +200,6 @@ def _make_result(
     query: str,
     results: list[dict],
     source: str,
-    cached: bool = False,
     answer: Optional[str] = None,
     images: Optional[list[dict]] = None,
 ) -> dict:
@@ -213,7 +210,6 @@ def _make_result(
         "results": results,
         "images": images or [],
         "source": source,
-        "cached": cached,
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
@@ -383,7 +379,6 @@ def search(
     max_results: int = 5,
     *,
     provider: Optional[str] = None,
-    use_cache: bool = True,
     filter_blacklisted: bool = True,
 ) -> dict:
     """Search the web.  The primary entry-point for LLM callers.
@@ -393,24 +388,16 @@ def search(
         max_results:        Max results to request from the API.
         provider:           Pin a single provider (``"tavily"`` or ``"baidu"``).
                             ``None`` = auto-rotate Tavily → Baidu.
-        use_cache:          Reuse cached results within the TTL window.
         filter_blacklisted: Remove results whose domain is blacklisted.
 
     Returns:
         Unified result dict (see ``_make_result``).
+
+    No result caching is performed — every call hits the live API so that
+    repeated searches with identical queries can genuinely re-fetch fresh
+    data (prevents LLM from being stuck with stale wrong images on retry).
     """
     _load_search_env()
-
-    # --- Cache lookup ---
-    cache_key = _cache_key(query, max_results)
-    if use_cache:
-        cached = _cache_get(cache_key)
-        if cached is not None:
-            cached["cached"] = True
-            if filter_blacklisted:
-                cached["results"] = _apply_blacklist(cached["results"])
-            print(f"  [cache hit] query={query!r}", file=sys.stderr)
-            return cached
 
     # --- Provider chain (persisted rotation) ---
     chain = [provider] if provider else _rotated_chain()
@@ -424,7 +411,6 @@ def search(
         try:
             print(f"  [web_search] trying {name} ...", file=sys.stderr)
             result = fn(query, max_results)
-            _cache_put(cache_key, result)
             _rotation_save(name)  # persist for next invocation
             if filter_blacklisted:
                 result["results"] = _apply_blacklist(result["results"])
@@ -454,63 +440,6 @@ def _extract_domain(url: str) -> str:
         return urlparse(url).netloc.lower()
     except Exception:
         return ""
-
-
-# ===================================================================
-# Cache (JSON file, TTL-based)
-# ===================================================================
-
-def _cache_key(query: str, max_results: int) -> str:
-    raw = f"{query.strip().lower()}|{max_results}"
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]
-
-
-def _cache_load() -> dict:
-    if not CACHE_PATH.exists():
-        return {}
-    try:
-        return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
-
-
-def _cache_save(cache: dict) -> None:
-    _DATA_DIR.mkdir(parents=True, exist_ok=True)
-    CACHE_PATH.write_text(
-        json.dumps(cache, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-
-
-def _cache_get(key: str) -> Optional[dict]:
-    cache = _cache_load()
-    entry = cache.get(key)
-    if entry is None:
-        return None
-    if time.time() - entry.get("_ts", 0) > _CACHE_TTL_SECONDS:
-        return None
-    return entry.get("data")
-
-
-def _cache_put(key: str, data: dict) -> None:
-    cache = _cache_load()
-    # Evict expired entries to keep the file small
-    now = time.time()
-    cache = {
-        k: v for k, v in cache.items()
-        if now - v.get("_ts", 0) <= _CACHE_TTL_SECONDS
-    }
-    cache[key] = {"_ts": now, "data": data}
-    _cache_save(cache)
-
-
-def clear_cache() -> int:
-    """Remove all cached results.  Returns number of entries cleared."""
-    cache = _cache_load()
-    n = len(cache)
-    if CACHE_PATH.exists():
-        CACHE_PATH.unlink()
-    return n
 
 
 # ===================================================================
@@ -817,26 +746,62 @@ def _is_image_url(url: str) -> bool:
 
 
 def _derive_filename(url: str, fallback_index: int) -> str:
-    """Pick a filesystem-safe filename from a URL, preserving the original
-    basename whenever possible.
+    """Pick a filesystem-safe filename from a URL.
 
-    Many CDN URLs carry opaque basenames (random hashes, no extension, or a
-    misleading query string).  We keep whatever the server used unless it is
-    unusable, in which case we fall back to ``image_<index>.jpg`` — the LLM is
-    expected to rename adopted images later.
+    Strategy:
+      1. If the URL path ends with a real image file (e.g. ``/foo.jpg``),
+         keep that basename verbatim — identical URLs across searches will
+         therefore map to the same file on disk (true de-duplication).
+      2. Otherwise derive a stable ``img_<sha1_12>.ext`` name from the full
+         URL.  This guarantees:
+           * the same URL always maps to the same file (de-dup preserved);
+           * two **different** URLs can never collide on ``image_1.jpg``,
+             ``image_2.jpg`` … and therefore can never silently skip each
+             other because a previous search happened to fill that slot.
+
+    The old behaviour — ``image_<fallback_index>.jpg`` using the per-search
+    enumeration index — caused different queries to reuse the same slot
+    (image_1.jpg) for *different* URLs, which combined with the ``skip if
+    exists`` guard made the LLM see the same on-disk image for unrelated
+    keywords.  Hash-based fallback eliminates that aliasing entirely.
     """
     try:
         parsed = urlparse(url)
-        basename = unquote(Path(parsed.path).name or "")
+        raw_basename = unquote(Path(parsed.path).name or "")
     except Exception:
-        basename = ""
-    # Strip obviously bad characters for Windows compatibility
+        raw_basename = ""
+
+    # Strip obviously bad characters for Windows compatibility.
+    cleaned = raw_basename
     for ch in '<>:"|?*':
-        basename = basename.replace(ch, "_")
-    basename = basename.strip().strip(".")
-    if not basename or len(basename) > 120 or "." not in basename:
-        return f"image_{fallback_index}.jpg"
-    return basename
+        cleaned = cleaned.replace(ch, "_")
+    cleaned = cleaned.strip().strip(".")
+
+    # Preferred path: keep the server-provided basename iff it looks like a
+    # genuine image file (has a recognised image extension).
+    if cleaned and len(cleaned) <= 120 and "." in cleaned:
+        suffix = Path(cleaned).suffix.lower()
+        if suffix in _IMAGE_EXTENSIONS:
+            return cleaned
+
+    # Fallback: URL-hash name. Try to sniff a sane extension so downstream
+    # tools can still recognise the file type.
+    suffix = ""
+    if cleaned:
+        candidate = Path(cleaned).suffix.lower()
+        if candidate in _IMAGE_EXTENSIONS:
+            suffix = candidate
+    if not suffix:
+        lower_url = url.lower()
+        for ext in _IMAGE_EXTENSIONS:
+            if ext in lower_url:
+                suffix = ext
+                break
+    if not suffix:
+        suffix = ".jpg"
+
+    digest = hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
+    return f"img_{digest}{suffix}"
 
 
 def collect_images_from_result(result: dict, output_file: Optional[Path] = None) -> list[dict]:
@@ -1148,7 +1113,22 @@ def download_images(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Web search for PPT Master (Tavily / Baidu with auto-rotation).",
+        description=(
+            "Web search for PPT Master (Tavily / Baidu with auto-rotation).\n"
+            "\n"
+            "LLM usage notes:\n"
+            "  * The query MUST be written in Chinese — Baidu's recall on\n"
+            "    Chinese queries is far better than English, and consistent\n"
+            "    Chinese queries keep both providers returning comparable\n"
+            "    results across the rotation. Proper nouns that only exist\n"
+            "    in Latin script may be kept alongside the Chinese name\n"
+            "    (e.g. '久石让 Joe Hisaishi').\n"
+            "  * After each search, auto-downloaded images land in the\n"
+            "    current project's images/ folder. You must then review\n"
+            "    each file with analyze_images.py and rename adopted ones\n"
+            "    to meaningful content-matched names before they are\n"
+            "    referenced by design specs or SVGs."
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
@@ -1168,16 +1148,6 @@ def build_parser() -> argparse.ArgumentParser:
         choices=PROVIDERS,
         default=None,
         help="Pin a single provider. Default: auto-rotate.",
-    )
-    parser.add_argument(
-        "--no-cache",
-        action="store_true",
-        help="Bypass and do not write the result cache.",
-    )
-    parser.add_argument(
-        "--clear-cache",
-        action="store_true",
-        help="Clear all cached results and exit.",
     )
     parser.add_argument(
         "--domain-stats",
@@ -1250,8 +1220,7 @@ def build_parser() -> argparse.ArgumentParser:
 def _print_human(result: dict) -> None:
     """Pretty-print search results for human / LLM reading."""
     src = result["source"]
-    cached_tag = " (cached)" if result.get("cached") else ""
-    print(f"\n== Search: {result['query']} [{src}{cached_tag}] ==\n")
+    print(f"\n== Search: {result['query']} [{src}] ==\n")
     if result.get("answer"):
         print(f"Answer: {result['answer']}\n")
     for i, r in enumerate(result["results"], 1):
@@ -1289,11 +1258,6 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     # --- Utility modes ---
-    if args.clear_cache:
-        n = clear_cache()
-        print(f"Cleared {n} cached entries.", file=sys.stderr)
-        return 0
-
     if args.domain_stats:
         ranking = get_domain_ranking()
         if not ranking:
@@ -1366,7 +1330,6 @@ def main(argv: Optional[list[str]] = None) -> int:
         args.query,
         max_results=args.max_results,
         provider=args.provider,
-        use_cache=not args.no_cache,
     )
 
     # Auto-collect image URLs from results
