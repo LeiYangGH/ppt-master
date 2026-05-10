@@ -177,3 +177,4 @@ references
 
 # web_search.py runtime cache (transient)
 skills/ppt-master/scripts/web_search_data/search_cache.json
+skills/ppt-master/scripts/web_search_data/collected_images.jsonl
