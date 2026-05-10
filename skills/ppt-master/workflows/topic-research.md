@@ -142,16 +142,35 @@ projects/<topic_name>.md
 
 ### 3.1 图片来源策略
 
-**主工具** — `web_search.py`（返回结果中内联 `images` 字段，包含每个结果页面的引用图片 URL）：
+**主工具** — `web_search.py`（搜索后**自动并发下载**图片到当前项目 `images/` 目录，5 秒/张超时，你无需再单独 `curl`）：
 
 ```bash
-# 搜索时返回的 JSON 中每条数据就含 images 列表
+# 先告知脚本当前项目目录（一次即可，后续所有搜索都会命中）
+# - 方式 A：环境变量（推荐）
+$env:PPT_PROJECT_DIR = "projects/<topic_name>"   # PowerShell
+# export PPT_PROJECT_DIR=projects/<topic_name>   # bash
+# - 方式 B：每次显式传参 --project-dir projects/<topic_name>
+# - 方式 C：不设置时，脚本会自动选择 projects/ 下最近修改的子目录
+
+# 搜索：返回 JSON 里每条结果含 images 列表，同时后台并发下载图片
 python3 ${SKILL_DIR}/scripts/web_search.py "<主题> 相片" -n 8 --json
 
-# 下载成功/失败可回写给脚本用于域名排名
+# 返回的 JSON 顶层会多出两个字段：
+#   "download_dir":       "<abs path to images/>"
+#   "downloaded_images":  [{url, file, status: ok|skip|fail, reason, bytes}, ...]
+
+# 如需禁用自动下载（例如只是探索性搜索），加 --no-auto-download
+python3 ${SKILL_DIR}/scripts/web_search.py "<主题>" --no-auto-download
+
+# 手动调参：自定义超时与上限
+python3 ${SKILL_DIR}/scripts/web_search.py "<主题>" --auto-download-timeout 5 --auto-download-limit 30
+
+# 下载成功/失败可回写给脚本用于域名排名（一般由自动下载自动调用，无需手动）
 python3 ${SKILL_DIR}/scripts/web_search.py --record-download <domain> success|fail
 python3 ${SKILL_DIR}/scripts/web_search.py --domain-stats
 ```
+
+> 📌 **下载的图片文件名保留原始 URL 的 basename**，可能是随机码（如 `5f3a8c1b.jpg`）。后续你需要对 `projects/<topic_name>/images/` 下的图片**逐一审阅**：调用 `analyze_images.py` 获取视觉描述，决定采纳 / 删除 / 重命名为有意义的英文名。
 
 补充策略——按以下优先级搜索**公开可用的免费图片**：
 
@@ -174,20 +193,34 @@ python3 ${SKILL_DIR}/scripts/web_search.py --domain-stats
 | **相关性** | 每张图片应有明确用途（封面、插图、背景） |
 | **宽高比混合** | 适用时同时包含横版（背景用）和竖版（人物用） |
 
-### 3.3 下载流程
+### 3.3 下载与审阅流程
 
+#### 3.3.1 通过 `web_search.py` 自动下载（**默认路径**）
+
+1. **确认项目目录已识别**。搜索前通过 `PPT_PROJECT_DIR` 环境变量或 `--project-dir` 参数指定当前项目（`projects/<topic_name>`），否则脚本会回退到 `projects/` 下最近修改的子目录，可能错投。
+2. **运行若干次 `web_search.py` 搜索**。每次搜索结束，脚本会并发下载（8 线程 × 5s 超时，单次至多 30 张）到 `projects/<topic_name>/images/`，同一 URL 重复搜索不会重复下载。
+3. **查看返回 JSON 的 `downloaded_images` 字段**，快速掌握哪些图片已落地、哪些失败（域名 403、超时、非图片 Content-Type 等）。
+4. **逐张审阅 `images/` 下的内容**：
+   ```bash
+   python3 ${SKILL_DIR}/scripts/analyze_images.py projects/<topic_name>/images
+   ```
+   根据分析结果决定：
+   - **采纳**：重命名为描述性英文名（见下）；
+   - **弃用**：直接删除文件；
+   - **待定**：保留原名，后续设计阶段再定。
+
+#### 3.3.2 手动补充下载（兜底）
+
+仅在自动下载失败、或从 `web_search.py` 以外的来源（Wikipedia / 官网等）取图时才需要：
 ```powershell
-# 在projects/下创建图片文件夹（与文档同名）
-New-Item -ItemType Directory -Force -Path "projects/<topic_name>"
-
-# 用描述性文件名下载图片
-curl -L -o "projects/<topic_name>/descriptive_name.jpg" "<image_url>"
+curl -L -o "projects/<topic_name>/images/descriptive_name.jpg" "<image_url>"
 ```
 
-**文件命名规则**：
-- 使用描述性英文名：`joe_hisaishi_concert.jpg`，而非 `image1.jpg`
-- 小写，空格用下划线
-- 包含主体和上下文：`spirited_away_poster.jpg`、`tokyo_concert_2023.jpg`
+#### 3.3.3 文件命名规则（审阅采纳后）
+
+- 使用描述性英文名：`joe_hisaishi_concert.jpg`，而非 `image1.jpg` 或随机哈希；
+- 小写，空格用下划线；
+- 包含主体和上下文：`spirited_away_poster.jpg`、`tokyo_concert_2023.jpg`。
 
 ### 3.4 全分辨率URL模式
 

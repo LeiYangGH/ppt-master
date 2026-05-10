@@ -43,10 +43,11 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 import ssl
 
 import requests
@@ -60,7 +61,46 @@ _SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
-from config import load_prefixed_env_file  # noqa: E402
+try:
+    from config import load_prefixed_env_file  # type: ignore  # noqa: E402
+except ImportError:
+    # Fallback: minimal .env loader. Searches, in priority order:
+    #   1. <repo>/.env
+    #   2. <skill>/.env  (skills/ppt-master/.env)
+    #   3. <scripts>/.env
+    def load_prefixed_env_file(prefixes):  # type: ignore[no-redef]
+        """Load ``KEY=VALUE`` pairs whose KEY starts with any of *prefixes*.
+
+        Values that are already present in ``os.environ`` are not overwritten,
+        so explicit shell exports still take precedence over .env files.
+        """
+        if isinstance(prefixes, str):
+            prefixes = (prefixes,)
+        prefixes = tuple(prefixes)
+        repo_root = _SCRIPTS_DIR.parent.parent.parent
+        candidate_files = [
+            repo_root / ".env",
+            _SCRIPTS_DIR.parent / ".env",
+            _SCRIPTS_DIR / ".env",
+        ]
+        for env_path in candidate_files:
+            if not env_path.exists():
+                continue
+            try:
+                for raw in env_path.read_text(encoding="utf-8").splitlines():
+                    line = raw.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    if line.lower().startswith("export "):
+                        line = line[7:].lstrip()
+                    key, _, value = line.partition("=")
+                    key = key.strip()
+                    value = value.strip().strip('"').strip("'")
+                    if not key or not any(key.startswith(p) for p in prefixes):
+                        continue
+                    os.environ.setdefault(key, value)
+            except OSError:
+                continue
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -82,6 +122,15 @@ COLLECTED_IMAGES_PATH = _DATA_DIR / "collected_images.jsonl"
 
 # Image file extensions considered downloadable
 _IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".svg"}
+
+# Auto-download defaults (tuned for LLM-friendly short blocking time)
+_AUTO_DOWNLOAD_TIMEOUT = 5        # per-image HTTP timeout in seconds
+_AUTO_DOWNLOAD_WORKERS = 8        # concurrent download threads
+_AUTO_DOWNLOAD_MAX_IMAGES = 30    # cap per single search invocation
+_MIN_IMAGE_BYTES = 1024           # files smaller than this are treated as errors
+
+# Project root (two levels above this script: .../ppt-master)
+_PROJECT_ROOT = _SCRIPTS_DIR.parent.parent.parent
 
 
 # ---------------------------------------------------------------------------
@@ -655,6 +704,106 @@ def rank_results_by_domain_reliability(results: list[dict]) -> list[dict]:
 
 
 # ===================================================================
+# Project directory resolution (for auto-download destination)
+# ===================================================================
+
+def _is_project_dir(path: Path) -> bool:
+    """A PPT Master project dir is any directory under ``<repo>/projects/``."""
+    try:
+        path = path.resolve()
+    except OSError:
+        return False
+    projects_root = (_PROJECT_ROOT / "projects").resolve()
+    if not projects_root.exists():
+        return False
+    try:
+        rel = path.relative_to(projects_root)
+    except ValueError:
+        return False
+    # Direct child of projects/ (depth == 1)
+    return len(rel.parts) >= 1 and rel.parts[0] not in ("", ".")
+
+
+def _latest_project_dir() -> Optional[Path]:
+    """Return the most recently modified sub-directory of ``projects/``."""
+    projects_root = _PROJECT_ROOT / "projects"
+    if not projects_root.exists():
+        return None
+    candidates = [p for p in projects_root.iterdir() if p.is_dir() and not p.name.startswith(".")]
+    if not candidates:
+        return None
+    candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return candidates[0]
+
+
+def resolve_project_images_dir(hint: Optional[str] = None) -> Optional[Path]:
+    """Locate the best ``images/`` directory to drop auto-downloaded files in.
+
+    Priority (first match wins):
+      1. Explicit ``hint`` (CLI ``--project-dir`` or ``--images-dir``).
+         May be an absolute path, a relative path, or a bare project name.
+      2. Env ``PPT_PROJECT_DIR`` / ``PPT_CURRENT_PROJECT``.
+      3. CWD is inside ``<repo>/projects/<name>/...`` — use that project.
+      4. Most recently modified sub-directory of ``<repo>/projects/``.
+      5. ``None`` — caller should skip auto-download.
+
+    Returns the ``<project_dir>/images`` path (created on demand by caller).
+    """
+
+    def _normalise(raw: str) -> Optional[Path]:
+        if not raw:
+            return None
+        raw = raw.strip().strip('"').strip("'")
+        if not raw:
+            return None
+        candidate = Path(raw)
+        if not candidate.is_absolute():
+            # Try: relative to cwd, then as a project name under projects/
+            rel_cwd = (Path.cwd() / candidate).resolve()
+            if rel_cwd.exists():
+                candidate = rel_cwd
+            else:
+                candidate = (_PROJECT_ROOT / "projects" / raw).resolve()
+        # Accept either the project dir itself or its images/ sub-dir
+        if candidate.name == "images":
+            return candidate
+        return candidate / "images"
+
+    # (1) explicit hint
+    if hint:
+        resolved = _normalise(hint)
+        if resolved is not None:
+            return resolved
+
+    # (2) environment variable
+    for env_key in ("PPT_PROJECT_DIR", "PPT_CURRENT_PROJECT"):
+        env_val = os.environ.get(env_key)
+        if env_val:
+            resolved = _normalise(env_val)
+            if resolved is not None:
+                return resolved
+
+    # (3) CWD inside projects/<name>/...
+    cwd = Path.cwd().resolve()
+    projects_root = (_PROJECT_ROOT / "projects").resolve()
+    if projects_root.exists():
+        try:
+            rel = cwd.relative_to(projects_root)
+            if rel.parts and rel.parts[0] not in ("", "."):
+                return projects_root / rel.parts[0] / "images"
+        except ValueError:
+            pass
+
+    # (4) latest modified project
+    latest = _latest_project_dir()
+    if latest is not None:
+        return latest / "images"
+
+    # (5) give up
+    return None
+
+
+# ===================================================================
 # Image URL collection & download
 # ===================================================================
 
@@ -667,25 +816,54 @@ def _is_image_url(url: str) -> bool:
         return False
 
 
+def _derive_filename(url: str, fallback_index: int) -> str:
+    """Pick a filesystem-safe filename from a URL, preserving the original
+    basename whenever possible.
+
+    Many CDN URLs carry opaque basenames (random hashes, no extension, or a
+    misleading query string).  We keep whatever the server used unless it is
+    unusable, in which case we fall back to ``image_<index>.jpg`` — the LLM is
+    expected to rename adopted images later.
+    """
+    try:
+        parsed = urlparse(url)
+        basename = unquote(Path(parsed.path).name or "")
+    except Exception:
+        basename = ""
+    # Strip obviously bad characters for Windows compatibility
+    for ch in '<>:"|?*':
+        basename = basename.replace(ch, "_")
+    basename = basename.strip().strip(".")
+    if not basename or len(basename) > 120 or "." not in basename:
+        return f"image_{fallback_index}.jpg"
+    return basename
+
+
 def collect_images_from_result(result: dict, output_file: Optional[Path] = None) -> list[dict]:
     """Extract image URLs from a search result and append to a JSONL file.
 
     Each line in the JSONL file is a JSON object:
         {"url": "...", "title": "...", "source_page": "...", "query": "...", "ts": "..."}
 
-    Returns the list of image entries collected.
+    Returns the list of image entries collected (pre-dedup against the file).
+    URLs from the top-level ``images`` field are trusted as images regardless
+    of extension (API providers label them explicitly).  Per-result inline
+    images still pass through an extension filter to suppress false positives
+    (e.g. HTML links that merely contain an image anywhere on the page).
     """
     if output_file is None:
         output_file = COLLECTED_IMAGES_PATH
 
     entries: list[dict] = []
+    seen: set[str] = set()
     ts = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     query = result.get("query", "")
 
-    # Collect from top-level images array
+    # Collect from top-level images array (trusted — no extension filter)
     for img in result.get("images") or []:
         url = img.get("url", "") if isinstance(img, dict) else str(img)
-        if url and _is_image_url(url):
+        if url and url not in seen:
+            seen.add(url)
             entries.append({
                 "url": url,
                 "title": img.get("title", "") if isinstance(img, dict) else "",
@@ -694,11 +872,12 @@ def collect_images_from_result(result: dict, output_file: Optional[Path] = None)
                 "ts": ts,
             })
 
-    # Collect from per-result inline images
+    # Collect from per-result inline images (extension filter keeps noise out)
     for r in result.get("results") or []:
         source_page = r.get("url", "")
         for img_url in r.get("images") or []:
-            if img_url and _is_image_url(img_url):
+            if img_url and img_url not in seen and _is_image_url(img_url):
+                seen.add(img_url)
                 entries.append({
                     "url": img_url,
                     "title": r.get("title", ""),
@@ -731,6 +910,141 @@ def collect_images_from_result(result: dict, output_file: Optional[Path] = None)
             )
 
     return entries
+
+
+# ------------------------------------------------------------------
+# Concurrent ("async") image download — the main LLM-friendly entry
+# ------------------------------------------------------------------
+
+def _download_single_image(
+    entry: dict,
+    output_dir: Path,
+    timeout: int,
+    index: int,
+) -> dict:
+    """Worker: download one image.  Never raises — returns an outcome dict.
+
+    Outcome keys: ``url``, ``file``, ``status`` ("ok" | "skip" | "fail"),
+    ``reason``, ``domain``, ``bytes``.
+    """
+    url = entry.get("url", "")
+    domain = _extract_domain(url)
+    outcome = {"url": url, "file": "", "status": "fail", "reason": "", "domain": domain, "bytes": 0}
+    if not url:
+        outcome["reason"] = "empty url"
+        return outcome
+
+    basename = _derive_filename(url, fallback_index=index)
+    dest = output_dir / basename
+    # Skip if already present (same URL likely re-surfaced across searches)
+    if dest.exists() and dest.stat().st_size >= _MIN_IMAGE_BYTES:
+        outcome.update(status="skip", file=str(dest), reason="exists",
+                       bytes=dest.stat().st_size)
+        return outcome
+    # Avoid collision when the basename exists but is too small (stale error)
+    if dest.exists():
+        try:
+            dest.unlink()
+        except OSError:
+            stem, suffix = dest.stem, dest.suffix or ".jpg"
+            dest = output_dir / f"{stem}_{index}{suffix}"
+
+    try:
+        resp = requests.get(
+            url,
+            timeout=timeout,
+            headers={"User-Agent": "Mozilla/5.0 (PPT-Master image downloader)"},
+            stream=True,
+        )
+        resp.raise_for_status()
+        content_type = resp.headers.get("Content-Type", "").lower()
+        if "text/html" in content_type or "text/plain" in content_type:
+            raise ValueError(f"non-image content-type: {content_type}")
+        tmp = dest.with_suffix(dest.suffix + ".part")
+        with open(tmp, "wb") as f:
+            for chunk in resp.iter_content(8192):
+                if chunk:
+                    f.write(chunk)
+        size = tmp.stat().st_size
+        if size < _MIN_IMAGE_BYTES:
+            tmp.unlink(missing_ok=True)
+            raise ValueError(f"file too small ({size} bytes)")
+        tmp.replace(dest)
+        outcome.update(status="ok", file=str(dest), bytes=size)
+        record_download(domain, success=True)
+    except Exception as exc:  # noqa: BLE001
+        outcome["reason"] = str(exc)
+        record_download(domain, success=False)
+    return outcome
+
+
+def async_download_images(
+    entries: list[dict],
+    output_dir: Path,
+    *,
+    timeout: int = _AUTO_DOWNLOAD_TIMEOUT,
+    max_workers: int = _AUTO_DOWNLOAD_WORKERS,
+    limit: int = _AUTO_DOWNLOAD_MAX_IMAGES,
+) -> list[dict]:
+    """Concurrently download up to ``limit`` images with per-request timeout.
+
+    "Async" here means *parallel with a short per-image timeout* — the caller
+    still blocks until all workers finish, but each individual request is
+    capped at ``timeout`` seconds, so the worst-case wall-clock is roughly
+    ``ceil(N / max_workers) * timeout``.  For the default 30 images / 8
+    workers / 5 s timeout, that is under 20 s in the worst case and usually
+    only 1–2 s when the network is healthy.
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Deduplicate and apply limit
+    seen: set[str] = set()
+    work: list[dict] = []
+    for e in entries:
+        url = e.get("url", "")
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        work.append(e)
+    if limit > 0:
+        work = work[:limit]
+    if not work:
+        return []
+
+    print(
+        f"  [auto-download] {len(work)} image(s) → {output_dir} "
+        f"(timeout={timeout}s, workers={max_workers})",
+        file=sys.stderr,
+    )
+
+    outcomes: list[dict] = []
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(_download_single_image, e, output_dir, timeout, i): e
+            for i, e in enumerate(work, 1)
+        }
+        for fut in as_completed(futures):
+            try:
+                outcomes.append(fut.result())
+            except Exception as exc:  # defensive — worker already catches
+                outcomes.append({
+                    "url": futures[fut].get("url", ""),
+                    "file": "",
+                    "status": "fail",
+                    "reason": f"worker crash: {exc}",
+                    "domain": "",
+                    "bytes": 0,
+                })
+
+    ok = sum(1 for o in outcomes if o["status"] == "ok")
+    skip = sum(1 for o in outcomes if o["status"] == "skip")
+    fail = sum(1 for o in outcomes if o["status"] == "fail")
+    print(
+        f"  [auto-download] done: {ok} downloaded, {skip} skipped (exists), {fail} failed",
+        file=sys.stderr,
+    )
+    return outcomes
 
 
 def download_images(
@@ -895,6 +1209,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Max images to download (0 = all). Used with --download-images.",
     )
     parser.add_argument(
+        "--project-dir",
+        metavar="PATH_OR_NAME",
+        default=None,
+        help=(
+            "Target project for auto-download (absolute path, relative path, "
+            "or bare name resolved under projects/). Overrides PPT_PROJECT_DIR."
+        ),
+    )
+    parser.add_argument(
+        "--no-auto-download",
+        action="store_true",
+        help="Disable the post-search concurrent image download.",
+    )
+    parser.add_argument(
+        "--auto-download-timeout",
+        type=int,
+        default=_AUTO_DOWNLOAD_TIMEOUT,
+        help=f"Per-image HTTP timeout for auto-download (default: {_AUTO_DOWNLOAD_TIMEOUT}s).",
+    )
+    parser.add_argument(
+        "--auto-download-limit",
+        type=int,
+        default=_AUTO_DOWNLOAD_MAX_IMAGES,
+        help=f"Max images auto-downloaded per search (default: {_AUTO_DOWNLOAD_MAX_IMAGES}).",
+    )
+    parser.add_argument(
         "--list-images",
         action="store_true",
         help="List collected image URLs and exit.",
@@ -923,6 +1263,24 @@ def _print_human(result: dict) -> None:
             print(f"   {snippet}...")
         if r.get("images"):
             print(f"   images: {len(r['images'])}")
+        print()
+
+    dl = result.get("downloaded_images")
+    if dl:
+        ok = [o for o in dl if o["status"] == "ok"]
+        skipped = [o for o in dl if o["status"] == "skip"]
+        failed = [o for o in dl if o["status"] == "fail"]
+        print(f"-- Auto-downloaded images: {len(ok)} new, {len(skipped)} skipped, {len(failed)} failed --")
+        target = result.get("download_dir")
+        if target:
+            print(f"   saved to: {target}")
+        for o in ok[:20]:
+            size_kb = o.get("bytes", 0) // 1024
+            print(f"   + {Path(o['file']).name}  ({size_kb}KB)")
+        if failed:
+            print("   failed:")
+            for o in failed[:5]:
+                print(f"     - {o['url']} -> {o['reason']}")
         print()
 
 
@@ -1012,7 +1370,27 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
 
     # Auto-collect image URLs from results
-    collect_images_from_result(result)
+    collected = collect_images_from_result(result)
+
+    # Auto-download: concurrent, per-image timeout capped, non-blocking-ish
+    if not args.no_auto_download and collected:
+        images_dir = resolve_project_images_dir(args.project_dir)
+        if images_dir is None:
+            print(
+                "  [auto-download] skipped: no target project found. "
+                "Set PPT_PROJECT_DIR, run inside projects/<name>/, "
+                "or pass --project-dir.",
+                file=sys.stderr,
+            )
+        else:
+            outcomes = async_download_images(
+                collected,
+                images_dir,
+                timeout=args.auto_download_timeout,
+                limit=args.auto_download_limit,
+            )
+            result["downloaded_images"] = outcomes
+            result["download_dir"] = str(images_dir)
 
     if args.output_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
