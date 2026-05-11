@@ -16,7 +16,7 @@ workspace/
 ├── state.md           # 状态文件（阶段进度、决策记录、错误日志、经验教训）
 ├── design_spec.md     # 设计规范
 ├── spec_lock.md       # 执行锁定
-├── sources/           # 原始文件 / URL 存档 / 转换后的 Markdown 及其附件
+├── sources/           # 项目素材（用户手动放入）
 ├── images/            # 项目图片素材
 ├── notes/             # 工作笔记 (01_xxx.md, notes_all.md 等)
 ├── svg_output/        # Executor 生成的 SVG
@@ -28,11 +28,6 @@ workspace/
 
 工作区可处于不同阶段，不必包含全部目录。
 
-## 注意事项
-
-- 本目录内容已被 `.gitignore` 排除
-- 完成的项目可移至 `examples/` 分享
-- 工作区外文件默认复制，工作区内文件直接移入 `sources/`
 
 ## 状态文件
 

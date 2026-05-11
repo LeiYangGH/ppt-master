@@ -142,7 +142,6 @@ def get_project_info(project_path: str) -> Dict:
     legacy_source_file = project_path / '来源文档.md'
     sources_dir = project_path / 'sources'
     info['has_source'] = legacy_source_file.exists() or sources_dir.exists()
-
     if sources_dir.exists():
         info['source_count'] = len([p for p in sources_dir.iterdir() if p.is_file()])
 
