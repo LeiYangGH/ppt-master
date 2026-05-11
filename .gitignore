@@ -177,3 +177,4 @@ projects/*
 /scripts/web_search_data/search_cache.json
 /scripts/web_search_data/collected_images.jsonl
 workspace/
+.opencode/opencode.json
