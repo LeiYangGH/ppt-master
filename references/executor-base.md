@@ -88,7 +88,7 @@
 
 ### 3.1 图表绘图区标记（每个图表页强制）
 
-> [`verify-charts`](../workflows/verify-charts.md) 工作流会根据 `design_spec.md §VII` 找出图表页，再读取各页的 plot-area marker，并把它交给 `svg_position_calculator.py`。如果缺少标记，就只能每次重新从坐标轴反推绘图区。
+> [`verify-charts`](../optional-optional-workflows/verify-charts.md) 工作流会根据 `design_spec.md §VII` 找出图表页，再读取各页的 plot-area marker，并把它交给 `svg_position_calculator.py`。如果缺少标记，就只能每次重新从坐标轴反推绘图区。
 
 每个包含数据图表的 SVG 页面，都必须在 `<g id="chartArea">` 中加入绘图区标记，位置应放在**坐标轴之后**、**第一个数据元素之前**。
 
@@ -255,7 +255,7 @@ ls templates/icons/simple-icons/ | grep github
 
 ### 5.1 图表坐标校准
 
-坐标校准是**独立的生成后工作流**，不属于 executor 主流程。SVG 全部生成后，如果 deck 中含数据图表，应在后处理前运行 [`workflows/verify-charts.md`](../workflows/verify-charts.md)。
+坐标校准是**独立的生成后工作流**，不属于 executor 主流程。SVG 全部生成后，如果 deck 中含数据图表，应在后处理前运行 [`optional-workflows/verify-charts.md`](../optional-workflows/verify-charts.md)。
 
 Executor 在这里唯一的上游义务，是在初稿阶段就为每个图表页嵌入 `<!-- chart-plot-area ... -->` 标记（见 §3.1）。`verify-charts` 会根据 `design_spec.md §VII` 找到图表页，并用该标记驱动 `svg_position_calculator.py`。
 
