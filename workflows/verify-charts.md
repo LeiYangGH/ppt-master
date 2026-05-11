@@ -4,7 +4,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 
 # 图表验证工作流
 
-> 独立的后生成步骤。在包含数据图表的演示文稿完成SVG生成后、后处理与导出前运行。捕捉AI模型将数据映射到像素位置时常见的10-50px坐标误差。
+> 独立的后生成步骤。在包含数据图表的演示文稿完成SVG生成后、后处理前运行。捕捉AI模型将数据映射到像素位置时常见的10-50px坐标误差。
 
 本工作流**独立运行**：读取 `design_spec.md` 和已生成的SVG，然后运行计算器脚本 — 无需上游对话上下文。可在新会话中安全调用。
 
@@ -12,7 +12,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 
 - 演示文稿包含一个或多个数据可视化图表，类型属于**单次** `svg_position_calculator.py calc` 调用所支持的集合。支持集由计算器的CLI子命令（`bar`、`line`、`pie`、`radar`）及其单系列模型固定 — 具体 `charts_index.json` 键见步骤1。
 - SVG已生成到 `workspace/svg_output/` 且 `svg_quality_checker.py` 已通过。
-- 后处理（`finalize_svg.py`、`svg_to_pptx.py`）**尚未**运行。
+- 后处理（`finalize_svg.py`）**尚未**运行。
 
 复合/衍生图表类型（多系列、堆叠、正负差值、镜像、双轴、累积叠加）无法通过一次calc调用校准，超出范围。非XY数据可视化（树状图/仪表盘/漏斗图/热力图/矩阵/气泡图/箱线图）和信息图/图表/框架/地图同样超出范围。
 
@@ -145,10 +145,10 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 
 ## 验证后
 
-继续后处理与导出（[SKILL.md 步骤7](../SKILL.md)）：
+继续后处理（[SKILL.md 步骤5](../SKILL.md)），然后用户手动执行步骤6导出PPTX：
 
 ```powershell
 python /scripts/notes_all_md_split.py workspace
 python /scripts/finalize_svg.py workspace
-python /scripts/svg_to_pptx.py workspace -s final
+# 用户手动执行：python scripts/svg_to_pptx.py workspace -s final
 ```

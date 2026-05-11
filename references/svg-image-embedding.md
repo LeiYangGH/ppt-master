@@ -31,10 +31,11 @@
 3. Executor 生成 SVG（svg_output/）
    └── Existing → <image href="../images/xxx.png" .../>
 4. 预览：python -m http.server -d <project_path> 8000 → /svg_output/<filename>.svg
-5. 后处理与导出 → 按 shared-standards.md §5 执行
+5. 后处理 → 按 shared-standards.md §5 执行
+6. 用户手动导出 PPTX → 按 shared-standards.md §5 执行
 ```
 
-> 生成阶段请保留 `svg_output/` 中的外部图片引用。`finalize_svg.py` 会自动把它们嵌入到 `svg_final/`；导出 PPTX 时应从 `svg_final/` 导出。
+> 生成阶段请保留 `svg_output/` 中的外部图片引用。`finalize_svg.py` 会自动把它们嵌入到 `svg_final/`；用户手动导出 PPTX 时应从 `svg_final/` 导出。
 
 ---
 

@@ -1,14 +1,14 @@
 ---
 name: ppt-master
 description: >
-  AI驱动的多格式SVG内容生成系统。通过多角色协作，将源文档Markdown转换为高质量SVG页面并导出为PPTX。当用户要求“生成PPT”、“做PPT”、“制作演示文稿”时调用。
+  AI驱动的多格式SVG内容生成系统。通过多角色协作，将源文档Markdown转换为高质量SVG页面，用户手动导出为PPTX。当用户要求“生成PPT”、“做PPT”、“制作演示文稿”时调用。
 ---
 
 # PPT Master 技能
 
-> AI驱动的多格式SVG内容生成系统。通过多角色协作将源文档转换为高质量SVG页面，并导出为PPTX。
+> AI驱动的多格式SVG内容生成系统。通过多角色协作将源文档转换为高质量SVG页面，用户手动导出为PPTX。
 
-**核心流程**：`源文档 → 创建项目 → 模板选项 → Strategist → Executor → 后处理 → 导出`
+**核心流程**：`源文档 → 创建项目 → 模板选项 → Strategist → Executor → 后处理 → 用户手动导出`
 
 > [!CAUTION]
 > ## 🚨 全局执行纪律（强制）
@@ -233,7 +233,7 @@ python scripts/svg_quality_checker.py workspace
 
 **逻辑构建阶段**：生成演讲备注 → `workspace/notes/notes_all.md`
 
-**✅ 检查点 —— 确认所有 SVG 和演讲备注均已生成并完成质量检查。直接进入第 5 步后处理**：
+**✅ 检查点 —— 确认所有 SVG 和演讲备注均已生成并完成质量检查。直接进入第 5 步后处理（然后用户手动执行第 6 步导出 PPTX）**：
 ```markdown
 ## ✅ Executor 阶段完成
 - [x] 所有 SVG 均已生成到 svg_output/
@@ -246,18 +246,18 @@ python scripts/svg_quality_checker.py workspace
 
 **状态更新**：`workspace/state.md` 阶段清单标记 S4 完成，当前阶段改为 S5。
 
-> **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 5 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。
+> **图表页？** 如果该 deck 包含数据图表（柱状图 / 折线图 / 饼图 / 雷达图等），在进入第 5 步前运行独立的 [`verify-charts`](workflows/verify-charts.md) 工作流以校准坐标。AI 模型在将数据映射到像素位置时通常会产生 10-50 px 的误差；verify-charts 可以消除此类误差。如果没有图表页则跳过。完成图表校准后，进入第 5 步后处理，然后用户手动执行第 6 步导出 PPTX。
 
 ---
 
-### 第 5 步：后处理与导出
+### 第 5 步：后处理
 
 🚧 **GATE**：第 4 步完成；所有 SVG 生成到 `workspace/svg_output/`；演讲备注 `workspace/notes/notes_all.md` 已生成。
 
-> ⚠️ 这三个子步骤必须**依次单独运行** —— 每一步成功完成后才能进行下一步。
+> ⚠️ 这两个子步骤必须**依次单独运行** —— 每一步成功完成后才能进行下一步。
 > ❌ **绝不要**把它们合并成一个代码块或一次 Shell 调用。
 
-标准三命令流程（参考 `references/shared-standards.md` §5）：
+标准两命令流程（参考 `references/shared-standards.md` §5）：
 
 **第 5.1 步** —— 拆分演讲备注：
 ```powershell
@@ -269,7 +269,17 @@ python scripts/notes_all_md_split.py workspace
 python scripts/finalize_svg.py workspace
 ```
 
-**第 5.3 步** —— 导出 PPTX（默认嵌入演讲备注）：
+> ❌ **绝不要**用 `cp` 替代 `finalize_svg.py` —— finalize 执行多个关键处理步骤
+
+> **成功标准**：`workspace/svg_final/` 文件数与 `workspace/svg_output/` 一致；`workspace/notes/` 下每页一个独立 `.md` 文件。
+
+---
+
+### 第 6 步：用户手动导出 PPTX
+
+🚧 **GATE**：第 5 步完成；`workspace/svg_final/` 已生成。
+
+**导出 PPTX（默认嵌入演讲备注）**：
 ```powershell
 python scripts/svg_to_pptx.py workspace -s final
 # 输出：
@@ -286,11 +296,10 @@ python scripts/svg_to_pptx.py workspace -s final
 
 完整效果列表、锚点逻辑及限制见：`references/animations.md`。
 
-> ❌ **绝不要**用 `cp` 替代 `finalize_svg.py` —— finalize 执行多个关键处理步骤
 > ❌ **绝不要**从 `svg_output/` 目录导出 —— **必须**使用 `-s final`（从 `svg_final/` 导出）
 > ❌ **绝不要**使用 `--only`（这会抑制生成两个输出文件之一）
 
-> **成功标准**：`workspace/exports/` 下存在带时间戳的 `.pptx` 文件且文件大小 > 0；`workspace/svg_final/` 文件数与 `workspace/svg_output/` 一致；`workspace/notes/` 下每页一个独立 `.md` 文件。
+> **成功标准**：`workspace/exports/` 下存在带时间戳的 `.pptx` 文件且文件大小 > 0。
 
 ---
 

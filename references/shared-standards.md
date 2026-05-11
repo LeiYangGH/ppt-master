@@ -289,18 +289,22 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 
 ---
 
-## 5. 后处理流程（3 步）
+## 5. 后处理流程（2 步）+ 用户手动导出
 
 必须按顺序执行——禁止跳步，也禁止额外乱加参数：
 
+**第 5.1 步** —— 拆分演讲备注：
 ```powershell
-# 1. 将总备注拆分为逐页备注文件
 python scripts/notes_all_md_split.py <project_path>
+```
 
-# 2. SVG 后处理（嵌入图标、裁切/嵌入图片、文字扁平化、圆角矩形转 path）
+**第 5.2 步** —— SVG 后处理（嵌入图标、裁切/嵌入图片、文字扁平化、圆角矩形转 path）：
+```powershell
 python scripts/finalize_svg.py <project_path>
+```
 
-# 3. 导出 PPTX（从 svg_final/ 导出，默认嵌入演讲备注）
+**第 6 步** —— 用户手动导出 PPTX（从 svg_final/ 导出，默认嵌入演讲备注）：
+```powershell
 python scripts/svg_to_pptx.py <project_path> -s final
 # 输出：
 #   exports/<project_name>_<timestamp>.pptx           ← 主原生 pptx
@@ -321,7 +325,7 @@ python scripts/svg_to_pptx.py <project_path> -s final
 - 绝对不要直接从 `svg_output/` 导出——**必须**从 `svg_final/` 导出（使用 `-s final`）
 - 绝对不要使用 `--only`（它会抑制两种输出中的一种）
 
-**重跑规则**：后处理之后，只要 `svg_output/` 再次发生变化，就必须重新执行第 2-3 步。第 1 步只在 `notes/notes_all.md` 发生变化时才需要重跑。
+**重跑规则**：后处理之后，只要 `svg_output/` 再次发生变化，就必须重新执行第 5.2 步。第 5.1 步只在 `notes/notes_all.md` 发生变化时才需要重跑。用户手动执行第 6 步导出 PPTX。
 
 ---
 

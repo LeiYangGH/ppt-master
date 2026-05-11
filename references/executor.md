@@ -144,7 +144,7 @@ Executor 是 SVG 设计执行者，负责根据 Design Spec 生成高质量 SVG 
 
 ## 9. 完成后的下一步
 
-**后处理与导出**：
+**后处理**：
 
 ```powershell
 # 1. 拆分备注
@@ -153,8 +153,8 @@ python scripts/notes_all_md_split.py <project_path>
 # 2. SVG 后处理
 python scripts/finalize_svg.py <project_path>
 
-# 3. 导出 PPTX
-python scripts/svg_to_pptx.py <project_path> -s final
+# 3. 用户手动导出 PPTX
+# python scripts/svg_to_pptx.py <project_path> -s final
 ```
 
 ---
