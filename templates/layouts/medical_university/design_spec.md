@@ -254,10 +254,10 @@ To adapt to other medical institution branding, replace the corresponding values
 
 ## XI. Usage Notes
 
-### 1. Copy Template to Project
+### 1. Copy Template to Workspace
 
 ```powershell
-cp templates/layouts/medical_university/* projects/<project>/templates/
+cp templates/layouts/medical_university/* workspace/templates/
 ```
 
 ### 2. Logo Placement Guidelines

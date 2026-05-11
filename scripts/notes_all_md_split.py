@@ -6,12 +6,12 @@ PPT Master - 演讲备注拆分工具
 每个文件对应一个 SVG 页面。
 
 用法：
-    python scripts/notes_all_md_split.py <项目路径>
-    python scripts/notes_all_md_split.py <项目路径> -o 输出目录
+    python scripts/notes_all_md_split.py workspace
+    python scripts/notes_all_md_split.py workspace -o notes
 
 示例：
-    python scripts/notes_all_md_split.py projects/<svg_title>_ppt169_YYYYMMDD
-    python scripts/notes_all_md_split.py projects/<svg_title>_ppt169_YYYYMMDD -o notes
+    python scripts/notes_all_md_split.py workspace
+    python scripts/notes_all_md_split.py workspace -o notes
 
 依赖：
     无（仅使用标准库）
@@ -277,9 +277,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例：
-    %(prog)s projects/<svg_title>_ppt169_YYYYMMDD
-    %(prog)s projects/<svg_title>_ppt169_YYYYMMDD -o notes
-    %(prog)s projects/<svg_title>_ppt169_YYYYMMDD -q
+    %(prog)s workspace
+    %(prog)s workspace -o notes
+    %(prog)s workspace -q
 
 功能：
     - 读取 notes_all.md 演讲备注文件

@@ -40,7 +40,7 @@
 
 **硬规则**：生成**每一页** SVG 前，都必须执行 `read_file <project_path>/spec_lock.md`。只能使用文件中的值，不能凭记忆。如果上下文被自动压缩，也要再读一次 `read_file <project_path>/design_spec.md`，查看当前页的 §IX 摘要。
 
-**经验教训（强制读取）**：首次进入 Executor 阶段时，`read_file projects/findings.md` 中的经验教训章节，避免重复犯已记录的错误（如 tspan 语法、spec_lock 漂移模式等）。
+**经验教训（强制读取）**：首次进入 Executor 阶段时，`read_file workspace/state.md` 中的经验教训章节，避免重复犯已记录的错误（如 tspan 语法、spec_lock 漂移模式等）。
 
 **如果 `spec_lock.md` 缺失**：输出一次 `warning: spec_lock.md missing — generating without execution lock`，然后改用 `design_spec.md` 中的值继续。理论上只会发生在旧项目；新项目**必须**有这个文件（见 strategist.md §6 step 4）。
 
@@ -82,8 +82,8 @@
 - **极简改动**：不为一次性场景创建抽象；不为"以防万一"添加未要求的装饰、动画占位或额外颜色。如果 50 行 SVG 能解决的问题不要用 200 行。每一处改动都必须能溯源到 spec_lock 或用户请求。
 - **手术刀修复**：修复错误时只动目标页/目标元素，不连带改写无关内容。例如：quality_checker 报 P05 漂移只重生成 P05，不要"顺便"修改 P04/P06；修一个颜色漂移只替换该颜色值，不要"统一"相邻页面的间距。修改产生的孤儿代码（如删除图片引用后的 `<clipPath>`）必须清理，但预先存在的死代码不要删。
 - **分阶段批处理**（推荐）：
-  1. **视觉构建阶段**：按顺序生成全部 SVG 页面，以保证视觉一致性。图表初稿阶段可先按布局判断绘制，但**每个图表页都必须嵌入 plot-area marker**（见下文 §3.1）；坐标校准是生成后的独立步骤，依赖这些标记。每完成一页后更新 `projects/task_plan.md` 的“当前页进度”字段（如 P05/12），以便会话中断后可从该页恢复。
-  2. **质量检查关卡**：对 `svg_output/` 运行 `python scripts/svg_quality_checker.py <project_path>`。任何 `error`（禁用特性、viewBox 不匹配、spec_lock 漂移、PPT 不安全字体等）都必须在继续前修复并复检。`warning` 在容易修时也应处理。不要推迟到 `finalize_svg.py` 之后，因为后处理会重写 SVG，掩盖部分问题。
+  1. **视觉构建阶段**：按顺序生成全部 SVG 页面，以保证视觉一致性。图表初稿阶段可先按布局判断绘制，但**每个图表页都必须嵌入 plot-area marker**（见下文 §3.1）；坐标校准是生成后的独立步骤，依赖这些标记。每完成一页后更新 `workspace/state.md` 的"当前页进度"字段（如 P05/12），以便会话中断后可从该页恢复。
+  2. **质量检查关卡**：对 `svg_output/` 运行 `python scripts/svg_quality_checker.py workspace`。任何 `error`（禁用特性、viewBox 不匹配、spec_lock 漂移、PPT 不安全字体等）都必须在继续前修复并复检。`warning` 在容易修时也应处理。不要推迟到 `finalize_svg.py` 之后，因为后处理会重写 SVG，掩盖部分问题。
   3. **逻辑构建阶段**：SVG 全部通过质量检查后，再批量生成演讲备注，以保持叙事连续性。
 
 ### 3.1 图表绘图区标记（每个图表页强制）

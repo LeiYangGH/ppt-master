@@ -637,32 +637,28 @@ def rank_results_by_domain_reliability(results: list[dict]) -> list[dict]:
 # ===================================================================
 
 def _is_project_dir(path: Path) -> bool:
-    """A PPT Master project dir is any directory under ``<repo>/projects/``."""
+    """A PPT Master project dir is the workspace directory."""
     try:
         path = path.resolve()
     except OSError:
         return False
-    projects_root = (_PROJECT_ROOT / "projects").resolve()
-    if not projects_root.exists():
+    workspace_root = (_PROJECT_ROOT / "workspace").resolve()
+    if not workspace_root.exists():
         return False
     try:
-        rel = path.relative_to(projects_root)
+        rel = path.relative_to(workspace_root)
     except ValueError:
         return False
-    # Direct child of projects/ (depth == 1)
+    # Direct child of workspace/ (depth == 1)
     return len(rel.parts) >= 1 and rel.parts[0] not in ("", ".")
 
 
 def _latest_project_dir() -> Optional[Path]:
-    """Return the most recently modified sub-directory of ``projects/``."""
-    projects_root = _PROJECT_ROOT / "projects"
-    if not projects_root.exists():
+    """Return the workspace directory if it exists."""
+    workspace_root = _PROJECT_ROOT / "workspace"
+    if not workspace_root.exists():
         return None
-    candidates = [p for p in projects_root.iterdir() if p.is_dir() and not p.name.startswith(".")]
-    if not candidates:
-        return None
-    candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    return candidates[0]
+    return workspace_root
 
 
 def resolve_project_images_dir(hint: Optional[str] = None) -> Optional[Path]:
@@ -670,13 +666,13 @@ def resolve_project_images_dir(hint: Optional[str] = None) -> Optional[Path]:
 
     Priority (first match wins):
       1. Explicit ``hint`` (CLI ``--project-dir`` or ``--images-dir``).
-         May be an absolute path, a relative path, or a bare project name.
+         May be an absolute path, a relative path, or "workspace".
       2. Env ``PPT_PROJECT_DIR`` / ``PPT_CURRENT_PROJECT``.
-      3. CWD is inside ``<repo>/projects/<name>/...`` — use that project.
-      4. Most recently modified sub-directory of ``<repo>/projects/``.
+      3. CWD is inside ``<repo>/workspace/`` — use that.
+      4. ``<repo>/workspace/`` directory.
       5. ``None`` — caller should skip auto-download.
 
-    Returns the ``<project_dir>/images`` path (created on demand by caller).
+    Returns the ``<workspace>/images`` path (created on demand by caller).
     """
 
     def _normalise(raw: str) -> Optional[Path]:
@@ -687,13 +683,13 @@ def resolve_project_images_dir(hint: Optional[str] = None) -> Optional[Path]:
             return None
         candidate = Path(raw)
         if not candidate.is_absolute():
-            # Try: relative to cwd, then as a project name under projects/
+            # Try: relative to cwd, then as workspace
             rel_cwd = (Path.cwd() / candidate).resolve()
             if rel_cwd.exists():
                 candidate = rel_cwd
             else:
-                candidate = (_PROJECT_ROOT / "projects" / raw).resolve()
-        # Accept either the project dir itself or its images/ sub-dir
+                candidate = (_PROJECT_ROOT / "workspace").resolve()
+        # Accept either the workspace dir itself or its images/ sub-dir
         if candidate.name == "images":
             return candidate
         return candidate / "images"
@@ -712,18 +708,18 @@ def resolve_project_images_dir(hint: Optional[str] = None) -> Optional[Path]:
             if resolved is not None:
                 return resolved
 
-    # (3) CWD inside projects/<name>/...
+    # (3) CWD inside workspace/...
     cwd = Path.cwd().resolve()
-    projects_root = (_PROJECT_ROOT / "projects").resolve()
-    if projects_root.exists():
+    workspace_root = (_PROJECT_ROOT / "workspace").resolve()
+    if workspace_root.exists():
         try:
-            rel = cwd.relative_to(projects_root)
+            rel = cwd.relative_to(workspace_root)
             if rel.parts and rel.parts[0] not in ("", "."):
-                return projects_root / rel.parts[0] / "images"
+                return workspace_root / "images"
         except ValueError:
             pass
 
-    # (4) latest modified project
+    # (4) workspace directory
     latest = _latest_project_dir()
     if latest is not None:
         return latest / "images"
@@ -1183,8 +1179,8 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PATH_OR_NAME",
         default=None,
         help=(
-            "Target project for auto-download (absolute path, relative path, "
-            "or bare name resolved under projects/). Overrides PPT_PROJECT_DIR."
+            "Target workspace for auto-download (absolute path, relative path, "
+            "or 'workspace'). Overrides PPT_PROJECT_DIR."
         ),
     )
     parser.add_argument(
@@ -1340,8 +1336,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         images_dir = resolve_project_images_dir(args.project_dir)
         if images_dir is None:
             print(
-                "  [auto-download] skipped: no target project found. "
-                "Set PPT_PROJECT_DIR, run inside projects/<name>/, "
+                "  [auto-download] skipped: no target workspace found. "
+                "Set PPT_PROJECT_DIR, run inside workspace/, "
                 "or pass --project-dir.",
                 file=sys.stderr,
             )

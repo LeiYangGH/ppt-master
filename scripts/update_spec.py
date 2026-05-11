@@ -2,9 +2,9 @@
 """将 spec_lock.md 的值变更同步到锁文件和 svg_output/*.svg。
 
 示例：
-    python update_spec.py <项目路径> primary=#0066AA
-    python update_spec.py <项目路径> colors.text=#111111
-    python update_spec.py <项目路径> typography.font_family='"PingFang SC", "Microsoft YaHei", sans-serif'
+    python update_spec.py workspace primary=#0066AA
+    python update_spec.py workspace colors.text=#111111
+    python update_spec.py workspace typography.font_family='"PingFang SC", "Microsoft YaHei", sans-serif'
 
 v2 支持范围：
 - `colors.*` — 在 svg_output/*.svg 中替换 HEX 值（不区分大小写）。

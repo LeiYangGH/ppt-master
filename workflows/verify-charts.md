@@ -11,7 +11,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 ## 何时运行
 
 - 演示文稿包含一个或多个数据可视化图表，类型属于**单次** `svg_position_calculator.py calc` 调用所支持的集合。支持集由计算器的CLI子命令（`bar`、`line`、`pie`、`radar`）及其单系列模型固定 — 具体 `charts_index.json` 键见步骤1。
-- SVG已生成到 `<project_path>/svg_output/` 且 `svg_quality_checker.py` 已通过。
+- SVG已生成到 `workspace/svg_output/` 且 `svg_quality_checker.py` 已通过。
 - 后处理（`finalize_svg.py`、`svg_to_pptx.py`）**尚未**运行。
 
 复合/衍生图表类型（多系列、堆叠、正负差值、镜像、双轴、累积叠加）无法通过一次calc调用校准，超出范围。非XY数据可视化（树状图/仪表盘/漏斗图/热力图/矩阵/气泡图/箱线图）和信息图/图表/框架/地图同样超出范围。
@@ -20,7 +20,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 
 ## 步骤 1：从设计规格构建页面列表
 
-读取 `<project_path>/design_spec.md` §VII 可视化参考列表（权威演示文稿计划；与§IX页面大纲交叉核对），并**严格过滤**为以下计算器支持集合。范围外的内容不要纳入列表，即使§VII将其标记为图表。
+读取 `workspace/design_spec.md` §VII 可视化参考列表（权威演示文稿计划；与§IX页面大纲交叉核对），并**严格过滤**为以下计算器支持集合。范围外的内容不要纳入列表，即使§VII将其标记为图表。
 
 | 计算器子命令 | 范围内 `charts_index.json` 键 | 备注 |
 |-------------|-------------------------------|------|
@@ -57,7 +57,7 @@ P11 11_share_split.svg   type=pie
 
 对步骤1列表中的每一页：
 
-1. 读取 `<project_path>/svg_output/<page>.svg`。
+1. 读取 `workspace/svg_output/<page>.svg`。
 2. 定位绑图区定义：
    - 首选：Executor放置的 `<!-- chart-plot-area: ... -->` 标记（见 [executor-base.md §3.1](../references/executor-base.md)）。直接读取坐标。
    - 如缺失：从SVG的轴线（矩形图表）或中心/半径元素（径向图表）推导绑图区。然后**将标记回写到SVG**，避免后续运行重复此开销。
@@ -100,7 +100,7 @@ P11 11_share_split.svg   type=pie
 更新任何页面后，重新运行质量检查器确认未引入问题：
 
 ```powershell
-python /scripts/svg_quality_checker.py <project_path>
+python /scripts/svg_quality_checker.py workspace
 ```
 
 ---
@@ -148,7 +148,7 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 继续后处理与导出（[SKILL.md 步骤7](../SKILL.md)）：
 
 ```powershell
-python /scripts/notes_all_md_split.py <project_path>
-python /scripts/finalize_svg.py <project_path>
-python /scripts/svg_to_pptx.py <project_path> -s final
+python /scripts/notes_all_md_split.py workspace
+python /scripts/finalize_svg.py workspace
+python /scripts/svg_to_pptx.py workspace -s final
 ```

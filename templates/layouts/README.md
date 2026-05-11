@@ -195,17 +195,17 @@ Templates use `{{PLACEHOLDER}}` format to mark replaceable content:
 
 ## Usage
 
-### Copy from Template Library to Project
+### Copy from Template Library to Workspace
 
 ```powershell
-# Copy exhibit style template to project
-Copy-Item "templates/layouts/exhibit/*" -Destination "projects/<project>/templates/"
+# Copy exhibit style template to workspace
+Copy-Item "templates/layouts/exhibit/*" -Destination "workspace/templates/"
 
-# Copy Google style template to project
-Copy-Item "templates/layouts/google_style/*" -Destination "projects/<project>/templates/"
+# Copy Google style template to workspace
+Copy-Item "templates/layouts/google_style/*" -Destination "workspace/templates/"
 
-# Copy government style template to project (e.g., government red)
-Copy-Item "templates/layouts/government_red/*" -Destination "projects/<project>/templates/"
+# Copy government style template to workspace (e.g., government red)
+Copy-Item "templates/layouts/government_red/*" -Destination "workspace/templates/"
 ```
 
 ### After Copying

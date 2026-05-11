@@ -1,30 +1,32 @@
-# 用户项目工作区
+# 工作区
 
-存放进行中的项目。
+PPT Master 的工作目录。
 
-## 新建项目
+## 初始化工作区
 
 ```powershell
-python /scripts/project_manager.py init my_project --format ppt169
+python scripts/project_manager.py init
 ```
 
 ## 目录结构
 
 ```
-project_name_format_YYYYMMDD/
+workspace/
 ├── README.md
-├── design_spec.md
-├── sources/          # 原始文件 / URL 存档 / 转换后的 Markdown 及其附件
-├── images/           # 项目图片素材
-├── notes/            # 工作笔记 (01_xxx.md, notes_all.md 等)
-├── svg_output/       # Executor 生成的 SVG
-├── svg_final/        # 后处理后的最终 SVG
-├── templates/        # 项目级模板（可选）
-├── *.pptx            # 导出的演示文稿
-└── image_analysis.csv  # 图片扫描结果（可选）
+├── state.md           # 状态文件（阶段进度、决策记录、错误日志、经验教训）
+├── design_spec.md     # 设计规范
+├── spec_lock.md       # 执行锁定
+├── sources/           # 原始文件 / URL 存档 / 转换后的 Markdown 及其附件
+├── images/            # 项目图片素材
+├── notes/             # 工作笔记 (01_xxx.md, notes_all.md 等)
+├── svg_output/        # Executor 生成的 SVG
+├── svg_final/         # 后处理后的最终 SVG
+├── templates/         # 项目级模板（可选）
+├── exports/           # 导出的演示文稿
+└── backup/            # 备份文件
 ```
 
-项目可处于不同阶段，不必包含全部目录。
+工作区可处于不同阶段，不必包含全部目录。
 
 ## 注意事项
 
@@ -32,15 +34,20 @@ project_name_format_YYYYMMDD/
 - 完成的项目可移至 `examples/` 分享
 - 工作区外文件默认复制，工作区内文件直接移入 `sources/`
 
-## 共享状态文件
+## 状态文件
 
-`projects/` 根目录下有三个共享状态文件（三件套），由 LLM 在工作流执行过程中自动读写：
+`workspace/state.md` 是工作区的状态文件，由 LLM 在工作流执行过程中自动读写：
 
-| 文件 | 用途 | 生命周期 |
-|------|------|----------|
-| `task_plan.md` | 当前项目、阶段进度、决策与错误日志 | 新项目 init 时重置 |
-| `findings.md` | 当前项目发现 + 跨项目经验教训 | 经验教训持久保留 |
-| `progress.md` | 时间戳追加式进度日志 | 持续追加 |
+| 章节 | 用途 |
+|------|------|
+| 当前项目 | 画布格式等基本信息 |
+| 当前阶段 | 工作流进度 |
+| 阶段清单 | 各阶段完成状态 |
+| 当前页进度 | Executor 阶段的页码跟踪 |
+| 决策记录 | 关键决策及原因 |
+| 错误日志 | 错误及处理方式 |
+| 经验教训 | 跨项目持久保留的经验 |
+| 进度日志 | 时间戳追加式进度记录 |
 
-- 这些文件可手工编辑或删除。例如新项目开始时，可保留 `findings.md` 中的经验教训部分，清空其他内容。
-- `findings.md` 的经验教训是跨项目的关键资产——LLM 在每个新项目启动时都会读取，避免重复犯错。
+- 该文件可手工编辑或删除
+- 经验教训是跨项目的关键资产——LLM 在每个新项目启动时都会读取，避免重复犯错

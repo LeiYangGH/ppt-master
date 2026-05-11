@@ -10,8 +10,7 @@
 这些数值仅在 Strategist 选择 side-by-side 意图时适用。
 
 用法：
-    python scripts/analyze_images.py <图片目录路径>
-    python scripts/analyze_images.py projects/xxx/images
+    python scripts/analyze_images.py workspace/images
 
 输出：
     - 控制台显示分析报告

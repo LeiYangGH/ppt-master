@@ -9,16 +9,16 @@ Renderer priority: PyMuPDF (works everywhere) > CairoSVG > svglib.
 
 Usage:
     # Render a single SVG
-    python scripts/render_svg.py <file.svg>
+    python scripts/render_svg.py workspace/svg_output/slide_01.svg
 
-    # Render all SVGs in a project's svg_output/
-    python scripts/render_svg.py <project_directory>
+    # Render all SVGs in workspace/svg_output/
+    python scripts/render_svg.py workspace
 
     # Custom output directory
-    python scripts/render_svg.py <project_directory> -o <output_dir>
+    python scripts/render_svg.py workspace -o <output_dir>
 
 Output:
-    PNG files are written to <project_path>/svg_preview/ (default)
+    PNG files are written to workspace/svg_preview/ (default)
     or next to the SVG file when rendering a single file.
 
 Notes:

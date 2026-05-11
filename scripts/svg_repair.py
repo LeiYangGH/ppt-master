@@ -12,9 +12,9 @@ Common issues fixed:
   - Duplicate attributes
 
 Usage (standalone):
-    python scripts/svg_repair.py <project_directory>
-    python scripts/svg_repair.py <single_file.svg>
-    python scripts/svg_repair.py <project_directory> --dry-run
+    python scripts/svg_repair.py workspace
+    python scripts/svg_repair.py workspace/svg_output/slide_01.svg
+    python scripts/svg_repair.py workspace --dry-run
 
 Usage (as library):
     from svg_repair import repair_svg_file, repair_svg_text
@@ -232,13 +232,13 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""\
             Examples:
-              %(prog)s projects/my_project              # repair svg_output/*.svg
-              %(prog)s slide_01.svg                     # repair single file
-              %(prog)s projects/my_project --dry-run    # preview only
+              %(prog)s workspace                       # repair svg_output/*.svg
+              %(prog)s slide_01.svg                    # repair single file
+              %(prog)s workspace --dry-run             # preview only
         """),
     )
     parser.add_argument("path", type=Path,
-                        help="Project directory or single SVG file")
+                        help="Workspace directory or single SVG file")
     parser.add_argument("--dry-run", "-n", action="store_true",
                         help="Show what would be repaired without writing")
     parser.add_argument("--quiet", "-q", action="store_true",

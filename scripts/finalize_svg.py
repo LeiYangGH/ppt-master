@@ -7,13 +7,13 @@ PPT Master - SVG 后处理工具（统一入口）
 
 用法：
     # 执行所有处理步骤（推荐）
-    python scripts/finalize_svg.py <项目目录>
+    python scripts/finalize_svg.py workspace
 
     # 仅执行指定步骤
-    python scripts/finalize_svg.py <项目目录> --only embed-icons fix-rounded
+    python scripts/finalize_svg.py workspace --only embed-icons fix-rounded
 
 示例：
-    python scripts/finalize_svg.py projects/my_project
+    python scripts/finalize_svg.py workspace
     python scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
 
 处理选项：
@@ -285,9 +285,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例：
-  %(prog)s projects/my_project           # 执行所有处理（默认）
-  %(prog)s projects/my_project --only embed-icons fix-rounded
-  %(prog)s projects/my_project -q        # 安静模式
+  %(prog)s workspace                        # 执行所有处理（默认）
+  %(prog)s workspace --only embed-icons fix-rounded
+  %(prog)s workspace -q                     # 安静模式
 
 处理选项（用于 --only）：
   repair-xml    修复格式错误的 XML（sloppy-xml）

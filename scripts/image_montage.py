@@ -390,10 +390,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ap.add_argument("images_dir", nargs="?", default=None,
                     help="Directory of images to tile. Default: autodiscover "
-                         "via --project-dir / PPT_PROJECT_DIR / latest project.")
+                         "via --project-dir / PPT_PROJECT_DIR / workspace.")
     ap.add_argument("--project-dir", default=None,
-                    help="Project name or path under projects/; resolves to "
-                         "<project>/images/. Overrides PPT_PROJECT_DIR.")
+                    help="Workspace path; resolves to "
+                         "workspace/images/. Overrides PPT_PROJECT_DIR.")
     ap.add_argument("--output-dir", default=None,
                     help=f"Where to write montages. Default: "
                          f"<images_dir>/{_DEFAULT_OUTPUT_NAME}/")

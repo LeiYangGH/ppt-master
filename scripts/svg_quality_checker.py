@@ -5,8 +5,8 @@ PPT Master - SVG 质量检查工具
 检查 SVG 文件是否符合项目技术规范。
 
 用法：
-    python scripts/svg_quality_checker.py <svg文件>
-    python scripts/svg_quality_checker.py <目录>
+    python scripts/svg_quality_checker.py workspace/svg_output/slide_01.svg
+    python scripts/svg_quality_checker.py workspace
     python scripts/svg_quality_checker.py --all examples
 """
 

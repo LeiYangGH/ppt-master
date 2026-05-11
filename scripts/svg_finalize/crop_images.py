@@ -316,7 +316,7 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  %(prog)s projects/my_project/svg_output
+  %(prog)s workspace/svg_output
   %(prog)s page_01.svg --dry-run
 
 preserveAspectRatio usage:

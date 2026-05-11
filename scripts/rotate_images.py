@@ -132,7 +132,7 @@ class ImageRotator:
         self.auto_fix_exif(target_path)
 
         # 2. Generate HTML
-        # Tool is generated in the parent directory (projects/)
+        # Tool is generated in the parent directory (workspace/)
         project_root = target_path.parent
         html_output_path = project_root / output_filename
 
@@ -151,7 +151,7 @@ class ImageRotator:
                     src_rel_path = f.relative_to(project_root).as_posix()
 
                     # path is used for JSON data, using path relative to the working directory (usually repo root)
-                    # e.g. "projects/Name/images/1.jpg"
+                    # e.g. "workspace/images/1.jpg"
                     # We assume the script is run from the repo root, or target_path is already absolute
                     # The safest approach is to compute a path relative to the repo root (avoids CWD changes making fixes.json unusable)
                     try:

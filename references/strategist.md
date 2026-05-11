@@ -22,7 +22,7 @@
 
 🚧 **GATE —— 必须先读**：在做任何分析或写作前，先执行 `read_file templates/design_spec_reference.md`。最终输出的 `design_spec.md` **必须**严格遵循该模板的 11 节结构。写完后自检各节是否齐全：I Project Info → II Canvas → III Visual Theme → IV Typography → V Layout → VI Icon → VII Visualization → VIII Image → IX Outline → X Speaker Notes → XI Tech Constraints。
 
-**先思考后动手**：在呈现八项确认之前，先读取 `projects/task_plan.md` 和 `projects/findings.md`。如果对用户需求存在多种解读（如"季度汇报"还是"项目汇报"、图片全用还是部分用），**必须**在确认中呈现权衡和你的假设，让用户选择——不要默默选一种。如果存在更简单的方案，主动提出来。
+**先思考后动手**：在呈现八项确认之前，先读取 `workspace/state.md`。如果对用户需求存在多种解读（如"季度汇报"还是"项目汇报"、图片全用还是部分用），**必须**在确认中呈现权衡和你的假设，让用户选择——不要默默选一种。如果存在更简单的方案，主动提出来。
 
 ⛔ **阻塞规则**：读取完成后，必须把下面八项的专业建议一次性打包给用户，并等待用户明确确认。
 
@@ -377,22 +377,22 @@
 **生成步骤**：
 1. 读取参考模板：`templates/design_spec_reference.md`
 2. 基于分析结果，从零生成完整 spec
-3. 保存到：`projects/<project_name>.../design_spec.md`
-4. **生成执行锁文件**：读取 `templates/spec_lock_reference.md`，并生成 `projects/<project_name>.../spec_lock.md`——它是上方配色 / 字体 / 图标 / 图片 / **page_rhythm** 决策的精简、机器可读版本。Executor 在生成每一页前都会重新读取它（见 executor.md §3.1）。`spec_lock.md` 中的值**必须**与 `design_spec.md` 中记录的决策完全一致；若两者发生冲突，以 `spec_lock.md` 为准，`design_spec.md` 视为历史叙述。
+3. 保存到：`workspace/design_spec.md`
+4. **生成执行锁文件**：读取 `templates/spec_lock_reference.md`，并生成 `workspace/spec_lock.md`——它是上方配色 / 字体 / 图标 / 图片 / **page_rhythm** 决策的精简、机器可读版本。Executor 在生成每一页前都会重新读取它（见 executor.md §3.1）。`spec_lock.md` 中的值**必须**与 `design_spec.md` 中记录的决策完全一致；若两者发生冲突，以 `spec_lock.md` 为准，`design_spec.md` 视为历史叙述。
    - **page_rhythm 是强制项**：根据第 IX 节内容大纲中的页面列表，为每页分配 `structural` / `analytical` / `focal` 之一（完整词汇见 `spec_lock_reference.md`）。这正是打破"每页都像卡片网格"统一感的关键——若缺少它，Executor 会默认所有页面都是 `analytical`。
    - **节奏服从叙事，而不是配额**：`focal` 页面用于自然停顿——如章节过渡、独立强调页（hero quote / big number）、SCQA 过桥页。高密度 deck 完全可以全部是 `analytical`。**不要为了凑节奏而发明空页面**（如"Thank you"、纯空分隔页）；每个 `focal` 页面都必须表达独立信息。
 
 ---
 
-## 7. 项目文件夹
+## 7. 工作区
 
-Strategist 开始前，项目文件夹必须已经存在。若不存在，应先执行：
+Strategist 开始前，工作区必须已经存在。若不存在，应先执行：
 
 ```powershell
-python scripts/project_manager.py init <project_name> --format <canvas_format>
+python scripts/project_manager.py init
 ```
 
-输出文件保存到 `projects/<project_name>_<format>_<YYYYMMDD>/design_spec.md`。
+设计规范保存到 `workspace/design_spec.md`。
 
 ---
 

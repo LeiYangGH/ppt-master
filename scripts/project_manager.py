@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""PPT Master 项目管理工具。
+"""PPT Master 工作区管理工具。
 
 用法：
-    python scripts/project_manager.py init <项目名称> [--dir projects]
-    python scripts/project_manager.py import-sources <项目路径> <源文件1> [<源文件2> ...] [--move | --copy]
-    python scripts/project_manager.py validate <项目路径>
-    python scripts/project_manager.py info <项目路径>
+    python scripts/project_manager.py init
+    python scripts/project_manager.py import-sources <源文件1> [<源文件2> ...] [--move | --copy]
+    python scripts/project_manager.py validate
+    python scripts/project_manager.py info
 """
 
 from __future__ import annotations
@@ -63,21 +63,17 @@ def is_within_path(path: Path, parent: Path) -> bool:
 
 
 class ProjectManager:
-    """Create, inspect, validate, and populate project folders."""
+    """Create, inspect, validate, and populate workspace."""
 
     CANVAS_FORMATS = CANVAS_FORMATS
 
-    def __init__(self, base_dir: str = "projects") -> None:
-        self.base_dir = Path(base_dir)
+    def __init__(self, workspace_dir: str = "workspace") -> None:
+        self.workspace_dir = Path(workspace_dir)
 
     def init_project(
         self,
-        project_name: str,
         canvas_format: str = "ppt169",
-        base_dir: str | None = None,
     ) -> str:
-        base_path = Path(base_dir) if base_dir else self.base_dir
-
         normalized_format = normalize_canvas_format(canvas_format)
         if normalized_format not in self.CANVAS_FORMATS:
             available = ", ".join(sorted(self.CANVAS_FORMATS.keys()))
@@ -86,12 +82,8 @@ class ProjectManager:
                 f"(可用: {available})"
             )
 
-        date_str = datetime.now().strftime("%Y%m%d")
-        project_dir_name = f"{project_name}_{normalized_format}_{date_str}"
-        project_path = base_path / project_dir_name
-
-        if project_path.exists():
-            raise FileExistsError(f"项目目录已存在: {project_path}")
+        workspace_path = self.workspace_dir
+        workspace_path.mkdir(parents=True, exist_ok=True)
 
         for rel_path in (
             "svg_output",
@@ -102,15 +94,14 @@ class ProjectManager:
             SOURCE_DIRNAME,
             "exports",
         ):
-            (project_path / rel_path).mkdir(parents=True, exist_ok=True)
+            (workspace_path / rel_path).mkdir(parents=True, exist_ok=True)
 
         canvas_info = self.CANVAS_FORMATS[normalized_format]
-        readme_path = project_path / "README.md"
+        readme_path = workspace_path / "README.md"
         readme_path.write_text(
             (
-                f"# {project_name}\n\n"
-                f"- Canvas format: {normalized_format}\n"
-                f"- Created: {date_str}\n\n"
+                "# PPT Master Workspace\n\n"
+                f"- Canvas format: {normalized_format}\n\n"
                 "## Directories\n\n"
                 "- `svg_output/`: 原始 SVG 输出\n"
                 "- `svg_final/`: 后处理后的 SVG 输出\n"
@@ -124,48 +115,33 @@ class ProjectManager:
             encoding="utf-8",
         )
 
-        print(f"项目已创建: {project_path}")
+        print(f"工作区已创建: {workspace_path}")
         print(f"画布: {canvas_info['name']} ({canvas_info['dimensions']})")
 
-        # 初始化共享三件套状态文件（位于 projects/ 根目录）
-        self._init_shared_state(base_path, project_name, normalized_format, date_str)
+        # 初始化状态文件
+        self._init_state(workspace_path, normalized_format)
 
-        return str(project_path)
+        return str(workspace_path)
 
-    def _init_shared_state(
+    def _init_state(
         self,
-        base_path: Path,
-        project_name: str,
+        workspace_path: Path,
         canvas_format: str,
-        date_str: str,
     ) -> None:
-        """初始化 projects/ 下的共享三件套状态文件。
+        """初始化 workspace/state.md 状态文件。"""
+        state_path = workspace_path / "state.md"
+        template_path = SKILL_DIR / "templates" / "state" / "state.md"
 
-        - task_plan.md: 新项目时覆盖重写
-        - findings.md: 保留已有（经验教训跨项目持久）；不存在则从模板创建
-        - progress.md: 追加新项目分隔行；不存在则从模板创建
-        """
-        state_dir = SKILL_DIR / "templates" / "state"
-
-        # task_plan.md: 始终从模板重新生成，填入当前项目信息
-        task_plan_path = base_path / "task_plan.md"
-        template_tp = state_dir / "task_plan.md"
-        if template_tp.exists():
-            content = template_tp.read_text(encoding="utf-8")
-            content = content.replace(
-                "_（未初始化 — 运行 project_manager.py init 后自动填写）_",
-                f"{project_name} ({canvas_format}, {date_str})",
-            )
-            content = content.replace(
-                "S0 — 未开始",
-                "S0 项目初始化 — 进行中",
-            )
-            task_plan_path.write_text(content, encoding="utf-8")
+        if template_path.exists():
+            content = template_path.read_text(encoding="utf-8")
+            content = content.replace("{canvas_format}", canvas_format)
+            state_path.write_text(content, encoding="utf-8")
         else:
             # 模板不存在时生成最小版本
-            task_plan_path.write_text(
-                f"# 任务计划\n\n"
-                f"## 当前项目\n{project_name} ({canvas_format}, {date_str})\n\n"
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+            state_path.write_text(
+                f"# 工作区状态\n\n"
+                f"## 当前项目\n画布格式: {canvas_format}\n\n"
                 f"## 当前阶段\nS0 项目初始化 — 进行中\n\n"
                 f"## 阶段清单\n"
                 f"- [/] S0 项目初始化\n"
@@ -176,58 +152,15 @@ class ProjectManager:
                 f"- [ ] S5 后处理 + 导出\n\n"
                 f"## 当前页进度\n_（Executor 阶段填写）_\n\n"
                 f"## 决策记录\n| # | 决策 | 原因 |\n|---|------|------|\n\n"
-                f"## 错误日志\n| 错误 | 阶段 | 处理 |\n|------|------|------|\n",
+                f"## 错误日志\n| 错误 | 阶段 | 处理 |\n|------|------|------|\n\n"
+                f"## 经验教训\n_（跨项目持久保留）_\n\n"
+                f"## 进度日志\n| 时间 | 动作 | 结果 |\n|------|------|------|\n"
+                f"| {now_str} | 工作区初始化 | 成功 |\n",
                 encoding="utf-8",
             )
 
-        # findings.md: 保留已有文件（经验教训跨项目持久），不存在则从模板创建
-        findings_path = base_path / "findings.md"
-        if not findings_path.exists():
-            template_fi = state_dir / "findings.md"
-            if template_fi.exists():
-                content = template_fi.read_text(encoding="utf-8")
-                # 清空当前项目发现，保留经验教训模板结构
-                findings_path.write_text(content, encoding="utf-8")
-            else:
-                findings_path.write_text(
-                    "# 研究发现与经验\n\n"
-                    "## 当前项目发现\n_（暂无）_\n\n---\n\n"
-                    "## 经验教训（跨项目持久保留）\n\n"
-                    "### SVG 生成\n\n### 工作流\n\n### 工具与脚本\n",
-                    encoding="utf-8",
-                )
-
-        # progress.md: 追加新项目分隔行，不存在则从模板创建
-        progress_path = base_path / "progress.md"
-        now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-        separator = f"\n| {now_str} | 项目初始化 {project_name} | 成功 |\n"
-        separator += f"\n--- 新项目: {project_name} ({date_str}) ---\n"
-
-        if progress_path.exists():
-            existing = progress_path.read_text(encoding="utf-8")
-            progress_path.write_text(
-                existing.rstrip() + "\n" + separator,
-                encoding="utf-8",
-            )
-        else:
-            template_pr = state_dir / "progress.md"
-            if template_pr.exists():
-                content = template_pr.read_text(encoding="utf-8")
-                progress_path.write_text(
-                    content.rstrip() + separator,
-                    encoding="utf-8",
-                )
-            else:
-                progress_path.write_text(
-                    "# 进度日志\n\n"
-                    "| 时间 | 动作 | 结果 |\n"
-                    "|------|------|------|\n"
-                    f"| {now_str} | 项目初始化 {project_name} | 成功 |\n",
-                    encoding="utf-8",
-                )
-
-    def _source_dir(self, project_path: Path) -> Path:
-        sources_dir = project_path / SOURCE_DIRNAME
+    def _source_dir(self, workspace_path: Path) -> Path:
+        sources_dir = workspace_path / SOURCE_DIRNAME
         sources_dir.mkdir(parents=True, exist_ok=True)
         return sources_dir
 
@@ -381,20 +314,19 @@ class ProjectManager:
 
     def import_sources(
         self,
-        project_path: str,
         source_items: list[str],
         move: bool = False,
         copy: bool = False,
     ) -> dict[str, list[str]]:
         if move and copy:
             raise ValueError("--move 和 --copy 互斥")
-        project_dir = Path(project_path)
-        if not project_dir.exists() or not project_dir.is_dir():
-            raise FileNotFoundError(f"项目目录未找到: {project_dir}")
+        workspace_path = self.workspace_dir
+        if not workspace_path.exists() or not workspace_path.is_dir():
+            raise FileNotFoundError(f"工作区目录未找到: {workspace_path}")
         if not source_items:
             raise ValueError("至少需要一个源文件路径")
 
-        sources_dir = self._source_dir(project_dir)
+        sources_dir = self._source_dir(workspace_path)
         summary: dict[str, list[str]] = {
             "archived": [],
             "markdown": [],
@@ -464,14 +396,14 @@ class ProjectManager:
 
         return summary
 
-    def validate_project(self, project_path: str) -> tuple[bool, list[str], list[str]]:
-        project_path_obj = Path(project_path)
-        is_valid, errors, warnings = validate_project_structure(str(project_path_obj))
+    def validate_project(self) -> tuple[bool, list[str], list[str]]:
+        workspace_path = self.workspace_dir
+        is_valid, errors, warnings = validate_project_structure(str(workspace_path))
 
-        if project_path_obj.exists() and project_path_obj.is_dir():
-            info = get_project_info_common(str(project_path_obj))
+        if workspace_path.exists() and workspace_path.is_dir():
+            info = get_project_info_common(str(workspace_path))
             if info.get("svg_files"):
-                svg_files = [project_path_obj / "svg_output" / name for name in info["svg_files"]]
+                svg_files = [workspace_path / "svg_output" / name for name in info["svg_files"]]
                 expected_format = info.get("format")
                 if expected_format == "unknown":
                     expected_format = None
@@ -479,11 +411,12 @@ class ProjectManager:
 
         return is_valid, errors, warnings
 
-    def get_project_info(self, project_path: str) -> dict[str, object]:
-        shared = get_project_info_common(project_path)
+    def get_project_info(self) -> dict[str, object]:
+        workspace_path = str(self.workspace_dir)
+        shared = get_project_info_common(workspace_path)
         return {
-            "name": shared.get("name", Path(project_path).name),
-            "path": shared.get("path", str(project_path)),
+            "name": shared.get("name", "workspace"),
+            "path": shared.get("path", workspace_path),
             "exists": shared.get("exists", False),
             "svg_count": shared.get("svg_count", 0),
             "has_spec": shared.get("has_spec", False),
@@ -499,36 +432,31 @@ def print_usage() -> None:
     print(__doc__)
 
 
-def parse_init_args(argv: list[str]) -> tuple[str, str]:
+def parse_init_args(argv: list[str]) -> str:
     """Parse arguments for the `init` subcommand."""
-    if len(argv) < 3:
-        raise ValueError("项目名称为必填项")
+    canvas_format = "ppt169"
 
-    project_name = argv[2]
-    base_dir = "projects"
-
-    i = 3
+    i = 2
     while i < len(argv):
-        if argv[i] == "--dir" and i + 1 < len(argv):
-            base_dir = argv[i + 1]
+        if argv[i] == "--format" and i + 1 < len(argv):
+            canvas_format = argv[i + 1]
             i += 2
         else:
             i += 1
 
-    return project_name, base_dir
+    return canvas_format
 
 
-def parse_import_args(argv: list[str]) -> tuple[str, list[str], bool, bool]:
+def parse_import_args(argv: list[str]) -> tuple[list[str], bool, bool]:
     """Parse arguments for the `import-sources` subcommand."""
-    if len(argv) < 4:
-        raise ValueError("项目路径和至少一个源文件为必填项")
+    if len(argv) < 3:
+        raise ValueError("至少一个源文件为必填项")
 
-    project_path = argv[2]
     move = False
     copy = False
     sources: list[str] = []
 
-    for arg in argv[3:]:
+    for arg in argv[2:]:
         if arg == "--move":
             move = True
         elif arg == "--copy":
@@ -539,7 +467,7 @@ def parse_import_args(argv: list[str]) -> tuple[str, list[str], bool, bool]:
     if move and copy:
         raise ValueError("--move 和 --copy 互斥")
 
-    return project_path, sources, move, copy
+    return sources, move, copy
 
 
 def main() -> None:
@@ -553,19 +481,19 @@ def main() -> None:
 
     try:
         if command == "init":
-            project_name, base_dir = parse_init_args(sys.argv)
-            project_path = manager.init_project(project_name, base_dir=base_dir)
-            print(f"[OK] 项目已初始化: {project_path}")
+            canvas_format = parse_init_args(sys.argv)
+            workspace_path = manager.init_project(canvas_format=canvas_format)
+            print(f"[OK] 工作区已初始化: {workspace_path}")
             print("下一步:")
-            print("1. 将源文件放入 sources/（或使用 import-sources）")
-            print("2. 将设计规范保存到项目根目录")
-            print("3. 生成 SVG 文件到 svg_output/")
+            print("1. 将源文件放入 workspace/sources/（或使用 import-sources）")
+            print("2. 将设计规范保存到 workspace/ 根目录")
+            print("3. 生成 SVG 文件到 workspace/svg_output/")
             return
 
         if command == "import-sources":
-            project_path, sources, move, copy = parse_import_args(sys.argv)
-            summary = manager.import_sources(project_path, sources, move=move, copy=copy)
-            print(f"[OK] 源文件已导入: {project_path}")
+            sources, move, copy = parse_import_args(sys.argv)
+            summary = manager.import_sources(sources, move=move, copy=copy)
+            print(f"[OK] 源文件已导入: {manager.workspace_dir}")
             if summary["archived"]:
                 print("\n归档的原始文件 / URL 记录:")
                 for item in summary["archived"]:
@@ -589,13 +517,9 @@ def main() -> None:
             return
 
         if command == "validate":
-            if len(sys.argv) < 3:
-                raise ValueError("项目路径为必填项")
+            is_valid, errors, warnings = manager.validate_project()
 
-            project_path = sys.argv[2]
-            is_valid, errors, warnings = manager.validate_project(project_path)
-
-            print(f"\n项目校验: {project_path}")
+            print(f"\n工作区校验: {manager.workspace_dir}")
             print("=" * 60)
 
             if errors:
@@ -609,22 +533,18 @@ def main() -> None:
                     print(f"  - {warning}")
 
             if is_valid and not warnings:
-                print("\n[OK] 项目结构完整。")
+                print("\n[OK] 工作区结构完整。")
             elif is_valid:
-                print("\n[OK] 项目结构有效，但有警告。")
+                print("\n[OK] 工作区结构有效，但有警告。")
             else:
-                print("\n[ERROR] 项目结构无效。")
+                print("\n[ERROR] 工作区结构无效。")
                 sys.exit(1)
             return
 
         if command == "info":
-            if len(sys.argv) < 3:
-                raise ValueError("项目路径为必填项")
+            info = manager.get_project_info()
 
-            project_path = sys.argv[2]
-            info = manager.get_project_info(project_path)
-
-            print(f"\n项目信息: {info['name']}")
+            print(f"\n工作区信息: {info['name']}")
             print("=" * 60)
             print(f"路径: {info['path']}")
             print(f"存在: {'是' if info['exists'] else '否'}")
