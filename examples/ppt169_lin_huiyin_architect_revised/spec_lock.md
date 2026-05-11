@@ -54,15 +54,15 @@
 - lin_later: images/lin_later.png
 
 ## page_rhythm
-- P01: anchor
-- P02: breathing
-- P03: dense
-- P04: dense
-- P05: breathing
-- P06: dense
-- P07: dense
-- P08: breathing
-- P09: anchor
+- P01: structural
+- P02: focal
+- P03: analytical
+- P04: analytical
+- P05: focal
+- P06: analytical
+- P07: analytical
+- P08: focal
+- P09: structural
 
 ## forbidden
 - Mixing icon libraries

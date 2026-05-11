@@ -22,7 +22,7 @@ description: >
 > 5. **极简改动** —— **禁止**为后续步骤"预先准备"内容（例如，在 Strategist 阶段编写 SVG 代码）。**禁止**添加用户未要求的功能、装饰、颜色或布局变体。不为一次性场景创建抽象。如果 50 行 SVG 能解决的问题不要用 200 行。**检验标准**：每一处改动都能直接溯源到用户的请求或 spec_lock 的要求——无法溯源的改动就是过度工程。
 > 6. **禁止子智能体生成 SVG** —— 第 5 步 Executor 生成 SVG 高度依赖上下文，**必须**由当前主智能体端到端完成。**禁止**委托给子智能体。
 > 7. **仅限逐页生成** —— 在第 5 步 Executor 中，全局设计上下文确认后，SVG 页面**必须**在一个连续的上下文中按顺序一页一页地生成。**禁止**批量生成（例如每次 5 页）。
-> 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`anchor` / `dense` / `breathing`——见 executor.md §3.1）。
+> 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`structural` / `analytical` / `focal`——见 executor.md §3.1）。
 > 9. **先思考后动手** —— 在关键决策前，**必须**先读取 `projects/task_plan.md` 和 `projects/findings.md`，确保理解当前状态和已积累的经验教训。如果对用户需求存在多种解读，**必须**呈现权衡让用户选择，而非默默选一种。如果存在更简单的方案，**必须**提出来。困惑时停下来问，不要假设。
 
 

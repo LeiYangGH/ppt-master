@@ -207,7 +207,7 @@
 #### Slide 01 — Cover
 
 - **Layout**: Single column centered, dark hero with subtle radial glow
-- **page_rhythm**: anchor
+- **page_rhythm**: structural
 - **Title**: Claude Code Auto Mode
 - **Subtitle**: A Safer Way to Skip Permissions
 - **Info**: Anthropic Engineering · Mar 2026
@@ -215,7 +215,7 @@
 #### Slide 02 — The Problem: Approval Fatigue
 
 - **Layout**: Top-bottom split — headline stat on top, explanation below
-- **page_rhythm**: breathing
+- **page_rhythm**: focal
 - **Title**: 93% of Permission Prompts Are Approved
 - **Content**:
   - Users approve 93% of prompts → approval fatigue sets in
@@ -227,7 +227,7 @@
 #### Slide 03 — What Is Auto Mode?
 
 - **Layout**: Top-bottom — headline definition + three key pillars in horizontal blocks
-- **page_rhythm**: breathing
+- **page_rhythm**: focal
 - **Title**: Auto Mode: Classifier-Delegated Approvals
 - **Content**:
   - Delegates permission decisions to model-based classifiers
@@ -237,7 +237,7 @@
 #### Slide 04 — System Architecture
 
 - **Layout**: Asymmetric split (4:6) — image_1.png left, annotated highlights right
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: Two Layers of Defense
 - **Image**: image_1.png (Fig.2: System architecture)
 - **Content**:
@@ -251,7 +251,7 @@
 #### Slide 05 — Four Threat Categories
 
 - **Layout**: Four cards in 2×2 grid with icons
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: Why an Agent Might Take Dangerous Action
 - **Content**:
   - {{icon:chunk/robot}} **Overeager behavior** — takes initiative beyond what user would approve
@@ -263,7 +263,7 @@
 #### Slide 06 — Three-Tier Permission System
 
 - **Layout**: Asymmetric split (5:5) — image.png left, tier breakdown right
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: How Permission Decisions Work
 - **Image**: image.png (Fig.1: Permission modes)
 - **Visualization**: concentric_circles (conceptual reference)
@@ -277,7 +277,7 @@
 #### Slide 07 — What the Classifier Sees
 
 - **Layout**: Asymmetric split (4:6) — image_2.png left, key design decisions right
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: Reasoning-Blind by Design
 - **Image**: image_2.png (Fig.3: What the classifier sees)
 - **Content**:
@@ -289,7 +289,7 @@
 #### Slide 08 — Evaluation Results
 
 - **Layout**: Vertical list — key metrics with visual emphasis
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: Performance: The Honest Numbers
 - **Visualization**: comparison_table
 - **Content**:
@@ -303,7 +303,7 @@
 #### Slide 09 — Key Design Decisions
 
 - **Layout**: Asymmetric split (4:6) — image_3.png left, design highlights right
-- **page_rhythm**: dense
+- **page_rhythm**: analytical
 - **Title**: Design Decisions That Matter
 - **Image**: image_3.png (Fig.4: Two-stage pipeline)
 - **Content**:
@@ -314,7 +314,7 @@
 #### Slide 10 — Closing
 
 - **Layout**: Single column centered, minimal with key takeaway
-- **page_rhythm**: anchor
+- **page_rhythm**: structural
 - **Title**: Substantially Safer Than No Guardrails
 - **Content**:
   - Auto mode catches enough dangerous actions to make autonomous operation substantially safer

@@ -321,7 +321,7 @@
 
 #### Slide 10 - 可持续奢华
 
-- **Layout**: Full-bleed + floating text（breathing页）
+- **Layout**: Full-bleed + floating text（focal页）
 - **Title**: 可持续奢华：负责任的审美
 - **Images**: `sustainable_luxury.png`
 - **Content**:

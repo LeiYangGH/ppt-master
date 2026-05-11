@@ -122,9 +122,9 @@ images:
     # ... 更多图片
 
 page_rhythm:
-  P01: "anchor"  # 封面
-  P02: "dense"   # 内容页
-  P03: "breathing"  # 留白页
+  P01: "structural"  # 封面
+  P02: "analytical"   # 内容页
+  P03: "focal"  # 留白页
   # ... 更多页面节奏
 ```
 
@@ -133,7 +133,7 @@ page_rhythm:
 - 图标必须来自 `icons.inventory`，库必须匹配 `icons.library`
 - 字体必须来自 `typography` 节
 - 图片必须引用 `images` 中列出的文件
-- 每页布局节奏来自 `page_rhythm`（anchor/dense/breathing）
+- 每页布局节奏来自 `page_rhythm`（structural/analytical/focal）
 
 ### 2.3 SVG 生成规范
 

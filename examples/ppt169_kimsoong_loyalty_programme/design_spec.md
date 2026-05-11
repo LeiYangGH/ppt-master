@@ -94,7 +94,7 @@
 
 ### Font Size Hierarchy
 
-**Baseline**: Body font size = 18px (dense — consulting analysis with 6+ data points per page)
+**Baseline**: Body font size = 18px (analytical — consulting analysis with 6+ data points per page)
 
 | Purpose | Ratio | Size @ body=18 | Weight |
 | ------- | ----- | -------------- | ------ |
@@ -215,7 +215,7 @@
 
 ### Part 1: Setting the Stage
 
-#### Slide 01 - Cover (anchor)
+#### Slide 01 - Cover (structural)
 
 - **Layout**: Full-bleed background image + centered title with overlay
 - **Title**: "Kimsoong Customer Loyalty Programme"
@@ -223,7 +223,7 @@
 - **Info**: European Headquarters | Strategic Proposal | April 2026
 - **Image**: `cover_bg.jpg` — hero / full-bleed intent
 
-#### Slide 02 - The Challenge: A Critical Retention Gap (breathing)
+#### Slide 02 - The Challenge: A Critical Retention Gap (focal)
 
 - **Layout**: Single column — three hero KPI cards + takeaway box
 - **Title**: "Only 15% of customers return — 78% rate after-sales as Fair or Poor"
@@ -236,7 +236,7 @@
 
 ### Part 2: Understanding the Customer
 
-#### Slide 03 - Kimsoong: Market Position & Brand Assets (dense)
+#### Slide 03 - Kimsoong: Market Position & Brand Assets (analytical)
 
 - **Layout**: Asymmetric split (4:6) — image left, structured text right
 - **Title**: "Strong brand assets provide foundation for loyalty strategy"
@@ -261,7 +261,7 @@
   - Q4: Interests — Top 3: Eating/drinking, Sport, Travel; #4 Environment (brand-aligned)
   - Gender split: 52M / 48F (near-even)
 
-#### Slide 05 - The Gap: What Customers Want vs. What They Get (dense)
+#### Slide 05 - The Gap: What Customers Want vs. What They Get (analytical)
 
 - **Layout**: Matrix 2×2 — importance vs. satisfaction
 - **Title**: "After-sales service: high importance, critically low satisfaction"
@@ -277,7 +277,7 @@
 
 ### Part 3: Diagnosis
 
-#### Slide 06 - Why Customers Leave: Root Cause Decomposition (dense)
+#### Slide 06 - Why Customers Leave: Root Cause Decomposition (analytical)
 
 - **Layout**: Horizontal bar chart (descending) + cumulative percentage line
 - **Title**: "78% of customer loss is addressable — competitors and service dominate"
@@ -293,7 +293,7 @@
 
 ### Part 4: Strategy & Solutions
 
-#### Slide 07 - Four Pillars of Customer Loyalty Strategy (breathing)
+#### Slide 07 - Four Pillars of Customer Loyalty Strategy (focal)
 
 - **Layout**: Center-radiating — core objective surrounded by 4 pillars
 - **Title**: "A four-pillar framework to transform customer relationships"
@@ -306,7 +306,7 @@
   - Pillar 4: Staff engagement → Service excellence
   - Cost model: 50/50 shared with head office
 
-#### Slide 08 - Five Recommended Initiatives: Impact vs. Cost (dense)
+#### Slide 08 - Five Recommended Initiatives: Impact vs. Cost (analytical)
 
 - **Layout**: Five evaluation cards in priority order
 - **Title**: "Prioritize service and data — financial incentives follow"
@@ -321,7 +321,7 @@
 
 ### Part 5: Execution
 
-#### Slide 09 - Implementation Roadmap: Phased Rollout (dense)
+#### Slide 09 - Implementation Roadmap: Phased Rollout (analytical)
 
 - **Layout**: Horizontal timeline (Q1-Q4) + KPI tracker cards at bottom
 - **Title**: "Quick wins first, then systematic service transformation"

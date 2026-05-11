@@ -100,7 +100,7 @@
 
 ### Font Size Hierarchy
 
-**Baseline**: Body font size = 18px (dense — multiple technical points per page, architectural diagrams)
+**Baseline**: Body font size = 18px (analytical — multiple technical points per page, architectural diagrams)
 
 | Purpose | Ratio to body | Actual Size | Weight |
 | ------- | ------------- | ----------- | ------ |
@@ -126,9 +126,9 @@
 The deck uses a variety of patterns to avoid the "every page is a card grid" monotony:
 
 - **Cover**: Full-bleed dark background + centered title with gradient accent
-- **Concept pages** (breathing): Asymmetric split with hero diagram + key text; generous whitespace
-- **Pattern pages** (dense): Top-bottom split — ultra-wide workflow diagram above, structured content below
-- **Summary pages** (anchor): Single column centered with key principles
+- **Concept pages** (focal): Asymmetric split with hero diagram + key text; generous whitespace
+- **Pattern pages** (analytical): Top-bottom split — ultra-wide workflow diagram above, structured content below
+- **Summary pages** (structural): Single column centered with key principles
 
 ### Spacing Specification
 
@@ -140,7 +140,7 @@ The deck uses a variety of patterns to avoid the "every page is a card grid" mon
 | Content block gap | 30px |
 | Icon-text gap | 12px |
 
-**Card-based layouts** (dense pages):
+**Card-based layouts** (analytical pages):
 
 | Element | Value |
 | ------- | ----- |
@@ -223,7 +223,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 02 — What Are Agents? (P02)
 
-- **Layout**: Breathing — asymmetric split, left text block (60%) with key distinction, right visual accent
+- **Layout**: Focal — asymmetric split, left text block (60%) with key distinction, right visual accent
 - **Title**: What Are Agents?
 - **Content**:
   - **Workflows**: LLMs + tools orchestrated through predefined code paths
@@ -235,7 +235,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 03 — When to Use Agents (P03)
 
-- **Layout**: Dense — two-column with decision guidance
+- **Layout**: Analytical — two-column with decision guidance
 - **Title**: When (and When Not) to Use Agents
 - **Content**:
   - Start with the simplest solution — single LLM calls with retrieval often suffice
@@ -246,7 +246,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 04 — The Augmented LLM (P04)
 
-- **Layout**: Breathing — top-bottom split; ultra-wide diagram above, key text below
+- **Layout**: Focal — top-bottom split; ultra-wide diagram above, key text below
 - **Title**: Building Block: The Augmented LLM
 - **Image**: image.png (top, full-width)
 - **Content**:
@@ -259,7 +259,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 05 — Prompt Chaining (P05)
 
-- **Layout**: Dense — top-bottom split; diagram above, structured content below
+- **Layout**: Analytical — top-bottom split; diagram above, structured content below
 - **Title**: Workflow: Prompt Chaining
 - **Image**: image_1.png (top, full-width)
 - **Content**:
@@ -270,7 +270,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 06 — Routing (P06)
 
-- **Layout**: Dense — top-bottom split; diagram above, structured content below
+- **Layout**: Analytical — top-bottom split; diagram above, structured content below
 - **Title**: Workflow: Routing
 - **Image**: image_2.png (top, full-width)
 - **Content**:
@@ -281,7 +281,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 07 — Parallelization (P07)
 
-- **Layout**: Dense — top-bottom split; diagram above, two-column content below (Sectioning | Voting)
+- **Layout**: Analytical — top-bottom split; diagram above, two-column content below (Sectioning | Voting)
 - **Title**: Workflow: Parallelization
 - **Image**: image_3.png (top, full-width)
 - **Content**:
@@ -292,7 +292,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 08 — Orchestrator-Workers (P08)
 
-- **Layout**: Dense — top-bottom split; diagram above, structured content below
+- **Layout**: Analytical — top-bottom split; diagram above, structured content below
 - **Title**: Workflow: Orchestrator-Workers
 - **Image**: image_4.png (top, full-width)
 - **Content**:
@@ -303,7 +303,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 09 — Evaluator-Optimizer (P09)
 
-- **Layout**: Dense — top-bottom split; diagram above, structured content below
+- **Layout**: Analytical — top-bottom split; diagram above, structured content below
 - **Title**: Workflow: Evaluator-Optimizer
 - **Image**: image_5.png (top, full-width)
 - **Content**:
@@ -316,7 +316,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 10 — Agents (P10)
 
-- **Layout**: Breathing — hero concept; diagram centered, key capabilities floating
+- **Layout**: Focal — hero concept; diagram centered, key capabilities floating
 - **Title**: Agents: Autonomous LLM Systems
 - **Image**: image_6.png (centered, prominent)
 - **Content**:
@@ -328,7 +328,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 11 — Agents in Practice (P11)
 
-- **Layout**: Dense — left-right split; coding agent diagram on right, two application areas on left
+- **Layout**: Analytical — left-right split; coding agent diagram on right, two application areas on left
 - **Title**: Agents in Practice
 - **Image**: image_7.png (right side, standard landscape)
 - **Content**:
@@ -341,7 +341,7 @@ No additional chart templates needed — the article's 8 architectural diagrams 
 
 #### Slide 12 — Summary & Key Principles (P12)
 
-- **Layout**: Anchor — single column centered; three principle cards with icons
+- **Layout**: Structural — single column centered; three principle cards with icons
 - **Title**: Three Core Principles
 - **Content**:
   - ① **Simplicity** — Maintain simplicity in your agent's design
