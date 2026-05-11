@@ -71,26 +71,26 @@ description: >
 
 | 脚本 | 用途 |
 |--------|---------|
-| `${SKILL_DIR}/scripts/project_manager.py` | 项目初始化 / 校验 / 管理（含三件套状态文件初始化） |
-| `${SKILL_DIR}/scripts/analyze_images.py` | 图片分析（单张精查） |
-| `${SKILL_DIR}/scripts/image_montage.py` | **图片批量缩略图墙**（将 `images/` 下所有图片拼接为 `montage_NN_of_MM.jpg`，每张 4×5=20 格且每格底部带文件名标签）——供 LLM **一次视觉读图批量判定保留 / 删除 / 重命名**，避免对数十张图通过 `analyze_images.py` 逐张读取的高成本。 |
-| `${SKILL_DIR}/scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询，**搜索后自动并发下载图片到当前项目 `images/` 目录**，5 秒/张超时，无缓存（每次调用实时请求 API，重试可真正拿到新结果），带域名黑名单；⚠ **搜索关键字必须用中文**，下载后需逐张审阅并重命名，详见 `workflows/topic-research.md` 顶部约束） |
-| `${SKILL_DIR}/scripts/svg_quality_checker.py` | SVG 质量检查 |
-| `${SKILL_DIR}/scripts/render_svg.py` | SVG → PNG 预览渲染（用于逐页视觉复检） |
-| `${SKILL_DIR}/scripts/svg_repair.py` | SVG XML 自动修复（基于 sloppy-xml，修复 LLM 输出的不规范 XML） |
-| `${SKILL_DIR}/scripts/notes_all_md_split.py` | 演讲备注拆分 |
-| `${SKILL_DIR}/scripts/finalize_svg.py` | SVG 后处理（统一入口） |
-| `${SKILL_DIR}/scripts/svg_to_pptx.py` | 导出为 PPTX |
-| `${SKILL_DIR}/scripts/update_spec.py` | 将 `spec_lock.md` 中的颜色 / 字体变更同步到所有 SVG |
+| `scripts/project_manager.py` | 项目初始化 / 校验 / 管理（含三件套状态文件初始化） |
+| `scripts/analyze_images.py` | 图片分析（单张精查） |
+| `scripts/image_montage.py` | **图片批量缩略图墙**（将 `images/` 下所有图片拼接为 `montage_NN_of_MM.jpg`，每张 4×5=20 格且每格底部带文件名标签）——供 LLM **一次视觉读图批量判定保留 / 删除 / 重命名**，避免对数十张图通过 `analyze_images.py` 逐张读取的高成本。 |
+| `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询，**搜索后自动并发下载图片到当前项目 `images/` 目录**，5 秒/张超时，无缓存（每次调用实时请求 API，重试可真正拿到新结果），带域名黑名单；⚠ **搜索关键字必须用中文**，下载后需逐张审阅并重命名，详见 `workflows/topic-research.md` 顶部约束） |
+| `scripts/svg_quality_checker.py` | SVG 质量检查 |
+| `scripts/render_svg.py` | SVG → PNG 预览渲染（用于逐页视觉复检） |
+| `scripts/svg_repair.py` | SVG XML 自动修复（基于 sloppy-xml，修复 LLM 输出的不规范 XML） |
+| `scripts/notes_all_md_split.py` | 演讲备注拆分 |
+| `scripts/finalize_svg.py` | SVG 后处理（统一入口） |
+| `scripts/svg_to_pptx.py` | 导出为 PPTX |
+| `scripts/update_spec.py` | 将 `spec_lock.md` 中的颜色 / 字体变更同步到所有 SVG |
 
 
 ## 模板索引
 
 | 索引 | 路径 | 用途 |
 |-------|------|---------|
-| 布局模板 | `${SKILL_DIR}/templates/layouts/layouts_index.json` | 查询可用的页面布局模板 |
-| 可视化模板 | `${SKILL_DIR}/templates/charts/charts_index.json` | 查询可用的可视化 SVG 模板（图表、信息图、流程图等） |
-| 图标库 | `${SKILL_DIR}/templates/icons/` | 见 `${SKILL_DIR}/templates/icons/README.md`；按需搜索：`Get-ChildItem templates\icons\<library>\*<keyword>*` |
+| 布局模板 | `templates/layouts/layouts_index.json` | 查询可用的页面布局模板 |
+| 可视化模板 | `templates/charts/charts_index.json` | 查询可用的可视化 SVG 模板（图表、信息图、流程图等） |
+| 图标库 | `templates/icons/` | 见 `templates/icons/README.md`；按需搜索：`Get-ChildItem templates\icons\<library>\*<keyword>*` |
 
 ## 独立工作流
 
@@ -122,7 +122,7 @@ description: >
 🚧 **GATE**：第 1 步完成；源内容准备就绪（Markdown 文件或对话中描述的需求均有效）。
 
 ```powershell
-python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
+python scripts/project_manager.py init <project_name>
 ```
 
 画布格式固定为 `ppt169`（PPT 16:9）。
@@ -131,7 +131,7 @@ python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 
 | 情况 | 操作 |
 |-----------|--------|
-| 有源 Markdown 等文件 | `python ${SKILL_DIR}/scripts/project_manager.py import-sources <project_path> <source_files...> --move` |
+| 有源 Markdown 等文件 | `python scripts/project_manager.py import-sources <project_path> <source_files...> --move` |
 | 用户在对话中直接提供文本 | 无需导入 —— 内容已在对话上下文中；后续步骤可直接引用 |
 
 > ⚠️ **必须使用 `--move`** (而不是复制)：所有源文件 —— 原始 Markdown / 图片 —— 都通过 `import-sources --move` 移动到 `sources/` 中。执行后它们在原位置将不再存在。中间产物（例如 `_files/`）会自动处理。
@@ -156,13 +156,13 @@ python ${SKILL_DIR}/scripts/project_manager.py init <project_name>
 2. 指定了对应模板的风格/品牌（如“McKinsey 那种” / “Google style” / “学术答辩样式”）
 3. 询问有哪些模板可用（如“有哪些模板可以用”）
 
-触发时：读取 `${SKILL_DIR}/templates/layouts/layouts_index.json`，匹配模板（对于触发条件 3 则列出选项），并复制：
+触发时：读取 `templates/layouts/layouts_index.json`，匹配模板（对于触发条件 3 则列出选项），并复制：
 
 ```powershell
-Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.svg" -Destination "<project_path>\templates\"
-Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\design_spec.md" -Destination "<project_path>\templates\"
-Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.png" -Destination "<project_path>\images\" -ErrorAction SilentlyContinue
-Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.jpg" -Destination "<project_path>\images\" -ErrorAction SilentlyContinue
+Copy-Item "templates\layouts\<template_name>\*.svg" -Destination "<project_path>\templates\"
+Copy-Item "templates\layouts\<template_name>\design_spec.md" -Destination "<project_path>\templates\"
+Copy-Item "templates\layouts\<template_name>\*.png" -Destination "<project_path>\images\" -ErrorAction SilentlyContinue
+Copy-Item "templates\layouts\<template_name>\*.jpg" -Destination "<project_path>\images\" -ErrorAction SilentlyContinue
 ```
 
 **软提示（非阻塞）。** 当内容非常契合某个现有模板（例如学术答辩、政府报告、McKinsey 风格），且**未触发**上述模板条件时，输出一句简短提示并继续（不等待用户回复）：
@@ -205,7 +205,7 @@ Copy-Item "${SKILL_DIR}\templates\layouts\<template_name>\*.jpg" -Destination "<
 
 如果用户提供了图片，**在输出设计规范之前**进行分析：
 ```powershell
-python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
+python scripts/analyze_images.py <project_path>/images
 ```
 
 > ⚠️ **图片处理**：绝不要直接读取 / 打开 / 查看图片文件（`.jpg`、`.png` 等）。所有图片信息必须来自 `analyze_images.py` 的输出或设计规范中的图片资源列表。
@@ -254,7 +254,7 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 
 **质量检查门控（强制）** —— 在所有 SVG 生成后，生成演讲备注之前：
 ```powershell
-python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
+python scripts/svg_quality_checker.py <project_path>
 ```
 - 任何 `error`（使用了禁用的 SVG 特性、viewBox 不匹配、偏离 spec_lock 等）**必须**在继续前修复 —— 返回视觉构建阶段，重新生成该页，再次运行检查。
 - `warning` 条目（低分辨率图片、非 PPT 安全字体结尾等）：如果容易修复就修复，否则确认情况后放行。
@@ -292,17 +292,17 @@ python ${SKILL_DIR}/scripts/svg_quality_checker.py <project_path>
 
 **第 7.1 步** —— 拆分演讲备注：
 ```powershell
-python ${SKILL_DIR}/scripts/notes_all_md_split.py <project_path>
+python scripts/notes_all_md_split.py <project_path>
 ```
 
 **第 7.2 步** —— SVG 后处理（图标嵌入 / 图片裁剪与嵌入 / 文本扁平化 / 圆角矩形转路径）：
 ```powershell
-python ${SKILL_DIR}/scripts/finalize_svg.py <project_path>
+python scripts/finalize_svg.py <project_path>
 ```
 
 **第 7.3 步** —— 导出 PPTX（默认嵌入演讲备注）：
 ```powershell
-python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
+python scripts/svg_to_pptx.py <project_path> -s final
 # 输出：
 #   exports/<project_name>_<timestamp>.pptx           ← 最终原生 pptx
 #   backup/<timestamp>/<project_name>_svg.pptx        ← SVG 格式快照

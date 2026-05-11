@@ -68,24 +68,24 @@ P11 11_share_split.svg   type=pie
    ```powershell
    # bar_chart / horizontal_bar_chart（后者加 --horizontal）
    # 重要：始终从轴刻度标签传递 --value-range（步骤4）
-   python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+   python /scripts/svg_position_calculator.py calc bar \
      --data "Label1:Value1,Label2:Value2" --area "x_min,y_min,x_max,y_max" \
      --bar-width 120 --value-range "0,axis_max"
 
    # line_chart / area_chart / scatter_chart — 面积图使用线输出作为上边界，然后闭包到y_max
-   python skills/ppt-master/scripts/svg_position_calculator.py calc line \
+   python /scripts/svg_position_calculator.py calc line \
      --data "x1:y1,x2:y2,..." --area "x_min,y_min,x_max,y_max" --y-range "0,max"
 
    # pie_chart
-   python skills/ppt-master/scripts/svg_position_calculator.py calc pie \
+   python /scripts/svg_position_calculator.py calc pie \
      --data "Slice1:Value1,Slice2:Value2" --center "cx,cy" --radius 200
 
    # donut_chart（带inner-radius的饼图）
-   python skills/ppt-master/scripts/svg_position_calculator.py calc pie \
+   python /scripts/svg_position_calculator.py calc pie \
      --data "Slice1:Value1,Slice2:Value2" --center "cx,cy" --radius 200 --inner-radius 120
 
    # radar_chart（独立子命令）
-   python skills/ppt-master/scripts/svg_position_calculator.py calc radar \
+   python /scripts/svg_position_calculator.py calc radar \
      --data "Dim1:Value1,Dim2:Value2,Dim3:Value3" --center "cx,cy" --radius 200
    ```
 
@@ -100,7 +100,7 @@ P11 11_share_split.svg   type=pie
 更新任何页面后，重新运行质量检查器确认未引入问题：
 
 ```powershell
-python skills/ppt-master/scripts/svg_quality_checker.py <project_path>
+python /scripts/svg_quality_checker.py <project_path>
 ```
 
 ---
@@ -114,11 +114,11 @@ python skills/ppt-master/scripts/svg_quality_checker.py <project_path>
 ```powershell
 # 示例：类别"Q1"处双系列堆叠，底部=30，顶部=20，绑图区y从100到500
 # 运行1 — 底部段（原点 = 基线）
-python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+python /scripts/svg_position_calculator.py calc bar \
   --data "Q1:30,Q2:..." --area "x_min,100,x_max,500" \
   --bar-width 80 --value-range "0,axis_max"
 # 运行2 — 顶部段（原点上移底部段的像素高度）
-python skills/ppt-master/scripts/svg_position_calculator.py calc bar \
+python /scripts/svg_position_calculator.py calc bar \
   --data "Q1:20,Q2:..." --area "x_min,100,x_max,<500 - bottom_height_px>" \
   --bar-width 80 --value-range "0,axis_max"
 ```
@@ -148,7 +148,7 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 继续后处理与导出（[SKILL.md 步骤7](../SKILL.md)）：
 
 ```powershell
-python skills/ppt-master/scripts/notes_all_md_split.py <project_path>
-python skills/ppt-master/scripts/finalize_svg.py <project_path>
-python skills/ppt-master/scripts/svg_to_pptx.py <project_path> -s final
+python /scripts/notes_all_md_split.py <project_path>
+python /scripts/finalize_svg.py <project_path>
+python /scripts/svg_to_pptx.py <project_path> -s final
 ```

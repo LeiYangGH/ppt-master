@@ -462,7 +462,7 @@ We welcome your project contributions! Please ensure:
 
 1. Follow the standard project structure
 2. Include a complete design specification document
-3. SVG files comply with technical specifications (check with `python skills/ppt-master/scripts/svg_quality_checker.py`)
+3. SVG files comply with technical specifications (check with `python /scripts/svg_quality_checker.py`)
 4. No sensitive information is included
 
 ### How to Contribute
@@ -474,9 +474,9 @@ We welcome your project contributions! Please ensure:
 ## Related Resources
 
 - [Quick Start](../README.md)
-- [Workflow Tutorial](../skills/ppt-master/SKILL.md)
-- [Chart Templates](../skills/ppt-master/templates/charts/)
-- [Icon Library](../skills/ppt-master/templates/icons/) (11,600+ icons)
+- [Workflow Tutorial](..//SKILL.md)
+- [Chart Templates](..//templates/charts/)
+- [Icon Library](..//templates/icons/) (11,600+ icons)
 
 ---
 

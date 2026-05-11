@@ -52,7 +52,7 @@ Get-ChildItem -Force "<reference_source_path>"
 如参考来源为 `.pptx` 模板文件，使用统一准备助手：
 
 ```powershell
-python skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pptx>"
+python /scripts/pptx_template_import.py "<reference_template.pptx>"
 ```
 
 此助手在一个工作区内完成全部PPTX参考准备：
@@ -135,10 +135,10 @@ python skills/ppt-master/scripts/pptx_template_import.py "<reference_template.pp
 ## 步骤 3：创建模板目录
 
 ```powershell
-New-Item -ItemType Directory -Force -Path "skills/ppt-master/templates/layouts/<template_id>"
+New-Item -ItemType Directory -Force -Path "/templates/layouts/<template_id>"
 ```
 
-> **输出位置**：全局模板放在 `skills/ppt-master/templates/layouts/`；项目模板放在 `projects/<project>/templates/`
+> **输出位置**：全局模板放在 `/templates/layouts/`；项目模板放在 `projects/<project>/templates/`
 >
 > 生成的目录名必须与 `layouts_index.json` 中的最终模板ID一致。
 
@@ -185,13 +185,13 @@ New-Item -ItemType Directory -Force -Path "skills/ppt-master/templates/layouts/<
 ## 步骤 5：验证模板资产
 
 ```powershell
-Get-ChildItem -Force "skills/ppt-master/templates/layouts/<template_id>"
+Get-ChildItem -Force "/templates/layouts/<template_id>"
 ```
 
 对模板目录运行SVG验证：
 
 ```powershell
-python skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templates/layouts/<template_id>" --format <canvas_format>
+python /scripts/svg_quality_checker.py "/templates/layouts/<template_id>" --format <canvas_format>
 ```
 
 **检查清单**：
@@ -209,7 +209,7 @@ python skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templ
 
 ## 步骤 6：注册模板到库索引
 
-在 `skills/ppt-master/templates/layouts/layouts_index.json` 中添加顶层条目。该文件为 `template_id → { label, summary, keywords }` 的扁平映射：
+在 `/templates/layouts/layouts_index.json` 中添加顶层条目。该文件为 `template_id → { label, summary, keywords }` 的扁平映射：
 
 ```json
 "<template_id>": {
@@ -231,7 +231,7 @@ python skills/ppt-master/scripts/svg_quality_checker.py "skills/ppt-master/templ
 ## 模板创建完成
 
 **模板名称**: <template_id> (<display_name>)
-**模板路径**: `skills/ppt-master/templates/layouts/<template_id>/`
+**模板路径**: `/templates/layouts/<template_id>/`
 **分类**: <category>
 **画布格式**: <canvas_format>
 **索引注册**: 已完成

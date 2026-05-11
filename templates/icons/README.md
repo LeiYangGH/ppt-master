@@ -54,11 +54,11 @@ python scripts/svg_finalize/embed_icons.py svg_output/*.svg
 Use `ls | grep` — zero token cost:
 
 ```powershell
-Get-ChildItem skills\ppt-master	emplates\icons\chunk-filled\*home*
-Get-ChildItem skills\ppt-master	emplates\icons	abler-filled\*home*
-Get-ChildItem skills\ppt-master	emplates\icons	abler-outline\*chart*
-ls skills/ppt-master/templates/icons/phosphor-duotone/ | grep house
-ls skills/ppt-master/templates/icons/simple-icons/ | grep github
+Get-ChildItem 	emplates\icons\chunk-filled\*home*
+Get-ChildItem 	emplates\icons	abler-filled\*home*
+Get-ChildItem 	emplates\icons	abler-outline\*chart*
+ls /templates/icons/phosphor-duotone/ | grep house
+ls /templates/icons/simple-icons/ | grep github
 ```
 
 ---

@@ -5,7 +5,7 @@
 ## 新建项目
 
 ```powershell
-python skills/ppt-master/scripts/project_manager.py init my_project --format ppt169
+python /scripts/project_manager.py init my_project --format ppt169
 ```
 
 ## 目录结构

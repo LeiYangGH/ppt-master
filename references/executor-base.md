@@ -132,7 +132,7 @@ grep "chart-plot-area" <project_path>/svg_output/<current_page>.svg
 **每写完一页 SVG 后**，渲染并视觉检查：
 
 ```bash
-python3 ${SKILL_DIR}/scripts/render_svg.py <project_path>/svg_output/<current_page>.svg
+python3 scripts/render_svg.py <project_path>/svg_output/<current_page>.svg
 ```
 
 这会在 SVG 旁生成 `<current_page>.png`。然后 `read_file` 该 PNG 并检查：
@@ -199,11 +199,11 @@ Strategist 负责选择图标库和清单；Executor 只负责实现。图标库
 
 **查找图标**——建议用终端，零 token 成本：
 ```powershell
-Get-ChildItem skills\ppt-master	emplates\icons\chunk-filled\*home*
-Get-ChildItem skills\ppt-master	emplates\icons	abler-filled\*home*
-Get-ChildItem skills\ppt-master	emplates\icons	abler-outline\*chart*
-ls skills/ppt-master/templates/icons/phosphor-duotone/ | grep house
-ls skills/ppt-master/templates/icons/simple-icons/ | grep github
+Get-ChildItem templates\icons\chunk-filled\*home*
+Get-ChildItem templates\icons	abler-filled\*home*
+Get-ChildItem templates\icons	abler-outline\*chart*
+ls templates/icons/phosphor-duotone/ | grep house
+ls templates/icons/simple-icons/ | grep github
 ```
 
 **抽象概念 → 图标名**（`chunk-filled` 命名；tabler 系列请用其对应名并自行 `ls | grep` 验证）：

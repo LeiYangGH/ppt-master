@@ -15,13 +15,13 @@ PPT Master 导出的 PPTX 支持**页面切换**（页与页之间）和**逐元
 
 ```powershell
 # 使用其他切换效果
-python skills/ppt-master/scripts/svg_to_pptx.py <project> -t push --transition-duration 0.6
+python scripts/svg_to_pptx.py <project> -t push --transition-duration 0.6
 
 # 关闭切换
-python skills/ppt-master/scripts/svg_to_pptx.py <project> -t none
+python scripts/svg_to_pptx.py <project> -t none
 
 # 每 5 秒自动翻页（展台/轮播）
-python skills/ppt-master/scripts/svg_to_pptx.py <project> --auto-advance 5
+python scripts/svg_to_pptx.py <project> --auto-advance 5
 ```
 
 可用效果：`fade`、`push`、`wipe`、`split`、`strips`、`cover`、`random`。
@@ -42,23 +42,23 @@ python skills/ppt-master/scripts/svg_to_pptx.py <project> --auto-advance 5
 
 ```powershell
 # 默认行为：mixed + after-previous
-python skills/ppt-master/scripts/svg_to_pptx.py <project>
+python scripts/svg_to_pptx.py <project>
 
 # 完全关闭逐元素动画
-python skills/ppt-master/scripts/svg_to_pptx.py <project> -a none
+python scripts/svg_to_pptx.py <project> -a none
 
 # 固定使用一种效果
-python skills/ppt-master/scripts/svg_to_pptx.py <project> --animation fade
+python scripts/svg_to_pptx.py <project> --animation fade
 
 # 切为点击触发
-python skills/ppt-master/scripts/svg_to_pptx.py <project> --animation-trigger on-click
+python scripts/svg_to_pptx.py <project> --animation-trigger on-click
 
 # 自定义节奏
-python skills/ppt-master/scripts/svg_to_pptx.py <project> --animation mixed \
+python scripts/svg_to_pptx.py <project> --animation mixed \
         --animation-stagger 0.6 --animation-duration 0.5
 
 # 所有组同时播放
-python skills/ppt-master/scripts/svg_to_pptx.py <project> --animation-trigger with-previous
+python scripts/svg_to_pptx.py <project> --animation-trigger with-previous
 ```
 
 共 22 种单一效果：`appear`、`fade`、`fly`、`cut`、`zoom`、`wipe`、`split`、`blinds`、`checkerboard`、`dissolve`、`random_bars`、`peek`、`wheel`、`box`、`circle`、`diamond`、`plus`、`strips`、`wedge`、`stretch`、`expand`、`swivel`。另有两种自动模式：

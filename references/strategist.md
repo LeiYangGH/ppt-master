@@ -105,7 +105,7 @@
 > **在八项确认全部通过之后——当你开始填写 `design_spec.md` §VI / `spec_lock.md` 时**，再正式落地 icon inventory：
 >
 > 3. 根据确认后的大纲，列出 deck 实际需要的图标概念（如 home、chart、users 等）
-> 4. 在所选图标库中搜索每个概念对应的文件名：`Get-ChildItem skills\ppt-master\templates\icons\<chosen-library>\*<keyword>*`
+> 4. 在所选图标库中搜索每个概念对应的文件名：`Get-ChildItem templates\icons\<chosen-library>\*<keyword>*`
 > 5. 使用验证过的文件名（不带 `.svg`）作为图标名，并始终带上库前缀（如 `chunk-filled/home`）
 > 6. 在 `design_spec.md` §VI 中列出最终 icon inventory 和所选图标库；在 `spec_lock.md icons` 中同步记录（线稿库还需记录 `stroke_width`）。Executor 只能使用这份清单中的图标。
 >

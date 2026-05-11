@@ -66,7 +66,7 @@ try:
 except ImportError:
     # Fallback: minimal .env loader. Searches, in priority order:
     #   1. <repo>/.env
-    #   2. <skill>/.env  (skills/ppt-master/.env)
+    #   2. <skill>/.env  (/.env)
     #   3. <scripts>/.env
     def load_prefixed_env_file(prefixes):  # type: ignore[no-redef]
         """Load ``KEY=VALUE`` pairs whose KEY starts with any of *prefixes*.
@@ -77,7 +77,7 @@ except ImportError:
         if isinstance(prefixes, str):
             prefixes = (prefixes,)
         prefixes = tuple(prefixes)
-        repo_root = _SCRIPTS_DIR.parent.parent.parent
+        repo_root = _SCRIPTS_DIR.parent
         candidate_files = [
             repo_root / ".env",
             _SCRIPTS_DIR.parent / ".env",
@@ -127,8 +127,8 @@ _AUTO_DOWNLOAD_WORKERS = 8        # concurrent download threads
 _AUTO_DOWNLOAD_MAX_IMAGES = 30    # cap per single search invocation
 _MIN_IMAGE_BYTES = 1024           # files smaller than this are treated as errors
 
-# Project root (two levels above this script: .../ppt-master)
-_PROJECT_ROOT = _SCRIPTS_DIR.parent.parent.parent
+# Project root (one level above this script: .../ppt-master)
+_PROJECT_ROOT = _SCRIPTS_DIR.parent
 
 
 # ---------------------------------------------------------------------------

@@ -33,7 +33,7 @@ TEMPLATES_DIR = PROJECT_ROOT / 'templates'
 WORKFLOWS_DIR = PROJECT_ROOT / 'workflows'
 
 # Repository root directory
-REPO_ROOT = PROJECT_ROOT.parent.parent
+REPO_ROOT = PROJECT_ROOT
 EXAMPLES_DIR = REPO_ROOT / 'examples'
 PROJECTS_DIR = REPO_ROOT / 'projects'
 

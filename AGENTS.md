@@ -6,19 +6,19 @@ PPT Master — AI 驱动的多角色协作演示文稿生成系统。
 
 ## 必读
 
-**在任何 PPT 任务之前，你必须首先完整阅读 `skills/ppt-master/SKILL.md`** — 它是项目创建、角色切换、串行执行、质量关卡、后处理和导出的唯一权威来源。
+**在任何 PPT 任务之前，你必须首先完整阅读 `/SKILL.md`** — 它是项目创建、角色切换、串行执行、质量关卡、后处理和导出的唯一权威来源。
 
-- 独立模板创建：[`workflows/create-template.md`](skills/ppt-master/workflows/create-template.md)
-- 图表坐标校准：[`workflows/verify-charts.md`](skills/ppt-master/workflows/verify-charts.md)
+- 独立模板创建：[`workflows/create-template.md`](/workflows/create-template.md)
+- 图表坐标校准：[`workflows/verify-charts.md`](/workflows/verify-charts.md)
 
 ## 核心目录
 
 | 目录 | 用途 |
 |------|------|
-| `skills/ppt-master/` | 技能包根目录（SKILL.md、脚本、模板、参考规范） |
-| `skills/ppt-master/references/` | 角色定义（Strategist / Executor）和技术约束 |
-| `skills/ppt-master/scripts/` | 可运行工具脚本（项目管理、SVG 质检、导出等） |
-| `skills/ppt-master/templates/` | 布局模板、图表模板、图标库 |
+| `/` | 技能包根目录（SKILL.md、脚本、模板、参考规范） |
+| `/references/` | 角色定义（Strategist / Executor）和技术约束 |
+| `/scripts/` | 可运行工具脚本（项目管理、SVG 质检、导出等） |
+| `/templates/` | 布局模板、图表模板、图标库 |
 | `examples/` | 已完成的示例项目（可供参考风格和结构） |
 | `projects/` | 用户项目工作区（运行时产出目录） |
 

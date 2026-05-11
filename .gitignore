@@ -172,9 +172,7 @@ PERSONAL_NOTES.md
 # Use cloud sync (iCloud/Dropbox) for backup and multi-device access
 projects/*
 !projects/README.md
-references/
-references
 
 # web_search.py runtime cache (transient)
-skills/ppt-master/scripts/web_search_data/search_cache.json
-skills/ppt-master/scripts/web_search_data/collected_images.jsonl
+/scripts/web_search_data/search_cache.json
+/scripts/web_search_data/collected_images.jsonl

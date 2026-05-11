@@ -39,7 +39,7 @@ except ImportError:
 
 TOOLS_DIR = Path(__file__).resolve().parent
 SKILL_DIR = TOOLS_DIR.parent
-REPO_ROOT = SKILL_DIR.parent.parent
+REPO_ROOT = SKILL_DIR
 SOURCE_DIRNAME = "sources"
 TEXT_SOURCE_SUFFIXES = {".md", ".markdown", ".txt"}
 
