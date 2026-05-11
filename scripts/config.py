@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PPT Master - Unified Configuration Management Module
+Unified Configuration Management Module
 
 Centrally manages all project configuration items to ensure consistency and maintainability.
 
@@ -480,7 +480,7 @@ def main() -> None:
     import sys
 
     if len(sys.argv) < 2:
-        print("PPT Master - 配置管理工具\n")
+        print("配置管理工具\n")
         print("用法:")
         print("  python scripts/config.py list-formats     # 列出所有画布格式")
         print("  python scripts/config.py list-colors      # 列出所有配色方案")

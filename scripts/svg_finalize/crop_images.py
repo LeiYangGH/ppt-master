@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PPT Master - Smart Image Cropping Tool
+Smart Image Cropping Tool
 
 Smartly crops images based on the preserveAspectRatio attribute of <image> elements in SVG:
 - slice: Crop to fill (similar to CSS object-fit: cover)
@@ -312,7 +312,7 @@ def process_directory(directory: str, dry_run: bool = False, verbose: bool = Tru
 def main() -> None:
     """Run the CLI entry point."""
     parser = argparse.ArgumentParser(
-        description='PPT Master - Smart Image Cropping Tool',
+        description='Smart Image Cropping Tool',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
@@ -339,7 +339,7 @@ preserveAspectRatio usage:
         print(f"[ERROR] Path not found: {args.path}")
         sys.exit(1)
 
-    print("PPT Master - Smart Image Cropping")
+    print("Smart Image Cropping")
     print("=" * 50)
     
     if args.path.is_file():

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG 质量检查工具
+SVG 质量检查工具
 
 检查 SVG 文件是否符合项目技术规范。
 
 用法：
-    python scripts/svg_quality_checker.py workspace/svg_output/slide_01.svg
-    python scripts/svg_quality_checker.py workspace
-    python scripts/svg_quality_checker.py --all examples
+    python scripts/svg_quality_checker.py
 """
 
 import sys
@@ -796,55 +794,19 @@ class SVGQualityChecker:
 
 def main() -> None:
     """Run the CLI entry point."""
-    if len(sys.argv) < 2:
-        print("PPT Master - SVG 质量检查工具\n")
-        print("用法:")
-        print("  python scripts/svg_quality_checker.py <svg文件>")
-        print("  python scripts/svg_quality_checker.py <目录>")
-        print("  python scripts/svg_quality_checker.py --all examples")
-        print("\n示例:")
-        print("  python scripts/svg_quality_checker.py examples/project/svg_output/slide_01.svg")
-        print("  python scripts/svg_quality_checker.py examples/project/svg_output")
-        print("  python scripts/svg_quality_checker.py examples/project")
-        sys.exit(0)
-
+    from scripts.pathutil import SVG_OUTPUT_DIR
+    
     checker = SVGQualityChecker()
 
-    # Parse arguments
-    target = sys.argv[1]
-    expected_format = None
+    # Check workspace/svg_output
+    if not SVG_OUTPUT_DIR.exists():
+        print(f"错误: SVG 输出目录不存在: {SVG_OUTPUT_DIR}")
+        sys.exit(1)
 
-    if '--format' in sys.argv:
-        idx = sys.argv.index('--format')
-        if idx + 1 < len(sys.argv):
-            expected_format = sys.argv[idx + 1]
-
-    # Execute check
-    if target == '--all':
-        # Check all example projects
-        base_dir = sys.argv[2] if len(sys.argv) > 2 else 'examples'
-        from project_utils import find_all_projects
-        projects = find_all_projects(base_dir)
-
-        for project in projects:
-            print(f"\n{'=' * 80}")
-            print(f"正在检查项目: {project.name}")
-            print('=' * 80)
-            checker.check_directory(str(project))
-    else:
-        checker.check_directory(target, expected_format)
+    checker.check_directory(str(SVG_OUTPUT_DIR))
 
     # Print summary
     checker.print_summary()
-
-    # Export report (if specified)
-    if '--export' in sys.argv:
-        output_file = 'svg_quality_report.txt'
-        if '--output' in sys.argv:
-            idx = sys.argv.index('--output')
-            if idx + 1 < len(sys.argv):
-                output_file = sys.argv[idx + 1]
-        checker.export_report(output_file)
 
     # Return exit code
     if checker.summary['errors'] > 0:

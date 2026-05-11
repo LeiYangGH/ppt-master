@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """将 spec_lock.md 的值变更同步到锁文件和 svg_output/*.svg。
 
-示例：
-    python update_spec.py workspace primary=#0066AA
-    python update_spec.py workspace colors.text=#111111
-    python update_spec.py workspace typography.font_family='"PingFang SC", "Microsoft YaHei", sans-serif'
+用法：
+    python scripts/update_spec.py colors.primary=#0066AA
+    python scripts/update_spec.py typography.font_family='"PingFang SC", sans-serif'
 
 v2 支持范围：
 - `colors.*` — 在 svg_output/*.svg 中替换 HEX 值（不区分大小写）。
@@ -147,8 +146,9 @@ def replace_font_family_in_svgs(
 
 
 def main() -> int:
+    from scripts.pathutil import WORKSPACE_DIR, SPEC_LOCK_FILE, SVG_OUTPUT_DIR
+    
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("project_path", type=Path, help="包含 spec_lock.md 和 svg_output/ 的项目目录")
     ap.add_argument(
         "assignment",
         help="section.key=value（如 colors.primary=#0066AA, typography.font_family='\"Inter\", Arial, sans-serif'）。"
@@ -162,9 +162,9 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    project = args.project_path.resolve()
-    lock = project / "spec_lock.md"
-    svg_dir = project / "svg_output"
+    project = WORKSPACE_DIR
+    lock = SPEC_LOCK_FILE
+    svg_dir = SVG_OUTPUT_DIR
 
     if not lock.exists():
         print(f"错误: spec_lock.md 未找到: {lock}", file=sys.stderr)

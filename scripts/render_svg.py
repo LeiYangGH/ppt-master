@@ -1,34 +1,22 @@
 #!/usr/bin/env python3
 """
-PPT Master - SVG Preview Renderer
+SVG 预览渲染器
 
-Renders SVG files to PNG for visual review. Designed for the Executor
-visual-check loop: generate SVG → render PNG → LLM views image → fix if needed.
+将 SVG 渲染为 PNG 用于视觉检查。用于 Executor 视觉检查循环：生成 SVG → 渲染 PNG → LLM 查看图片 → 修复。
 
-Renderer priority: PyMuPDF (works everywhere) > CairoSVG > svglib.
+渲染器优先级：PyMuPDF（通用）> CairoSVG > svglib。
 
-Usage:
-    # Render a single SVG
-    python scripts/render_svg.py workspace/svg_output/slide_01.svg
+用法：
+    python scripts/render_svg.py
 
-    # Render all SVGs in workspace/svg_output/
-    python scripts/render_svg.py workspace
+输出：
+    将 workspace/svg_output/ 下的 SVG 渲染到 workspace/svg_preview/ 目录
 
-    # Custom output directory
-    python scripts/render_svg.py workspace -o <output_dir>
-
-Output:
-    PNG files are written to workspace/svg_preview/ (default)
-    or next to the SVG file when rendering a single file.
-
-Notes:
-    PyMuPDF renders SVG layout/text/shapes faithfully but may skip
-    external <image> references and <use> icons. This is fine for the
-    visual-check loop — the LLM reviews layout, spacing, text wrapping,
-    and overlap, not bitmap fidelity.
+注意：
+    PyMuPDF 忠实渲染布局/文本/形状，但可能跳过外部 <image> 和 <use> 图标。
+    这对视觉检查循环足够——LLM 检查布局、间距、文本换行和重叠，而非位图保真度。
 """
 
-import argparse
 import sys
 from pathlib import Path
 
@@ -156,18 +144,8 @@ def render_project(
 # ── CLI ──────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='PPT Master - SVG Preview Renderer',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='Renderer priority: PyMuPDF > CairoSVG > svglib.',
-    )
-    parser.add_argument('path', type=Path, help='SVG file or project directory')
-    parser.add_argument('-o', '--output', type=Path, default=None,
-                        help='Output directory (default: svg_preview/ under project)')
-    parser.add_argument('--dpi', type=int, default=150,
-                        help='Render DPI (default: 150, PyMuPDF only)')
-    args = parser.parse_args()
-
+    from scripts.pathutil import SVG_OUTPUT_DIR, WORKSPACE_DIR
+    
     if _RENDERER is None:
         print("[ERROR] No renderer available. Install one of:")
         print("  pip install PyMuPDF        # recommended, works everywhere")
@@ -175,23 +153,13 @@ def main():
         print("  pip install svglib reportlab")
         sys.exit(1)
 
-    target = args.path
-
-    if target.is_file() and target.suffix == '.svg':
-        if args.output and args.output.is_dir():
-            png_path = args.output / (target.stem + '.png')
-        else:
-            png_path = target.with_suffix('.png')
-        success = render_file(target, png_path, dpi=args.dpi)
-        sys.exit(0 if success else 1)
-
-    elif target.is_dir():
-        ok, fail = render_project(target, args.output, dpi=args.dpi)
-        sys.exit(0 if fail == 0 else 1)
-
-    else:
-        print(f"[ERROR] Not found: {target}")
+    if not SVG_OUTPUT_DIR.exists():
+        print(f"[ERROR] SVG output directory not found: {SVG_OUTPUT_DIR}")
         sys.exit(1)
+
+    output_dir = WORKSPACE_DIR / 'svg_preview'
+    ok, fail = render_project(SVG_OUTPUT_DIR, output_dir, dpi=150)
+    sys.exit(0 if fail == 0 else 1)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PPT Master - Image Orientation Management Tool
+Image Orientation Management Tool
 
 Provides visual image orientation filtering, fix code generation,
 and batch image rotation functionality.

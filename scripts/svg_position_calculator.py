@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG 坐标计算与校验工具
+SVG 坐标计算与校验工具
 
 提供图表坐标的预计算和后校验，输出清晰的坐标表。
 

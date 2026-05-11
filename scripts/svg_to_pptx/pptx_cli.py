@@ -33,7 +33,7 @@ def main() -> None:
     )
 
     parser = argparse.ArgumentParser(
-        description='PPT Master - SVG 转 PPTX 工具（Office 兼容模式）',
+        description='SVG 转 PPTX 工具（Office 兼容模式）',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f'''
 示例：
@@ -213,7 +213,7 @@ SVG 源目录 (-s)：
     # --- Native shapes version (primary) ---
     if gen_native:
         if verbose:
-            print("PPT Master - SVG 转 PPTX 工具")
+            print("SVG 转 PPTX 工具")
             print("=" * 50)
             print(f"  项目路径: {project_path}")
             print(f"  SVG 目录: {source_dir_name}")
@@ -233,7 +233,7 @@ SVG 源目录 (-s)：
             if gen_native:
                 print()
                 print("-" * 50)
-            print("PPT Master - SVG 转 PPTX 工具（SVG 参考）")
+            print("SVG 转 PPTX 工具（SVG 参考）")
             print("=" * 50)
             print(f"  项目路径: {project_path}")
             print(f"  SVG 目录: {source_dir_name}")

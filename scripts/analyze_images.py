@@ -10,14 +10,13 @@
 这些数值仅在 Strategist 选择 side-by-side 意图时适用。
 
 用法：
-    python scripts/analyze_images.py workspace/images
+    python scripts/analyze_images.py
 
 输出：
     - 控制台显示分析报告
     - 在图片目录的父目录生成 image_analysis.csv
 """
 
-import argparse
 import os
 import sys
 from pathlib import Path
@@ -325,23 +324,11 @@ def save_csv(results: list[ImageAnalysis], csv_path: str) -> None:
 
 def main() -> None:
     """Run the CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="分析图片尺寸并计算 PPT 布局尺寸"
-    )
-    parser.add_argument(
-        "images_dir",
-        help="图片目录路径"
-    )
-    parser.add_argument(
-        "--canvas",
-        default="ppt169",
-        help=f"画布格式键（默认: ppt169）。可用: {', '.join(sorted(CANVAS_FORMATS.keys()))}"
-    )
-
-    args = parser.parse_args()
-
-    images_dir = os.path.abspath(args.images_dir)
-
+    from scripts.pathutil import IMAGES_DIR
+    
+    images_dir = str(IMAGES_DIR)
+    canvas_key = "ppt169"
+    
     if not os.path.exists(images_dir):
         print(f"错误: 目录未找到: {images_dir}")
         sys.exit(1)
@@ -350,7 +337,6 @@ def main() -> None:
         print(f"错误: 不是目录: {images_dir}")
         sys.exit(1)
 
-    canvas_key = args.canvas
     if canvas_key not in CANVAS_FORMATS:
         print(f"错误: 未知画布格式 '{canvas_key}'。可用: {', '.join(sorted(CANVAS_FORMATS.keys()))}")
         sys.exit(1)

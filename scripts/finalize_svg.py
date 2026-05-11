@@ -1,35 +1,17 @@
 #!/usr/bin/env python
 """
-PPT Master - SVG 后处理工具（统一入口）
+SVG 后处理工具（统一入口）
 
 将 svg_output/ 中的 SVG 文件处理后输出到 svg_final/。
 默认执行所有处理步骤，也可通过参数指定单独步骤。
 
 用法：
-    # 执行所有处理步骤（推荐）
-    python scripts/finalize_svg.py workspace
-
-    # 仅执行指定步骤
-    python scripts/finalize_svg.py workspace --only embed-icons fix-rounded
-
-示例：
-    python scripts/finalize_svg.py workspace
-    python scripts/finalize_svg.py examples/ppt169_demo --only embed-icons
-
-处理选项：
-    repair-xml    - 使用 sloppy-xml 修复格式错误的 XML（先于其他基于 XML 的步骤）
-    embed-icons   - 将 <use data-icon="..."/> 替换为实际图标 SVG
-    crop-images   - 基于 preserveAspectRatio="slice" 智能裁剪图片
-    fix-aspect    - 修正图片宽高比（防止 PPT 形状转换时拉伸）
-    embed-images  - 将外部图片转换为 Base64 嵌入
-    flatten-text  - 将 <tspan> 转为独立 <text>（用于特殊渲染器）
-    fix-rounded   - 将 <rect rx="..."/> 转为 <path>（用于 PPT 形状转换）
+    python scripts/finalize_svg.py
 """
 
 import os
 import sys
 import shutil
-import argparse
 from pathlib import Path
 
 # Import finalize helpers from the internal package.
@@ -126,9 +108,11 @@ def finalize_project(
         compress: Compress images before embedding
         max_dimension: Downscale images exceeding this dimension
     """
-    svg_output = project_dir / 'svg_output'
-    svg_final = project_dir / 'svg_final'
-    icons_dir = Path(__file__).parent.parent / 'templates' / 'icons'
+    from scripts.pathutil import SVG_OUTPUT_DIR, SVG_FINAL_DIR, TEMPLATES_DIR
+    
+    svg_output = SVG_OUTPUT_DIR
+    svg_final = SVG_FINAL_DIR
+    icons_dir = TEMPLATES_DIR / 'icons'
 
     # Check if svg_output exists
     if not svg_output.exists():
@@ -280,72 +264,39 @@ def finalize_project(
 
 def main() -> None:
     """Run the CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description='PPT Master - SVG 后处理工具',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-示例：
-  %(prog)s workspace                        # 执行所有处理（默认）
-  %(prog)s workspace --only embed-icons fix-rounded
-  %(prog)s workspace -q                     # 安静模式
-
-处理选项（用于 --only）：
-  repair-xml    修复格式错误的 XML（sloppy-xml）
-  embed-icons   嵌入图标
-  crop-images   智能裁剪图片（基于 preserveAspectRatio）
-  fix-aspect    修正图片宽高比（防止 PPT 形状转换时拉伸）
-  embed-images  嵌入图片
-  flatten-text  展平文本
-  fix-rounded   将圆角矩形转为 Path
-        '''
-    )
-
-    parser.add_argument('project_dir', type=Path, help='项目目录路径')
-    parser.add_argument('--only', nargs='+', metavar='OPTION',
-                        choices=['repair-xml', 'embed-icons', 'crop-images', 'fix-aspect', 'embed-images', 'flatten-text', 'fix-rounded'],
-                        help='仅执行指定处理步骤（默认: 全部）')
-    parser.add_argument('--dry-run', '-n', action='store_true',
-                        help='仅预览，不执行')
-    parser.add_argument('--quiet', '-q', action='store_true',
-                        help='安静模式，减少输出')
-    parser.add_argument('--compress', action='store_true',
-                        help='嵌入前压缩图片（JPEG quality=85，PNG 优化）')
-    parser.add_argument('--max-dimension', type=int, default=None,
-                        help='缩放超过此尺寸的图片（如 2560）')
-
-    args = parser.parse_args()
-
-    if not args.project_dir.exists():
-        safe_print(f"[ERROR] 项目目录不存在: {args.project_dir}")
+    from scripts.pathutil import WORKSPACE_DIR, SVG_OUTPUT_DIR, SVG_FINAL_DIR
+    
+    project_dir = WORKSPACE_DIR
+    
+    if not SVG_OUTPUT_DIR.exists():
+        safe_print(f"[ERROR] SVG 输出目录不存在: {SVG_OUTPUT_DIR}")
         sys.exit(1)
 
-    # Determine processing options
-    if args.only:
-        # Execute only specified steps
-        options = {
-            'repair_xml': 'repair-xml' in args.only,
-            'embed_icons': 'embed-icons' in args.only,
-            'crop_images': 'crop-images' in args.only,
-            'fix_aspect': 'fix-aspect' in args.only,
-            'embed_images': 'embed-images' in args.only,
-            'flatten_text': 'flatten-text' in args.only,
-            'fix_rounded': 'fix-rounded' in args.only,
-        }
-    else:
-        # Execute all by default
-        options = {
-            'repair_xml': True,
-            'embed_icons': True,
-            'crop_images': True,
-            'fix_aspect': True,
-            'embed_images': True,
-            'flatten_text': True,
-            'fix_rounded': True,
-        }
+    # Execute all processing steps
+    options = {
+        'repair_xml': True,
+        'embed_icons': True,
+        'crop_images': True,
+        'fix_aspect': True,
+        'embed_images': True,
+        'flatten_text': True,
+        'fix_rounded': True,
+    }
+    
+    quiet = False
+    dry_run = False
+    compress = False
+    max_dimension = None
 
-    success = finalize_project(args.project_dir, options, args.dry_run, args.quiet,
-                               compress=args.compress,
-                               max_dimension=args.max_dimension)
+    success = finalize_project(
+        project_dir,
+        options,
+        dry_run=dry_run,
+        quiet=quiet,
+        compress=compress,
+        max_dimension=max_dimension
+    )
+
     sys.exit(0 if success else 1)
 
 

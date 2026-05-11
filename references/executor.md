@@ -43,7 +43,7 @@ Executor 是 SVG 设计执行者，负责根据 Design Spec 生成高质量 SVG 
 
 在生成第一张 SVG 页面前，先输出一份确认清单：画布尺寸、正文字号、配色方案（primary/secondary/accent HEX）、字体方案。
 
-### 3.1 每页重读 `spec_lock.md`（强制）
+### 3.1 每页重读 `spec_lock.md`
 
 > 长文档在中后段容易因上下文压缩而偏离已声明的配色和图标。`spec_lock.md` 是执行时的唯一基准，每页都要重读。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""PPT Master - 错误信息助手
+"""错误信息助手
 
 提供用户友好的错误信息和具体修复建议。
 """
@@ -405,7 +405,7 @@ class ErrorHelper:
     @classmethod
     def print_help(cls):
         """Print all error types and solutions."""
-        print("PPT Master - 错误类型与解决方案\n")
+        print("错误类型与解决方案\n")
         print("=" * 80)
 
         for error_type, info in cls.ERROR_SOLUTIONS.items():

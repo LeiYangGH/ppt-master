@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 """
-PPT Master - 演讲备注拆分工具
+演讲备注拆分工具
 
 将 notes_all.md 演讲备注文件拆分为多个独立备注文件，
 每个文件对应一个 SVG 页面。
 
 用法：
-    python scripts/notes_all_md_split.py workspace
-    python scripts/notes_all_md_split.py workspace -o notes
-
-示例：
-    python scripts/notes_all_md_split.py workspace
-    python scripts/notes_all_md_split.py workspace -o notes
-
-依赖：
-    无（仅使用标准库）
+    python scripts/notes_all_md_split.py
 
 说明：
     - 检查 SVG 文件与演讲备注的一一对应关系
@@ -24,7 +16,6 @@ PPT Master - 演讲备注拆分工具
 """
 
 import sys
-import argparse
 import re
 from pathlib import Path
 
@@ -108,25 +99,6 @@ def match_title(
         if len(candidates) == 1:
             return candidates[0]
     return None
-
-
-def find_svg_files(project_path: Path) -> list[Path]:
-    """
-    Find SVG files in the project
-
-    Args:
-        project_path: Project directory path
-
-    Returns:
-        List of SVG files (sorted by filename)
-    """
-    svg_dir = project_path / 'svg_output'
-
-    if not svg_dir.exists():
-        print(f"错误: {svg_dir} 目录不存在")
-        return []
-
-    return sorted(svg_dir.glob('*.svg'))
 
 
 def parse_notes_all_md(
@@ -272,51 +244,26 @@ def split_notes(notes: dict[str, str], output_dir: Path, verbose: bool = True) -
 
 def main() -> None:
     """Run the CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description='PPT Master - 演讲备注拆分工具',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-示例：
-    %(prog)s workspace
-    %(prog)s workspace -o notes
-    %(prog)s workspace -q
+    from scripts.pathutil import WORKSPACE_DIR, NOTES_DIR, NOTES_ALL_FILE, SVG_OUTPUT_DIR
 
-功能：
-    - 读取 notes_all.md 演讲备注文件
-    - 检查 SVG 文件与备注的映射关系
-    - 将备注拆分为多个独立文件
-    - 输出文件名与 SVG 文件名对应
-'''
-    )
-
-    parser.add_argument('project_path', type=str, help='项目目录路径')
-    parser.add_argument('-o', '--output', type=str, default=None, help='输出目录路径（默认: 项目下的 notes 目录）')
-    parser.add_argument('-q', '--quiet', action='store_true', help='安静模式')
-
-    args = parser.parse_args()
-
-    project_path = Path(args.project_path)
-    if not project_path.exists():
-        print(f"错误: 路径不存在: {project_path}")
-        sys.exit(1)
-
-    # Determine output directory
-    if args.output:
-        output_dir = Path(args.output)
-    else:
-        output_dir = project_path / 'notes'
-
-    verbose = not args.quiet
+    # Fixed parameters: workspace directory, output to workspace/notes
+    project_path = WORKSPACE_DIR
+    output_dir = NOTES_DIR
+    verbose = True
 
     if verbose:
-        print("PPT Master - 演讲备注拆分工具")
+        print("演讲备注拆分工具")
         print("=" * 50)
         print(f"  项目路径: {project_path}")
         print(f"  输出目录: {output_dir}")
         print()
 
     # Find SVG files
-    svg_files = find_svg_files(project_path)
+    if not SVG_OUTPUT_DIR.exists():
+        print(f"错误: {SVG_OUTPUT_DIR} 目录不存在")
+        sys.exit(1)
+        
+    svg_files = sorted(SVG_OUTPUT_DIR.glob('*.svg'))
 
     if not svg_files:
         print("错误: 未找到 SVG 文件")
@@ -326,7 +273,7 @@ def main() -> None:
         print(f"  找到 {len(svg_files)} 个 SVG 文件")
 
     # Parse notes_all.md
-    notes_all_md_path = project_path / 'notes' / 'notes_all.md'
+    notes_all_md_path = NOTES_ALL_FILE
     svg_stems = [p.stem for p in svg_files]
     notes = parse_notes_all_md(notes_all_md_path, svg_stems, verbose)
 

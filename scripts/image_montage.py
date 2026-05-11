@@ -8,16 +8,8 @@ containing up to 20 thumbnails with the original filename stamped under
 every cell.  The LLM then only needs to vision-read M montages to
 produce a keep/rename/delete decision for every source image.
 
-Typical usage
--------------
-    # Auto-locate current project's images/ directory
-    python image_montage.py
-
-    # Pin a specific project by name or path
-    python image_montage.py --project-dir 自然灾害科普儿童版_ppt169_20260507
-
-    # Ad-hoc: tile any folder
-    python image_montage.py d:/path/to/folder
+用法：
+    python scripts/image_montage.py
 
 LLM usage notes
 ---------------
@@ -35,7 +27,6 @@ LLM usage notes
 """
 from __future__ import annotations
 
-import argparse
 import json
 import math
 import os
@@ -377,87 +368,42 @@ def build_montages(
 # CLI
 # ---------------------------------------------------------------------------
 
-def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(
-        description=(
-            "Build contact-sheet montages for LLM batch image triage.\n\n"
-            "Tiles the images/ folder into montage_NN_of_MM.jpg (default 20\n"
-            "thumbnails per montage, 4x5 grid).  Each cell carries the\n"
-            "original filename, so the LLM can decide keep/rename/delete\n"
-            "after a single vision read per montage."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    ap.add_argument("images_dir", nargs="?", default=None,
-                    help="Directory of images to tile. Default: autodiscover "
-                         "via --project-dir / PPT_PROJECT_DIR / workspace.")
-    ap.add_argument("--project-dir", default=None,
-                    help="Workspace path; resolves to "
-                         "workspace/images/. Overrides PPT_PROJECT_DIR.")
-    ap.add_argument("--output-dir", default=None,
-                    help=f"Where to write montages. Default: "
-                         f"<images_dir>/{_DEFAULT_OUTPUT_NAME}/")
-    ap.add_argument("--cols", type=int, default=_DEFAULT_COLS,
-                    help=f"Grid columns (default: {_DEFAULT_COLS}).")
-    ap.add_argument("--rows", type=int, default=_DEFAULT_ROWS,
-                    help=f"Grid rows (default: {_DEFAULT_ROWS}).")
-    ap.add_argument("--cell-width", type=int, default=_DEFAULT_CELL_W,
-                    help=f"Thumbnail cell width in px (default: {_DEFAULT_CELL_W}).")
-    ap.add_argument("--cell-height", type=int, default=_DEFAULT_CELL_H,
-                    help=f"Thumbnail cell height in px (default: {_DEFAULT_CELL_H}).")
-    ap.add_argument("--label-height", type=int, default=_DEFAULT_LABEL_H,
-                    help=f"Filename label strip height in px (default: {_DEFAULT_LABEL_H}).")
-    ap.add_argument("--quality", type=int, default=_DEFAULT_QUALITY,
-                    help=f"JPEG quality (default: {_DEFAULT_QUALITY}).")
-    ap.add_argument("--format", choices=("jpg", "png"), default=_DEFAULT_FORMAT,
-                    help="Output format (default: jpg).")
-    ap.add_argument("--recursive", action="store_true",
-                    help="Recurse into sub-directories (output dir is always skipped).")
-    ap.add_argument("--font", default=None,
-                    help="Override font file for labels (any TTF/TTC path).")
-    ap.add_argument("--json", action="store_true",
-                    help="Print the full manifest JSON to stdout instead of a summary.")
-    return ap
-
-
-def _resolve_images_dir(args: argparse.Namespace) -> Optional[Path]:
-    if args.images_dir:
-        p = Path(args.images_dir)
-        if p.name != "images" and (p / "images").exists():
-            p = p / "images"
-        return p
-    return resolve_project_images_dir(args.project_dir)
-
-
 def main(argv: Optional[list[str]] = None) -> int:
-    args = build_parser().parse_args(argv)
-
-    images_dir = _resolve_images_dir(args)
-    if images_dir is None:
-        print("error: no images directory located. Pass a path, use --project-dir, "
-              "or set PPT_PROJECT_DIR.", file=sys.stderr)
-        return 2
+    from scripts.pathutil import IMAGES_DIR
+    
+    images_dir = IMAGES_DIR
     if not images_dir.exists():
         print(f"error: images directory does not exist: {images_dir}", file=sys.stderr)
         return 2
 
-    output_dir = Path(args.output_dir) if args.output_dir else None
+    # Use default parameters
+    output_dir = None
+    cols = 4
+    rows = 5
+    cell_w = None
+    cell_h = None
+    label_h = None
+    quality = 85
+    fmt = 'jpg'
+    recursive = False
+    font_override = None
+    json_output = False
 
     manifest = build_montages(
         images_dir,
         output_dir=output_dir,
-        cols=args.cols,
-        rows=args.rows,
-        cell_w=args.cell_width,
-        cell_h=args.cell_height,
-        label_h=args.label_height,
-        quality=args.quality,
-        fmt=args.format,
-        recursive=args.recursive,
-        font_override=args.font,
+        cols=cols,
+        rows=rows,
+        cell_w=cell_w,
+        cell_h=cell_h,
+        label_h=label_h,
+        quality=quality,
+        fmt=fmt,
+        recursive=recursive,
+        font_override=font_override,
     )
 
-    if args.json:
+    if json_output:
         print(json.dumps(manifest, ensure_ascii=False, indent=2))
         return 0
 

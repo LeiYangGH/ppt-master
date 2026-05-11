@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-PPT Master - 批量项目校验工具
+批量项目校验工具
 
 一次性检查多个项目的结构完整性和合规性。
 
@@ -257,7 +257,7 @@ class BatchValidator:
 def main() -> None:
     """Run the CLI entry point."""
     if len(sys.argv) < 2:
-        print("PPT Master - 批量项目校验工具\n")
+        print("批量项目校验工具\n")
         print("用法:")
         print("  python scripts/batch_validate.py <目录>")
         print("  python scripts/batch_validate.py <目录1> <目录2> ...")

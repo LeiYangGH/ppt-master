@@ -2,9 +2,7 @@
 """PPT Master 工作区管理工具。
 
 用法：
-    python scripts/project_manager.py init
-    python scripts/project_manager.py validate
-    python scripts/project_manager.py info
+    python scripts/project_manager.py
 """
 
 from __future__ import annotations
@@ -166,90 +164,18 @@ class ProjectManager:
         }
 
 
-def print_usage() -> None:
-    """Print CLI usage information from the module docstring."""
-    print(__doc__)
-
-
-def parse_init_args(argv: list[str]) -> str:
-    """Parse arguments for the `init` subcommand."""
-    canvas_format = "ppt169"
-
-    i = 2
-    while i < len(argv):
-        if argv[i] == "--format" and i + 1 < len(argv):
-            canvas_format = argv[i + 1]
-            i += 2
-        else:
-            i += 1
-
-    return canvas_format
-
-
 def main() -> None:
     """Run the CLI entry point."""
-    if len(sys.argv) < 2:
-        print_usage()
-        sys.exit(1)
-
-    command = sys.argv[1]
-    manager = ProjectManager()
-
-    try:
-        if command == "init":
-            canvas_format = parse_init_args(sys.argv)
-            workspace_path = manager.init_project(canvas_format=canvas_format)
-            print(f"[OK] 工作区已初始化: {workspace_path}")
-            print("下一步:")
-            print("1. 将设计规范保存到 workspace/ 根目录")
-            print("2. 生成 SVG 文件到 workspace/svg_output/")
-            return
-
-        if command == "validate":
-            is_valid, errors, warnings = manager.validate_project()
-
-            print(f"\n工作区校验: {manager.workspace_dir}")
-            print("=" * 60)
-
-            if errors:
-                print("\n[ERROR]")
-                for error in errors:
-                    print(f"  - {error}")
-
-            if warnings:
-                print("\n[WARN]")
-                for warning in warnings:
-                    print(f"  - {warning}")
-
-            if is_valid and not warnings:
-                print("\n[OK] 工作区结构完整。")
-            elif is_valid:
-                print("\n[OK] 工作区结构有效，但有警告。")
-            else:
-                print("\n[ERROR] 工作区结构无效。")
-                sys.exit(1)
-            return
-
-        if command == "info":
-            info = manager.get_project_info()
-
-            print(f"\n工作区信息: {info['name']}")
-            print("=" * 60)
-            print(f"路径: {info['path']}")
-            print(f"存在: {'是' if info['exists'] else '否'}")
-            print(f"SVG 文件数: {info['svg_count']}")
-            print(f"设计规范: {'有' if info['has_spec'] else '无'}")
-            print(f"源材料: {'有' if info['has_source'] else '无'}")
-            print(f"源文件数: {info['source_count']}")
-            print(f"画布格式: {info['canvas_format']}")
-            print(f"创建日期: {info['create_date']}")
-            return
-
-        raise ValueError(f"未知命令: {command}")
-    except Exception as exc:
-        print(f"[ERROR] {exc}")
-        print_usage()
-        sys.exit(1)
+    from scripts.pathutil import WORKSPACE_DIR
+    
+    # Default: init workspace
+    manager = ProjectManager(str(WORKSPACE_DIR))
+    canvas_format = "ppt169"
+    workspace_path = manager.init_project(canvas_format=canvas_format)
+    print(f"[OK] 工作区已初始化: {workspace_path}")
+    print("下一步:")
+    print("1. 将设计规范保存到 workspace/ 根目录")
+    print("2. 生成 SVG 文件到 workspace/svg_output/")
 
 
 if __name__ == "__main__":
