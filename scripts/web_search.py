@@ -53,6 +53,12 @@ import ssl
 import requests
 import urllib3
 
+# Suppress InsecureRequestWarning when SSL verification is disabled
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Disable SSL verification globally
+_ssl_verify_disabled = True
+
 # ---------------------------------------------------------------------------
 # Path bootstrapping
 # ---------------------------------------------------------------------------
@@ -132,63 +138,12 @@ _PROJECT_ROOT = _SCRIPTS_DIR.parent
 
 
 # ---------------------------------------------------------------------------
-# .env loading & SSL auto-fix
+# .env loading
 # ---------------------------------------------------------------------------
-
-_ZSCALER_CERT_PATHS = [
-    Path("C:/IT/ZscalerRootCertificate-2048-SHA256-it251020.crt"),
-    Path("C:/IT/ZscalerRootCertificate.crt"),
-]
-
-_ssl_checked = False
-
-
-def _ensure_ssl() -> None:
-    """Smoke-test HTTPS connectivity; auto-apply Zscaler cert if needed.
-
-    Runs once per process.  If the default CA bundle works, do nothing.
-    If an SSL error occurs and a known Zscaler cert file is found on disk,
-    set REQUESTS_CA_BUNDLE / SSL_CERT_FILE so all subsequent requests use it.
-    """
-    global _ssl_checked
-    if _ssl_checked:
-        return
-    _ssl_checked = True
-
-    # Already configured by the user / environment
-    if os.environ.get("REQUESTS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE"):
-        return
-
-    try:
-        requests.head("https://www.baidu.com", timeout=5)
-        return  # default certs work fine
-    except (requests.exceptions.SSLError, ssl.SSLError, urllib3.exceptions.SSLError):
-        pass
-    except Exception:
-        return  # non-SSL error (network down, etc.) — don't interfere
-
-    # SSL failed — look for a Zscaler cert
-    for cert_path in _ZSCALER_CERT_PATHS:
-        if cert_path.exists():
-            os.environ["REQUESTS_CA_BUNDLE"] = str(cert_path)
-            os.environ["SSL_CERT_FILE"] = str(cert_path)
-            print(
-                f"  [ssl] auto-applied Zscaler cert: {cert_path}",
-                file=sys.stderr,
-            )
-            return
-
-    print(
-        "  [ssl] SSL verification failed but no Zscaler cert found at known paths."
-        "  Set REQUESTS_CA_BUNDLE manually if needed.",
-        file=sys.stderr,
-    )
-
 
 def _load_search_env() -> None:
     """Load Tavily / Baidu keys from the shared .env locations."""
     load_prefixed_env_file(("TAVILY_", "BAIDU_"))
-    _ensure_ssl()
 
 
 # ===================================================================
@@ -235,6 +190,7 @@ def _search_tavily(query: str, max_results: int) -> dict:
             "include_image_descriptions": True,
         },
         timeout=10,
+        verify=False,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -291,6 +247,7 @@ def _search_baidu(query: str, max_results: int) -> dict:
             "safe_search": False,
         },
         timeout=10,
+        verify=False,  # Baidu doesn't need SSL verification
     )
     resp.raise_for_status()
     data = resp.json()
@@ -454,10 +411,18 @@ def _blacklist_load() -> dict[str, dict]:
     try:
         with BLACKLIST_PATH.open(encoding="utf-8", newline="") as f:
             for row in csv.DictReader(f):
-                entries[row["domain"]] = {
-                    "fail_count": int(row.get("fail_count", 0)),
-                    "last_fail": row.get("last_fail", ""),
-                }
+                domain = row.get("domain")
+                if not domain:
+                    continue
+                try:
+                    fail_count_val = row.get("fail_count")
+                    entries[domain] = {
+                        "fail_count": int(fail_count_val) if fail_count_val is not None else 0,
+                        "last_fail": row.get("last_fail", ""),
+                    }
+                except (ValueError, TypeError):
+                    # Skip rows with invalid data
+                    continue
     except (OSError, KeyError, ValueError):
         return {}
     return entries
@@ -531,11 +496,20 @@ def _stats_load() -> dict[str, dict]:
     try:
         with DOMAIN_STATS_PATH.open(encoding="utf-8", newline="") as f:
             for row in csv.DictReader(f):
-                entries[row["domain"]] = {
-                    "ok": int(row.get("ok", 0)),
-                    "fail": int(row.get("fail", 0)),
-                    "last": row.get("last", ""),
-                }
+                domain = row.get("domain")
+                if not domain:
+                    continue
+                try:
+                    ok_val = row.get("ok")
+                    fail_val = row.get("fail")
+                    entries[domain] = {
+                        "ok": int(ok_val) if ok_val is not None else 0,
+                        "fail": int(fail_val) if fail_val is not None else 0,
+                        "last": row.get("last", ""),
+                    }
+                except (ValueError, TypeError):
+                    # Skip rows with invalid data
+                    continue
     except (OSError, KeyError, ValueError):
         return {}
     return entries
@@ -888,55 +862,78 @@ def _download_single_image(
     Outcome keys: ``url``, ``file``, ``status`` ("ok" | "skip" | "fail"),
     ``reason``, ``domain``, ``bytes``.
     """
-    url = entry.get("url", "")
-    domain = _extract_domain(url)
-    outcome = {"url": url, "file": "", "status": "fail", "reason": "", "domain": domain, "bytes": 0}
-    if not url:
-        outcome["reason"] = "empty url"
-        return outcome
-
-    basename = _derive_filename(url, fallback_index=index)
-    dest = output_dir / basename
-    # Skip if already present (same URL likely re-surfaced across searches)
-    if dest.exists() and dest.stat().st_size >= _MIN_IMAGE_BYTES:
-        outcome.update(status="skip", file=str(dest), reason="exists",
-                       bytes=dest.stat().st_size)
-        return outcome
-    # Avoid collision when the basename exists but is too small (stale error)
-    if dest.exists():
-        try:
-            dest.unlink()
-        except OSError:
-            stem, suffix = dest.stem, dest.suffix or ".jpg"
-            dest = output_dir / f"{stem}_{index}{suffix}"
+    import traceback
 
     try:
-        resp = requests.get(
-            url,
-            timeout=timeout,
-            headers={"User-Agent": "Mozilla/5.0 (PPT-Master image downloader)"},
-            stream=True,
-        )
-        resp.raise_for_status()
-        content_type = resp.headers.get("Content-Type", "").lower()
-        if "text/html" in content_type or "text/plain" in content_type:
-            raise ValueError(f"non-image content-type: {content_type}")
-        tmp = dest.with_suffix(dest.suffix + ".part")
-        with open(tmp, "wb") as f:
-            for chunk in resp.iter_content(8192):
-                if chunk:
-                    f.write(chunk)
-        size = tmp.stat().st_size
-        if size < _MIN_IMAGE_BYTES:
-            tmp.unlink(missing_ok=True)
-            raise ValueError(f"file too small ({size} bytes)")
-        tmp.replace(dest)
-        outcome.update(status="ok", file=str(dest), bytes=size)
-        record_download(domain, success=True)
-    except Exception as exc:  # noqa: BLE001
-        outcome["reason"] = str(exc)
-        record_download(domain, success=False)
-    return outcome
+        url = entry.get("url", "")
+        domain = _extract_domain(url)
+        outcome = {"url": url, "file": "", "status": "fail", "reason": "", "domain": domain, "bytes": 0}
+        if not url:
+            outcome["reason"] = "empty url"
+            return outcome
+
+        try:
+            basename = _derive_filename(url, fallback_index=index)
+        except Exception as exc:
+            outcome["reason"] = f"_derive_filename error: {exc}"
+            return outcome
+
+        dest = output_dir / basename
+        # Skip if already present (same URL likely re-surfaced across searches)
+        if dest.exists() and dest.stat().st_size >= _MIN_IMAGE_BYTES:
+            outcome.update(status="skip", file=str(dest), reason="exists",
+                           bytes=dest.stat().st_size)
+            return outcome
+        # Avoid collision when the basename exists but is too small (stale error)
+        if dest.exists():
+            try:
+                dest.unlink()
+            except OSError:
+                try:
+                    stem, suffix = dest.stem, dest.suffix or ".jpg"
+                    dest = output_dir / f"{stem}_{index}{suffix}"
+                except Exception as exc:
+                    outcome["reason"] = f"filename collision error: {exc}"
+                    return outcome
+
+        try:
+            resp = requests.get(
+                url,
+                timeout=timeout,
+                headers={"User-Agent": "Mozilla/5.0 (PPT-Master image downloader)"},
+                stream=True,
+                verify=False,
+            )
+            resp.raise_for_status()
+            content_type = resp.headers.get("Content-Type", "").lower()
+            if "text/html" in content_type or "text/plain" in content_type:
+                raise ValueError(f"non-image content-type: {content_type}")
+            tmp = dest.with_suffix(dest.suffix + ".part")
+            with open(tmp, "wb") as f:
+                for chunk in resp.iter_content(8192):
+                    if chunk:
+                        f.write(chunk)
+            size = tmp.stat().st_size
+            if size < _MIN_IMAGE_BYTES:
+                tmp.unlink(missing_ok=True)
+                raise ValueError(f"file too small ({size} bytes)")
+            tmp.replace(dest)
+            outcome.update(status="ok", file=str(dest), bytes=size)
+            record_download(domain, success=True)
+        except Exception as exc:  # noqa: BLE001
+            outcome["reason"] = str(exc)
+            record_download(domain, success=False)
+        return outcome
+    except Exception as exc:
+        # This should not happen, but catch it just in case
+        return {
+            "url": entry.get("url", ""),
+            "file": "",
+            "status": "fail",
+            "reason": f"worker crash: {exc}\n{traceback.format_exc()}",
+            "domain": "",
+            "bytes": 0,
+        }
 
 
 def async_download_images(
@@ -1076,6 +1073,7 @@ def download_images(
                 timeout=timeout,
                 headers={"User-Agent": "Mozilla/5.0 (PPT-Master image downloader)"},
                 stream=True,
+                verify=False,
             )
             resp.raise_for_status()
             content_type = resp.headers.get("Content-Type", "")

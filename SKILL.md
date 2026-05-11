@@ -177,7 +177,9 @@ Copy-Item "templates\layouts\<template_name>\*.jpg" -Destination "workspace\imag
 python scripts/analyze_images.py workspace/images
 ```
 
-> ⚠️ **图片处理**：绝不要直接读取 / 打开 / 查看图片文件（`.jpg`、`.png` 等）。所有图片信息必须来自 `analyze_images.py` 的输出或设计规范中的图片资源列表。
+> ⚠️ **图片处理**：应该直接读取并确保每张最终采纳的图片都是亲自校验过内容一致的，而不仅是根据文件名或轻信搜索引擎等。可参考 `analyze_images.py` 的分析结果作为辅助。如果图片数量较多，可使用 `scripts/image_montage.py` 制作缩略图墙以提高批量审阅效率。
+
+⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-团队合影.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
 
 **输出**：
 - `workspace/design_spec.md` —— 供人类阅读的设计叙述
@@ -187,12 +189,13 @@ python scripts/analyze_images.py workspace/images
 ```markdown
 ## ✅ Strategist 阶段完成
 - [x] 八项确认完成（用户已确认）
+- [x] 图片已按 `<ppt号>-<简洁图片内容>` 格式重命名并通过人工核查
 - [x] 已生成设计规范和内容大纲 (Design Specification & Content Outline)
 - [x] 已生成执行锁文件 (spec_lock.md)
 - [ ] **下一步**：自动进入 Executor 阶段
 ```
 
-> **成功标准**：`design_spec.md` 包含完整的 I-XI 章节；`spec_lock.md` 包含 `colors` / `typography` / `icons` / `page_rhythm` 四个必需段；用户已对八项确认明确回复。
+> **成功标准**：`design_spec.md` 包含完整的 I-XI 章节；`spec_lock.md` 包含 `colors` / `typography` / `icons` / `page_rhythm` 四个必需段；用户已对八项确认明确回复；所有采纳到 SVG 的图片已按 `<ppt号>-<简洁图片内容>` 格式重命名并通过人工核查。
 
 **状态更新**：更新 `workspace/state.md`——阶段清单标记 S0-S3 完成，当前阶段改为 S4。如果用户在 ⛔ 处做了修改决策，记入决策记录。
 
