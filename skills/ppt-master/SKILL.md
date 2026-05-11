@@ -22,8 +22,9 @@ description: >
 > 5. **极简改动** —— **禁止**为后续步骤"预先准备"内容（例如，在 Strategist 阶段编写 SVG 代码）。**禁止**添加用户未要求的功能、装饰、颜色或布局变体。不为一次性场景创建抽象。如果 50 行 SVG 能解决的问题不要用 200 行。**检验标准**：每一处改动都能直接溯源到用户的请求或 spec_lock 的要求——无法溯源的改动就是过度工程。
 > 6. **禁止子智能体生成 SVG** —— 第 5 步 Executor 生成 SVG 高度依赖上下文，**必须**由当前主智能体端到端完成。**禁止**委托给子智能体。
 > 7. **仅限逐页生成** —— 在第 5 步 Executor 中，全局设计上下文确认后，SVG 页面**必须**在一个连续的上下文中按顺序一页一页地生成。**禁止**批量生成（例如每次 5 页）。
-> 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`anchor` / `dense` / `breathing`——见 executor-base.md §2.1）。
+> 8. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file <project_path>/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`anchor` / `dense` / `breathing`——见 executor.md §3.1）。
 > 9. **先思考后动手** —— 在关键决策前，**必须**先读取 `projects/task_plan.md` 和 `projects/findings.md`，确保理解当前状态和已积累的经验教训。如果对用户需求存在多种解读，**必须**呈现权衡让用户选择，而非默默选一种。如果存在更简单的方案，**必须**提出来。困惑时停下来问，不要假设。
+
 
 > [!IMPORTANT]
 > ## 💻 运行环境与命令规则（强制）
@@ -232,20 +233,17 @@ python ${SKILL_DIR}/scripts/analyze_images.py <project_path>/images
 
 🚧 **GATE**：第 4 步完成；所有前置交付物已准备就绪。
 
-根据选定的风格读取角色定义：
+读取角色定义：
 ```
-读取 references/executor-base.md          # 必需：通用准则
+读取 references/executor.md               # 必需：角色定义、执行规则、风格指南
 读取 references/shared-standards.md       # 必需：SVG/PPT 技术约束
-读取 references/executor-general.md       # 通用灵活风格
-读取 references/executor-consultant.md    # 咨询风格
-读取 references/executor-consultant-top.md # 顶级咨询风格（MBB 级别）
 ```
 
-> 只需读取 executor-base + shared-standards + 其中一个风格文件。
+> 只需读取 executor.md + shared-standards.md。
 
-**设计参数确认（强制）**：在生成第一个 SVG 之前，输出规范中的关键设计参数（画布尺寸、配色方案、字体方案、正文字号）。详见 executor-base.md §2。
+**设计参数确认（强制）**：在生成第一个 SVG 之前，输出规范中的关键设计参数（画布尺寸、配色方案、字体方案、正文字号）。详见 executor.md §3。
 
-**每页重读 spec_lock（强制）**：在生成**每页** SVG 之前，`read_file <project_path>/spec_lock.md` 并且仅使用其中的颜色 / 字体 / 图标 / 图片。防止长 deck 发生上下文漂移。详见 executor-base.md §2.1。
+**每页重读 spec_lock（强制）**：在生成**每页** SVG 之前，`read_file <project_path>/spec_lock.md` 并且仅使用其中的颜色 / 字体 / 图标 / 图片。防止长 deck 发生上下文漂移。详见 executor.md §3.1。
 
 > ⚠️ **仅限主智能体**：SVG 生成**必须**留在当前主智能体中 —— 页面设计依赖完整的上游上下文。**禁止**委托给子智能体。
 > ⚠️ **生成节奏**：在同一个连续上下文中，一页一页地按顺序生成页面。**禁止**批量生成（如每组 5 页）。
@@ -343,10 +341,8 @@ python ${SKILL_DIR}/scripts/svg_to_pptx.py <project_path> -s final
 
 | 资源 | 路径 |
 |----------|------|
-| 共享技术约束 | `references/shared-standards.md` |
-| 画布格式规范 | `references/canvas-formats.md` |
-| 图片布局规范 | `references/image-layout-spec.md` |
-| SVG 图片嵌入说明 | `references/svg-image-embedding.md` |
+| 共享技术约束（含画布格式、图片布局、图片嵌入） | `references/shared-standards.md` |
+| Executor 角色定义与执行指南 | `references/executor.md` |
 | 图标库说明 | `templates/icons/README.md` |
 | 三件套状态模板 | `templates/state/` |
 
