@@ -96,7 +96,6 @@ description: >
 
 | 工作流 | 路径 | 用途 |
 |----------|------|---------|
-| `create-template` | `workflows/create-template.md` | 独立模板创建工作流 |
 | `verify-charts` | `workflows/verify-charts.md` | 图表坐标校准 —— 若 deck 包含数据图表，在生成 SVG 后运行 |
 
 ---
@@ -170,8 +169,6 @@ Copy-Item "templates\layouts\<template_name>\*.jpg" -Destination "<project_path>
 > 提示：内置库中有一个非常契合此场景的模板 `<name>`。如果你想使用它请告诉我，否则我将继续进行自由设计。
 
 这只是提示，不是提问 —— **不要阻塞**。如果匹配度低或不明确则完全跳过。
-
-> 要创建新的全局模板，请阅读 `workflows/create-template.md`
 
 **✅ 检查点 —— 默认路径无需用户交互即可进入第 4 步。如果触发了模板，需在进入下一步前复制模板文件。**
 
