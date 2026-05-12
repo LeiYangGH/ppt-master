@@ -38,9 +38,9 @@
 | 脚本 | 用途 |
 |--------|---------|
 | `scripts/project_manager.py` | 工作区初始化 / 校验 / 管理（含状态文件初始化） |
-| `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询，**搜索后自动并发下载图片到当前项目 `images/` 目录**，5 秒/张超时，无缓存（每次调用实时请求 API，重试可真正拿到新结果），带域名黑名单；⚠ **搜索关键字必须用中文**，下载后需逐张审阅并重命名，详见 `optional-workflows/topic-research.md` 顶部约束） |
-| `scripts/analyze_images.py` | 图片分析（尺寸比例等） |
-| `scripts/image_montage.py` | **图片批量缩略图墙**（将 `images/` 下所有图片拼接为 `montage_NN_of_MM.jpg`，每张 4×5=20 格且每格底部带文件名标签）——供 LLM **一次视觉读图批量判定保留 / 删除 / 重命名**，避免对数十张图通过 `analyze_images.py` 逐张读取的高成本。 |
+| `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询）。**搜索后自动下载到 `workspace/downloads/` 暂存区**并自动生成**增量缩略图墙**；通过 `--adopt` 晋升到 `workspace/images/`。⚠ 搜索关键字必须用中文。**完整 CLI / 状态文件 / 配额 / 返回 schema 见 `references/web-search.md`**。 |
+| `scripts/analyze_images.py` | 图片分析（尺寸比例等）。由 `web_search.py` 自动管道调用，通常无需手动运行。 |
+| `scripts/image_montage.py` | 图片缩略图墙生成器（4×5 格 + 文件名标签）。由 `web_search.py` 自动管道**按下载批次增量**调用，通常无需手动运行。 |
 | `scripts/svg_repair.py` | SVG XML 自动修复（基于 sloppy-xml，修复 LLM 输出的不规范 XML） |
 | `scripts/svg_quality_checker.py` | SVG 质量检查 |
 | `scripts/render_svg.py` | SVG → PNG 预览渲染（用于逐页视觉复检） |
@@ -116,9 +116,11 @@
 
 如果用户提供了图片，**在输出设计规范之前**进行分析：`python scripts/analyze_images.py`
 
-⚠️ **图片处理**：应该直接读取并确保每张最终采纳的图片都是亲自校验过内容一致的，而不仅是根据文件名或轻信搜索引擎等。可参考 `analyze_images.py` 的分析结果作为辅助。如果图片数量较多，可使用 `scripts/image_montage.py` 制作缩略图墙以提高批量审阅效率。
+⚠️ **图片处理**：`workspace/images/` 只存**已采纳、已重命名**的正式资产；`web_search.py` 的自动下载落在 `workspace/downloads/`，并同步生成增量缩略图墙。LLM 通过读缩略图墙批量判定，然后用 `python scripts/web_search.py --adopt <downloads/xxx> <images/描述名>` 一次性完成移动+重命名。详见 `references/web-search.md`。
 
 ⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-团队合影.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
+
+⛔ **硬门禁**：`scripts/finalize_svg.py` 会在后处理阶段扫描 `workspace/images/`，如果发现 `img_<hash>` / `image_\d+` / `tmp_*` / `download*` 等哈希/占位命名的文件直接 block——必须全部采纳或删除后方可 finalize。
 
 **输出**：`workspace/design_spec.md`、`workspace/spec_lock.md`
 

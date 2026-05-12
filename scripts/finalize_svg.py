@@ -28,6 +28,45 @@ except ImportError:
     _HAS_REPAIR = False
 
 
+# Forbidden filename patterns in workspace/images/ —— task.md §5 hard gate.
+# These patterns indicate unreviewed / unrenamed download artifacts that
+# must not appear in final deliverables.  Keep in sync with
+# scripts/web_search.py::_validate_adopt_target_name.
+_FORBIDDEN_IMAGE_NAME_PATTERNS = [
+    r"^img_[0-9a-f]{8,}\.",    # web_search.py hash prefix
+    r"^image_\d+\.",           # enumerated placeholders
+    r"^tmp_",
+    r"^download",
+    r"^untitled",
+]
+
+_IMAGE_EXTENSIONS_FOR_GUARD = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".svg"}
+
+
+def check_images_naming(images_dir: Path) -> list[str]:
+    """Return a list of forbidden-name files found under *images_dir*.
+
+    Returns an empty list when every image uses a descriptive filename.
+    Used as a blocking gate inside :func:`finalize_project` to prevent
+    hash-named download artifacts (e.g. ``img_5f3a8c1b.jpg``) from
+    silently shipping in the final PPT.
+    """
+    import re
+    if not images_dir.exists() or not images_dir.is_dir():
+        return []
+    compiled = [re.compile(p) for p in _FORBIDDEN_IMAGE_NAME_PATTERNS]
+    offenders: list[str] = []
+    for p in images_dir.iterdir():
+        if not p.is_file():
+            continue
+        if p.suffix.lower() not in _IMAGE_EXTENSIONS_FOR_GUARD:
+            continue
+        name_lower = p.name.lower()
+        if any(pat.match(name_lower) for pat in compiled):
+            offenders.append(p.name)
+    return offenders
+
+
 def safe_print(text: str) -> None:
     """Print text while tolerating Windows terminal encoding limits."""
     try:
@@ -123,6 +162,22 @@ def finalize_project(
     svg_files = list(svg_output.glob('*.svg'))
     if not svg_files:
         safe_print(f"[ERROR] svg_output 中无 SVG 文件")
+        return False
+
+    # Hard gate (task.md §5): block hash-named files under workspace/images/
+    from scripts.pathutil import IMAGES_DIR
+    offenders = check_images_naming(IMAGES_DIR)
+    if offenders:
+        safe_print("[ERROR] workspace/images/ 中发现未采纳的哈希名文件：")
+        for name in offenders[:10]:
+            safe_print(f"        - {name}")
+        if len(offenders) > 10:
+            safe_print(f"        ... 等 {len(offenders) - 10} 个更多")
+        safe_print(
+            "[ERROR] 禁止以 img_<hash>/image_N/tmp_*/download* 命名。"
+            "请先删除或重命名为描述性名称（"
+            "可通过 `python scripts/web_search.py --adopt <downloads/xxx> <images/描述名>`）后再运行。"
+        )
         return False
 
     if not quiet:
