@@ -178,3 +178,4 @@ projects/*
 /scripts/web_search_data/collected_images.jsonl
 workspace/
 # .opencode/opencode.json
+pydantic-ai
