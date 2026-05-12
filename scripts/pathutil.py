@@ -20,8 +20,7 @@ EXPORTS_DIR = WORKSPACE_DIR / 'exports'
 
 # Specific key files
 STATE_FILE = WORKSPACE_DIR / 'state.md'
-SPEC_LOCK_FILE = WORKSPACE_DIR / 'spec_lock.md'
-DESIGN_SPEC_FILE = WORKSPACE_DIR / 'design_spec.md'
+SPEC_LOCK_FILE = WORKSPACE_DIR / 'spec_lock.json'
 NOTES_ALL_FILE = NOTES_DIR / 'notes_all.md'
 
 # Repo templates

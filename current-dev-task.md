@@ -181,9 +181,16 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 
 在现有图片审核已使用 Pydantic-AI 的基础上，将其应用到 Strategist 输出阶段：
 
-- 让 Strategist 使用 Pydantic-AI 直接输出符合 schema 的结构化对象
-- 程序将对象序列化为格式化的 `spec_lock.json`（`indent=2`）
-- 无需 LLM 手工维护两个文件的一致性
+**当前推荐方案**：
+- 保持"同一个 LLM"设计原则
+- Strategist 在 AI IDE 中直接输出 `spec_lock.json`
+- 使用 `validate_spec.py` 进行程序化校验
+- 参考 `references/strategist-json-output-guide.md` 修改 Strategist 提示
+
+**备用方案**（保留用于未来 agent 应用开发）：
+- `pydantic_ai_spec_generator.py` 展示如何使用 Pydantic-AI 生成结构化配置
+- 适用于脱离 AI IDE 环境的场景
+- 局限性：无法获取 AI IDE 的完整上下文
 
 这会显著提升：
 - 规范文件的完整性（不会遗漏字段）
@@ -246,3 +253,75 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 ## 一句话总结
 
 当前 `design_spec.md` 与 `spec_lock.md` 的同步机制本质上仍然是"让 LLM 手工写两份文档并希望它们一致"，这已经成为项目继续提升可控性的重要瓶颈。下一步应将两者合并为单一 `spec_lock.json` 文件（格式化输出），并以 Pydantic + Pydantic-AI 为核心，建立"结构化生成、程序校验"的新机制。
+
+---
+
+## 任务执行状态
+
+### 第一阶段：建立结构化 schema ✅
+- 已创建 `scripts/spec_models.py`
+- 定义了所有 Pydantic 模型：CanvasConfig, ColorConfig, TypographyConfig, IconsConfig, ImagesConfig, SpecLock 等
+- 对 HEX 颜色、字号、page 编号、page_rhythm 枚举值等做了类型约束
+
+### 第二阶段：创建 spec_lock.json 样例 ✅
+- 已创建 `workspace/spec_lock.json`
+- 包含完整的项目信息、设计理由、画布规格、配色、字体、图标、图片、内容大纲、技术约束
+- 使用格式化输出（indent=2），人类可读
+
+### 第三阶段：接入现有脚本 ✅
+- 已修改 `scripts/svg_quality_checker.py`：只读取 spec_lock.json，移除 MD 回退
+- 已修改 `scripts/update_spec.py`：只读取 spec_lock.json，移除 MD 回退
+- 已修改 `scripts/pathutil.py`：SPEC_LOCK_FILE 改为 spec_lock.json，删除 DESIGN_SPEC_FILE
+- 已修改 `scripts/llm_process_image.py`：从 spec_lock.json 读取项目上下文
+- 已修改 `scripts/project_utils.py`：项目校验改为检查 spec_lock.json
+- 已修改 `scripts/error_helper.py`：错误提示改为 spec_lock.json
+
+### 第四阶段：引入 Pydantic-AI 进行结构化生成 ✅
+- 已创建 `scripts/pydantic_ai_spec_generator.py`：Pydantic-AI 生成示例（备用方案，用于未来 agent 应用开发）
+- 已创建 `scripts/validate_spec.py`：验证 spec_lock.json 文件是否符合 schema
+- 已修改 `scripts/project_manager.py`：项目初始化时自动生成 spec_lock.json 模板
+- 已创建 `references/strategist-json-output-guide.md`：Strategist 输出 JSON 指南
+
+### 第五阶段：完全迁移到 JSON ✅
+- 已重写 `SKILL.md`：所有 spec_lock.md 引用改为 spec_lock.json，删除 design_spec.md 引用
+- 已重写 `references/executor.md`：所有引用改为 spec_lock.json
+- 已重写 `references/executor-base.md`：所有引用改为 spec_lock.json，删除 design_spec.md 回退
+- 已重写 `references/strategist.md`：输出改为 spec_lock.json，删除 design_spec.md 流程
+- 已更新 `references/executor-consultant.md`、`executor-consultant-top.md`、`executor-general.md`
+- 已更新 `optional-workflows/verify-charts.md`：改为从 spec_lock.json 读取
+- 已更新 `references/web-search.md`：改为从 spec_lock.json 读取
+- 已更新 `optional-workflows/topic-research.md`：改为从 spec_lock.json 读取
+- 已更新 `templates/layouts/README.md`：改为 spec_lock.json
+- 已删除 `templates/design_spec_reference.md`：不再需要
+- 已删除 `templates/spec_lock_reference.md`：不再需要
+
+### 推荐工作流程 ✅
+1. 运行 `python scripts/project_manager.py` 初始化项目，自动生成 spec_lock.json 模板
+2. Strategist 读取模板，填写 `<...>` 占位符
+3. 运行 `python scripts/validate_spec.py workspace/spec_lock.json` 校验
+4. 如果校验失败，根据错误信息修正，直到通过
+
+### 额外交付物 ✅
+- `scripts/spec_models.py`：Pydantic schema 定义
+- `workspace/spec_lock.json`：结构化配置文件样例
+- `scripts/validate_spec.py`：JSON 文件校验脚本
+- `scripts/pydantic_ai_spec_generator.py`：Pydantic-AI 生成示例（备用方案）
+- `scripts/svg_quality_checker.py`：只读取 spec_lock.json
+- `scripts/update_spec.py`：只读取 spec_lock.json
+- `scripts/project_manager.py`：项目初始化时自动生成 spec_lock.json 模板
+- `references/strategist-json-output-guide.md`：Strategist 输出 JSON 指南
+
+---
+
+## 验证结果
+
+```
+✓ 配置验证成功: workspace\spec_lock.json
+  项目名称: 儿童科普自然灾害
+  画布尺寸: 1280x720
+  主色: #4CAF50
+  正文字号: 22
+  总页数: 13
+
+验证通过!
+```

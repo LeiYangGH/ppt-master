@@ -29,9 +29,11 @@ except ImportError:
     ErrorHelper = None
 
 try:
-    from update_spec import parse_lock as _parse_spec_lock
+    import json
+    from scripts.spec_models import SpecLock
+    _has_spec_models = True
 except ImportError:
-    _parse_spec_lock = None  # spec_lock drift check will be skipped
+    _has_spec_models = False
 
 
 HEX_VALUE_RE = re.compile(r"#[0-9A-Fa-f]{3,8}")
@@ -59,15 +61,14 @@ class SVGQualityChecker:
             'errors': 0
         }
         self.issue_types = defaultdict(int)
-        # spec_lock drift state (populated only when _parse_spec_lock is available
-        # and a spec_lock.md is found near the SVG)
+        # spec_lock drift state (populated only when spec_lock.json is found near the SVG)
         self._lock_cache: Dict[Path, Dict] = {}
         self._drift_summary: Dict[str, Dict[str, set]] = {
             'colors': defaultdict(set),
             'fonts': defaultdict(set),
             'sizes': defaultdict(set),
         }
-        self._lock_seen = False  # True once we locate at least one spec_lock.md
+        self._lock_seen = False  # True once we locate at least one spec_lock.json
 
     def check_file(self, svg_file: str, expected_format: str = None) -> Dict:
         """
@@ -462,21 +463,24 @@ class SVGQualityChecker:
                 pass  # Image unreadable, skip resolution check
 
     def _get_spec_lock(self, svg_path: Path):
-        """Locate and parse spec_lock.md near the SVG. Returns dict or None.
+        """Locate and parse spec_lock.json near the SVG. Returns dict or None.
 
         Looks in svg_path.parent and svg_path.parent.parent (covers the two
         common layouts: SVG directly under <project>/ or under
         <project>/svg_output/). Results are cached per lock path.
         """
-        if _parse_spec_lock is None:
+        if not _has_spec_models:
             return None
-        for candidate in (svg_path.parent / 'spec_lock.md',
-                          svg_path.parent.parent / 'spec_lock.md'):
+        for candidate in (svg_path.parent / 'spec_lock.json',
+                          svg_path.parent.parent / 'spec_lock.json'):
             if candidate in self._lock_cache:
                 return self._lock_cache[candidate]
             if candidate.exists():
                 try:
-                    data = _parse_spec_lock(candidate)
+                    with open(candidate, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    spec = SpecLock(**data)
+                    data = spec.to_dict()
                 except Exception:
                     data = None
                 self._lock_cache[candidate] = data
@@ -486,12 +490,12 @@ class SVGQualityChecker:
         return None
 
     def _check_spec_lock_drift(self, content: str, svg_path: Path, result: Dict):
-        """Detect values used in the SVG that fall outside spec_lock.md.
+        """Detect values used in the SVG that fall outside spec_lock.json.
 
         Covers colors (fill / stroke / stop-color), font-family, and font-size.
         Emits per-file warnings summarising the drift counts; exact drifting
         values are accumulated in self._drift_summary for the end-of-run
-        aggregation. When spec_lock.md is missing, silently skip (consistent
+        aggregation. When spec_lock.json is missing, silently skip (consistent
         with executor-base.md §2.1's 'missing lock → warn and proceed' policy).
         """
         lock = self._get_spec_lock(svg_path)
@@ -586,7 +590,7 @@ class SVGQualityChecker:
             parts.append(f"{len(size_drifts)} font-size value(s)")
         if parts:
             result['warnings'].append(
-                f"spec_lock drift: {', '.join(parts)} not in spec_lock.md "
+                f"spec_lock drift: {', '.join(parts)} not in spec_lock.json "
                 "(see drift summary for details)"
             )
 
@@ -722,7 +726,7 @@ class SVGQualityChecker:
         """Print spec_lock drift aggregation if any was observed.
 
         Values are sorted by file-count descending so frequent drift surfaces
-        first. Frequent drift usually means spec_lock.md is missing entries
+        first. Frequent drift usually means spec_lock.json is missing entries
         the Strategist should have included; rare drift is more likely actual
         Executor drift and warrants SVG review.
         """
@@ -730,10 +734,10 @@ class SVGQualityChecker:
             return
         has_drift = any(self._drift_summary[cat] for cat in self._drift_summary)
         if not has_drift:
-            print("\n[OK] spec_lock 漂移: 无 — 所有颜色、字体和字号均锚定于 spec_lock.md")
+            print("\n[OK] spec_lock 漂移: 无 — 所有颜色、字体和字号均锚定于 spec_lock.json")
             return
 
-        print("\nspec_lock 漂移 — 使用了 spec_lock.md 之外的值:")
+        print("\nspec_lock 漂移 — 使用了 spec_lock.json 之外的值:")
         labels = [('colors', '颜色'),
                   ('fonts', '字体系列'),
                   ('sizes', '字号')]
@@ -748,7 +752,7 @@ class SVGQualityChecker:
                 suffix = "个文件" if n == 1 else "个文件"
                 print(f"    {val}  ({n} {suffix})")
         print(
-            "提示: 频繁出现的锁外值通常意味着 spec_lock.md 缺少条目\n"
+            "提示: 频繁出现的锁外值通常意味着 spec_lock.json 缺少条目\n"
             "     — 扩展锁文件（scripts/update_spec.py 或手动编辑）。\n"
             "     少量出现的锁外值更可能是 Executor 漂移 — 检查受影响 SVG。"
         )

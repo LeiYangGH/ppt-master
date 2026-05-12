@@ -80,7 +80,7 @@ MBB 级演示通常遵循 SCQA 结构：
 | 论点 | 内容区正文 | 14-16px（约 1x body） |
 | 支撑数据 | 图表 / 卡片 | 12-14px（约 0.85x body） |
 
-> MBB 风格通常采用较密的 `body` 基线（14-18px）以承载信息密度。以上 px 都基于这个前提；若某个 deck 在 `spec_lock.md` 中声明了不同正文字号，应按上面的比例换算，而不是机械照抄 px。
+> MBB 风格通常采用较密的 `body` 基线（14-18px）以承载信息密度。以上 px 都基于这个前提；若某个 deck 在 `spec_lock.json` 中声明了不同正文字号，应按上面的比例换算，而不是机械照抄 px。
 
 **对比**：标题写 `Market Research Results`（弱）不如写 `Metaverse needs 5-10 years to reach scale`（强）；正文写 `We researched... and found...`（弱）不如写 `Three arguments: (1)... (2)... (3)...`（强）。
 

@@ -106,7 +106,7 @@ Each template should contain the following standard files (TOC page is optional)
 
 | Filename | Required | Purpose | Description |
 |----------|----------|---------|-------------|
-| `design_spec.md` | Yes | Design specification | Complete color, typography, and layout specs |
+| `spec_lock.json` | Yes | Design specification | Complete color, typography, and layout specs |
 | `01_cover.svg` | Yes | Cover page | Title, subtitle, date, organization |
 | `02_toc.svg` | Optional | Table of contents | Chapter list, navigation |
 | `02_chapter.svg` | Yes | Chapter page | Chapter number, chapter title |
@@ -117,26 +117,23 @@ Each template should contain the following standard files (TOC page is optional)
 
 ---
 
-## design_spec.md Standard Structure
+## spec_lock.json Standard Structure
 
-All template design specification documents should follow this chapter structure:
+All template design specification documents should follow this JSON structure:
 
-```markdown
-# [Template Name] - Design Specification
-
-> One-line description of applicable scenarios
-
-## I. Template Overview
-## II. Canvas Specification
-## III. Color Scheme
-## IV. Typography System
-## V. Page Structure
-## VI. Page Types
-## VII. Layout Modes (Recommended)
-## VIII. Spacing Specification
-## IX. SVG Technical Constraints
-## X. Placeholder Specification
-## XI. Usage Guide (Recommended)
+```json
+{
+  "project": { ... },
+  "canvas": { ... },
+  "colors": { ... },
+  "typography": { ... },
+  "icons": { ... },
+  "images": { ... },
+  "page_rhythm": { ... },
+  "content_outline": { ... },
+  "technical_constraints": { ... },
+  "forbidden": [ ... ]
+}
 ```
 
 ---
@@ -210,7 +207,7 @@ Copy-Item "templates/layouts/government_red/*" -Destination "workspace/templates
 
 ### After Copying
 
-1. Read `design_spec.md` to understand the design specification
+1. Read `spec_lock.json` to understand the design specification
 2. Adjust colors based on project requirements (if needed)
 3. Place logo files in the `images/` directory
 4. Use the Executor role to generate SVG pages based on templates
@@ -223,7 +220,7 @@ Copy-Item "templates/layouts/government_red/*" -Destination "workspace/templates
 
 1. Create a new directory under `templates/layouts/`
 2. Create required files following the existing template structure
-3. Ensure `design_spec.md` follows the standard chapter structure
+3. Ensure `spec_lock.json` follows the standard JSON structure
 4. All SVGs use `viewBox="0 0 1280 720"`
 5. Follow SVG technical constraints (see below)
 6. Validate the template directory with `python scripts/svg_quality_checker.py templates/layouts/<template_name> --format ppt169`

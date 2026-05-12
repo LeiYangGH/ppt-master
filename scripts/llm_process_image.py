@@ -49,7 +49,7 @@ def _extract_ppt_context(
 ) -> dict:
     """Extract PPT context from multiple sources.
 
-    Priority: CLI params > design_spec.md > project directory name > generic
+    Priority: CLI params > spec_lock.json > project directory name > generic
 
     Returns dict with keys: project_name, audience, style, tone, color_scheme
     """
@@ -69,38 +69,27 @@ def _extract_ppt_context(
         if not workspace_dir.exists():
             workspace_dir = current_dir.parent / "workspace"
 
-    # Try design_spec.md
-    design_spec_path = workspace_dir / "design_spec.md"
-    if design_spec_path.exists():
+    # Try spec_lock.json
+    spec_lock_path = workspace_dir / "spec_lock.json"
+    if spec_lock_path.exists():
         try:
-            content = design_spec_path.read_text(encoding="utf-8")
+            import json as _json
+            with open(spec_lock_path, 'r', encoding='utf-8') as f:
+                data = _json.load(f)
 
             context = {}
 
-            # Extract project name
-            name_match = re.search(r"\*\*项目名称\*\*\s*\|\s*([^|]+)", content)
-            if name_match:
-                context["project_name"] = name_match.group(1).strip()
+            project = data.get("project", {})
+            if project.get("name"):
+                context["project_name"] = project["name"]
+            if project.get("audience"):
+                context["audience"] = project["audience"]
+            if project.get("style"):
+                context["style"] = project["style"]
 
-            # Extract target audience
-            audience_match = re.search(r"\*\*目标受众\*\*\s*\|\s*([^|]+)", content)
-            if audience_match:
-                context["audience"] = audience_match.group(1).strip()
-
-            # Extract design style
-            style_match = re.search(r"\*\*设计风格\*\*\s*\|\s*([^|]+)", content)
-            if style_match:
-                context["style"] = style_match.group(1).strip()
-
-            # Extract tone (from visual theme section)
-            tone_match = re.search(r"\*\*调性\**:\s*([^\n]+)", content)
-            if tone_match:
-                context["tone"] = tone_match.group(1).strip()
-
-            # Extract color scheme hints (generic pattern)
-            color_section = re.search(r"配色方案[^\n]*[:：][^\n]*([^\n。]+)", content)
-            if color_section:
-                context["color_scheme_hint"] = color_section.group(1).strip()
+            colors = data.get("colors", {})
+            if colors.get("primary"):
+                context["color_scheme_hint"] = colors["primary"]
 
             return context
         except Exception:

@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -35,6 +36,12 @@ except ImportError:
         validate_project_structure,
         validate_svg_viewbox,
     )
+
+try:
+    from scripts.spec_models import SpecLock
+    _has_spec_models = True
+except ImportError:
+    _has_spec_models = False
 
 TOOLS_DIR = Path(__file__).resolve().parent
 SKILL_DIR = TOOLS_DIR.parent
@@ -101,8 +108,165 @@ class ProjectManager:
 
         # 初始化状态文件
         self._init_state(workspace_path, normalized_format)
+        
+        # 初始化 spec_lock.json 模板
+        self._init_spec_lock_template(workspace_path, normalized_format)
 
         return str(workspace_path)
+
+    def _init_spec_lock_template(
+        self,
+        workspace_path: Path,
+        canvas_format: str,
+    ) -> None:
+        """初始化 spec_lock.json 模板文件。
+        
+        生成带占位符的 JSON 模板，供 Strategist 填写。
+        如果文件已存在，会覆盖（与删除再创建效果一致）。
+        """
+        if not _has_spec_models:
+            print("[跳过] spec_models 模块不可用，未生成 spec_lock.json 模板")
+            return
+        
+        spec_path = workspace_path / "spec_lock.json"
+        
+        canvas_info = self.CANVAS_FORMATS.get(canvas_format, {})
+        viewbox = canvas_info.get("viewbox", "0 0 1280 720")
+        
+        # 解析 viewbox 获取尺寸
+        vb_parts = viewbox.split()
+        width = int(vb_parts[2]) if len(vb_parts) >= 3 else 1280
+        height = int(vb_parts[3]) if len(vb_parts) >= 4 else 720
+        
+        # 生成模板字典
+        template = {
+            "project": {
+                "name": "<填写项目名称>",
+                "description": "<填写项目描述>",
+                "audience": "<填写目标受众>",
+                "style": "<填写设计风格，如: General Versatile（视觉冲击优先）>",
+                "total_pages": 13,
+                "created_date": datetime.now().strftime("%Y-%m-%d"),
+                "rationale": "<填写项目定位理由>"
+            },
+            "canvas": {
+                "viewbox": viewbox,
+                "format": canvas_info.get("name", "PPT 16:9"),
+                "width": width,
+                "height": height,
+                "margin_left": 60,
+                "margin_right": 60,
+                "margin_top": 50,
+                "margin_bottom": 50,
+                "rationale": "<填写画布配置理由>"
+            },
+            "colors": {
+                "bg": "#FFFFFF",
+                "secondary_bg": "#F5F5F5",
+                "primary": "<填写主色 HEX，如 #4CAF50>",
+                "accent": "<填写强调色 HEX，如 #2196F3>",
+                "secondary_accent": "<填写次要强调色 HEX，如 #FF9800>",
+                "text": "#333333",
+                "text_secondary": "#666666",
+                "text_tertiary": "#999999",
+                "border": "#E0E0E0",
+                "warning": "#F44336",
+                "rationale": "<填写配色理由>"
+            },
+            "typography": {
+                "font_family": "\"Microsoft YaHei\", Arial, sans-serif",
+                "body_family": "\"Microsoft YaHei\", \"PingFang SC\", Arial, sans-serif",
+                "code_family": "Consolas, \"Courier New\", monospace",
+                "body": 22,
+                "title": 36,
+                "subtitle": 28,
+                "section_title": 48,
+                "cover_title": 60,
+                "annotation": 16,
+                "footer": 12,
+                "rationale": "<填写字体选择理由>"
+            },
+            "icons": {
+                "library": "tabler-filled",
+                "inventory": [
+                    "<填写图标1，如: building>",
+                    "<填写图标2，如: wind>",
+                    "<填写图标3，如: droplet>"
+                ],
+                "rationale": "<填写图标选择理由>"
+            },
+            "images": {
+                "items": {
+                    "P01": "<填写图片文件名>",
+                    "P02": "<填写图片文件名>"
+                },
+                "rationale": "<填写图片配置理由>"
+            },
+            "page_rhythm": {
+                "rhythm": {
+                    "P01": "structural",
+                    "P02": "structural",
+                    "P03": "focal",
+                    "P04": "analytical",
+                    "P05": "analytical"
+                },
+                "rationale": "<填写节奏配置理由，structural=结构页, focal=焦点页, analytical=分析页>"
+            },
+            "content_outline": {
+                "sections": [
+                    {
+                        "page": "P01",
+                        "title": "<填写页面标题>",
+                        "layout": "<填写布局方式，如: 全屏背景图 + 居中标题>",
+                        "content": [
+                            "<填写内容要点1>",
+                            "<填写内容要点2>"
+                        ],
+                        "notes_file": "<填写演讲备注文件名，如: 01_cover.md>",
+                        "rationale": "<填写内容设计理由>"
+                    }
+                ],
+                "rationale": "<填写大纲设计理由>"
+            },
+            "technical_constraints": {
+                "forbidden_elements": [
+                    "rgba()",
+                    "<style>",
+                    "class",
+                    "<foreignObject>",
+                    "textPath",
+                    "@font-face",
+                    "<animate*>",
+                    "<script>",
+                    "<iframe>",
+                    "<symbol>+<use>"
+                ],
+                "forbidden_patterns": [
+                    "<g opacity>",
+                    "HTML 命名实体"
+                ],
+                "xml_escape_chars": ["&", "<", ">", "\"", "'"],
+                "xml_escape_entities": ["&amp;", "&lt;", "&gt;", "&quot;", "&apos;"],
+                "rationale": "<填写技术约束理由>"
+            },
+            "forbidden": [
+                "混用图标库",
+                "rgba()",
+                "<style>, class, <foreignObject>, textPath, @font-face, <animate*>, <script>, <iframe>, <symbol>+<use>",
+                "<g opacity>（在每个子元素上单独设置透明度）",
+                "文本中的 HTML 命名实体（&nbsp;, &mdash; 等）——写成原始 Unicode"
+            ],
+            "rationale": "<填写整体设计理由>"
+        }
+        
+        # 写入格式化 JSON
+        spec_path.write_text(
+            json.dumps(template, indent=2, ensure_ascii=False),
+            encoding="utf-8"
+        )
+        
+        print(f"spec_lock.json 模板已生成: {spec_path}")
+        print("请让 Strategist 填写模板中的 <...> 占位符")
 
     def _init_state(
         self,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""将 spec_lock.md 的值变更同步到锁文件和 svg_output/*.svg。
+"""将 spec_lock.json 的值变更同步到锁文件和 svg_output/*.svg。
 
 用法：
     python scripts/update_spec.py colors.primary=#0066AA
@@ -14,11 +14,12 @@ v2 支持范围：
 
 其他键（字号、角色级 `typography.*_family` 覆盖、图标、图片、画布、禁用项）
 故意不支持——它们涉及属性级或语义级替换，批量传播的风险收益不成比例。
-如需角色级字体变更，请编辑 spec_lock.md 并重新生成受影响页面。
+如需角色级字体变更，请编辑 spec_lock.json 并重新生成受影响页面。
 """
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -31,47 +32,55 @@ if str(REPO_ROOT) not in sys.path:
 HEX_RE = re.compile(r"^#(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")
 FONT_FAMILY_RE = re.compile(r"""(font-family\s*=\s*)(["'])(.*?)\2""")
 
+try:
+    from scripts.spec_models import SpecLock
+    _has_spec_models = True
+except ImportError:
+    _has_spec_models = False
+
 
 def parse_lock(lock_path: Path) -> dict[str, dict[str, str]]:
-    """Return {section_name: {key: value}} parsed from spec_lock.md.
+    """Return {section_name: {key: value}} parsed from spec_lock.json.
 
-    The format is:
-        ## section
-        - key: value
+    The lock_path should point to spec_lock.json. Returns a flattened dict
+    where nested JSON structures are converted to section.key format.
     """
-    sections: dict[str, dict[str, str]] = {}
-    current: str | None = None
-    for raw in lock_path.read_text(encoding="utf-8").splitlines():
-        line = raw.rstrip()
-        if line.startswith("## "):
-            current = line[3:].strip()
-            sections.setdefault(current, {})
-            continue
-        if current is None:
-            continue
-        m = re.match(r"^-\s+([A-Za-z0-9_]+)\s*:\s*(.+?)\s*$", line)
-        if m:
-            sections[current][m.group(1)] = m.group(2)
-    return sections
+    if not _has_spec_models:
+        raise RuntimeError("spec_models 模块不可用")
+    
+    with open(lock_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    spec = SpecLock(**data)
+    result = {}
+    for section_name, section_data in spec.to_dict().items():
+        if isinstance(section_data, dict):
+            result[section_name] = section_data
+        elif isinstance(section_data, list):
+            result[section_name] = {'_list': section_data}
+        else:
+            result[section_name] = {'_value': section_data}
+    return result
 
 
 def rewrite_lock(lock_path: Path, section: str, key: str, new_value: str) -> None:
-    """Rewrite the single `- key: old_value` line under `## section`."""
-    lines = lock_path.read_text(encoding="utf-8").splitlines(keepends=True)
-    in_section = False
-    for i, raw in enumerate(lines):
-        stripped = raw.rstrip("\n")
-        if stripped.startswith("## "):
-            in_section = stripped[3:].strip() == section
-            continue
-        if not in_section:
-            continue
-        m = re.match(r"^(-\s+)([A-Za-z0-9_]+)(\s*:\s*)(.+?)(\s*)$", stripped)
-        if m and m.group(2) == key:
-            lines[i] = f"{m.group(1)}{m.group(2)}{m.group(3)}{new_value}{m.group(5)}\n"
-            lock_path.write_text("".join(lines), encoding="utf-8")
-            return
-    raise KeyError(f"key {key!r} not found under section {section!r} in {lock_path}")
+    """Update a field in spec_lock.json and re-validate."""
+    if not _has_spec_models:
+        raise RuntimeError("spec_models 模块不可用")
+    
+    with open(lock_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    spec = SpecLock(**data)
+    spec_dict = spec.to_dict()
+    if section not in spec_dict:
+        raise KeyError(f"section {section!r} not found in spec_lock.json")
+    if not isinstance(spec_dict[section], dict):
+        raise KeyError(f"section {section!r} is not a dict, cannot set key {key!r}")
+    if key not in spec_dict[section]:
+        raise KeyError(f"key {key!r} not found under section {section!r}")
+    spec_dict[section][key] = new_value
+    updated_spec = SpecLock(**spec_dict)
+    with open(lock_path, 'w', encoding='utf-8') as f:
+        f.write(updated_spec.to_json(indent=2))
 
 
 def replace_color_in_svgs(
@@ -86,7 +95,7 @@ def replace_color_in_svgs(
 
     Two-phase: plan all file updates in memory, then write to disk. If any
     exception is raised during planning (e.g. bad HEX, read failure), no files
-    are touched. This keeps svg_output/ and the caller's spec_lock.md write
+    are touched. This keeps svg_output/ and the caller's spec_lock.json write
     in a consistent pair: either everything is applied or nothing is.
 
     When dry_run=True, the planning phase still runs (so bad HEX still raises
@@ -172,7 +181,7 @@ def main() -> int:
     svg_dir = SVG_OUTPUT_DIR
 
     if not lock.exists():
-        print(f"错误: spec_lock.md 未找到: {lock}", file=sys.stderr)
+        print(f"错误: spec_lock.json 未找到: {lock}", file=sys.stderr)
         return 2
     if not svg_dir.exists():
         print(f"错误: svg_output/ 未找到: {svg_dir}", file=sys.stderr)
@@ -196,7 +205,7 @@ def main() -> int:
     if key not in section_map:
         known = {s: sorted(v) for s, v in sections.items()}
         print(
-            f"错误: {key!r} 在 spec_lock.md 的 `## {section}` 下未找到。\n"
+            f"错误: {key!r} 在 spec_lock.json 的 `{section}` 下未找到。\n"
             f"已知键: {known}",
             file=sys.stderr,
         )
@@ -233,16 +242,16 @@ def main() -> int:
         print(
             f"错误: {section}.{key} 不被 update_spec.py 支持。\n"
             f"v2 支持: colors.* (HEX), typography.font_family。\n"
-            f"其他变更请手动编辑 spec_lock.md 和受影响 SVG。",
+            f"其他变更请手动编辑 spec_lock.json 和受影响 SVG。",
             file=sys.stderr,
         )
         return 2
 
     if args.dry_run:
-        print(f"[预览] spec_lock.md: {section}.{key}  {old_value} → {new_value}")
+        print(f"[预览] spec_lock.json: {section}.{key}  {old_value} → {new_value}")
         print(f"[预览] svg_output/:  {len(changed)} 个文件将更新")
     else:
-        print(f"spec_lock.md: {section}.{key}  {old_value} → {new_value}")
+        print(f"spec_lock.json: {section}.{key}  {old_value} → {new_value}")
         print(f"svg_output/:  {len(changed)} 个文件已更新")
     for p, n in changed:
         suffix = "处替换" if n == 1 else "处替换"

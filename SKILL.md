@@ -5,7 +5,7 @@
 1. **串行执行** —— 步骤必须按顺序执行；上一步的输出是下一步的输入。每步骤开始前必须核实其前提条件（🚧 GATE）。满足前提条件的非阻塞相邻步骤可连续进行，无需等待用户确认。
 2. **阻塞 = 强制停止** —— 标有 ⛔ BLOCKING 的步骤需要完全停止；AI **必须**等待用户的明确回复后才能继续，**绝对不能**替用户做决定。
 3. **极简改动**
-4. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file workspace/spec_lock.md`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`structural` / `analytical` / `focal`——见 executor.md §3.1）。
+4. **每页重读 SPEC_LOCK** —— 在生成每页 SVG 之前，Executor **必须** `read_file workspace/spec_lock.json`。所有颜色 / 字体 / 图标 / 图片**必须**来自此文件。Executor 还**必须**查找当前页的 `page_rhythm` 标签，并应用匹配的布局纪律（`structural` / `analytical` / `focal`——见 executor.md §3.1）。
 5. **先思考后动手** —— 在关键决策前，**必须**先读取 `workspace/state.md`，确保理解当前状态和已积累的经验教训。如果对用户需求存在多种解读，**必须**呈现权衡让用户选择，而非默默选一种。如果存在更简单的方案，**必须**提出来。困惑时停下来问，不要假设。
 
 
@@ -48,7 +48,7 @@
 | `scripts/notes_all_md_split.py` | 演讲备注拆分 |
 | `scripts/finalize_svg.py` | SVG 后处理（统一入口） |
 | `scripts/svg_to_pptx.py` | 导出为 PPTX |
-| `scripts/update_spec.py` | 将 `spec_lock.md` 中的颜色 / 字体变更同步到所有 SVG |
+| `scripts/update_spec.py` | 将 `spec_lock.json` 中的颜色 / 字体变更同步到所有 SVG |
 
 
 ## 模板索引
@@ -121,7 +121,7 @@
 
 ⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-团队合影.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
 
-**输出**：`workspace/design_spec.md`、`workspace/spec_lock.md`
+**输出**：`workspace/spec_lock.json`
 
 **✅ 检查点**：八项确认完成，设计规范和 spec_lock 已生成，自动进入第 4 步。
 
@@ -137,7 +137,7 @@
 
 **设计参数确认**：在生成第一个 SVG 之前，输出关键设计参数（画布尺寸、配色、字体、字号）。
 
-**每页重读 spec_lock**：生成每页 SVG 前重读 `workspace/spec_lock.md`，仅使用其中的颜色/字体/图标/图片。
+**每页重读 spec_lock**：生成每页 SVG 前重读 `workspace/spec_lock.json`，仅使用其中的颜色/字体/图标/图片。
 
 **视觉构建**：逐页生成 SVG → `workspace/svg_output/`
 

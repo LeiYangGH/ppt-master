@@ -192,7 +192,7 @@ python scripts/web_search.py "<主题>" --review-images
 **可选参数**：
 - `--ppt-style`：指定PPT风格（如"高端咨询风"、"科技风"），LLM会根据风格调整审核标准
 - `--ppt-audience`：指定目标受众（如"6-12岁儿童"、"企业高管"），LLM会根据受众调整审核标准
-- 如果未指定，LLM会自动从 `workspace/design_spec.md` 读取项目信息，或使用通用标准
+- 如果未指定，LLM会自动从 `workspace/spec_lock.json` 读取项目信息，或使用通用标准
 
 **优势**：
 - 跳过缩略图墙生成和手动采纳步骤
@@ -212,7 +212,7 @@ python scripts/web_search.py "<主题>" --review-images
    - **不合适** → 不管即可，下次迭代如果触配额再运行 `--purge-downloads` 清理；
    - **无任何图片合适** → 换一组中文关键字重新搜索，直至满足需求。
 
-   > 完成本步前禁止进入步骤 4 或后续设计 / SVG 生成；未采纳的哈希名文件不得出现在 `design_spec.md` 或 SVG 引用中（`finalize_svg.py` 会在后处理阶段硬门禁）。
+   > 完成本步前禁止进入步骤 4 或后续设计 / SVG 生成；未采纳的哈希名文件不得出现在 `spec_lock.json` 或 SVG 引用中（`finalize_svg.py` 会在后处理阶段硬门禁）。
 
 #### 3.3.3 手动补充下载（兜底）
 

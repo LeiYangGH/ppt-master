@@ -6,7 +6,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 
 > 独立的后生成步骤。在包含数据图表的演示文稿完成SVG生成后、后处理前运行。捕捉AI模型将数据映射到像素位置时常见的10-50px坐标误差。
 
-本工作流**独立运行**：读取 `design_spec.md` 和已生成的SVG，然后运行计算器脚本 — 无需上游对话上下文。可在新会话中安全调用。
+本工作流**独立运行**：读取 `spec_lock.json` 和已生成的SVG，然后运行计算器脚本 — 无需上游对话上下文。可在新会话中安全调用。
 
 ## 何时运行
 
@@ -20,7 +20,7 @@ description: 使用 svg_position_calculator.py 验证图表坐标与设计规格
 
 ## 步骤 1：从设计规格构建页面列表
 
-读取 `workspace/design_spec.md` §VII 可视化参考列表（权威演示文稿计划；与§IX页面大纲交叉核对），并**严格过滤**为以下计算器支持集合。范围外的内容不要纳入列表，即使§VII将其标记为图表。
+读取 `workspace/spec_lock.json` 中的 `content_outline` 部分，找出使用了可视化图表的页面，并**严格过滤**为以下计算器支持集合。范围外的内容不要纳入列表。
 
 | 计算器子命令 | 范围内 `charts_index.json` 键 | 备注 |
 |-------------|-------------------------------|------|
@@ -47,7 +47,7 @@ P07 07_growth.svg        type=line
 P11 11_share_split.svg   type=pie
 ```
 
-如§VII缺失（遗留项目/自由结构演示文稿），跳过本工作流并报告："design_spec.md 无 §VII — 图表页面无法权威枚举，verify-charts 已跳过"。不得回退到从SVG内容猜测；那会重新引入本工作流旨在消除的静默跳过问题。
+如 `content_outline` 缺失或为空，跳过本工作流并报告："spec_lock.json 无 content_outline — 图表页面无法权威枚举，verify-charts 已跳过"。不得回退到从SVG内容猜测；那会重新引入本工作流旨在消除的静默跳过问题。
 
 如过滤后列表为空，输出 `verify-charts: 规格未声明计算器支持的图表页面，无需验证` 并停止。
 

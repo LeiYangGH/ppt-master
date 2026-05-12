@@ -130,13 +130,11 @@ def get_project_info(project_path: str) -> Dict:
     # Check README.md
     info['has_readme'] = (project_path / 'README.md').exists()
 
-    # Check design specification files (current standard + legacy names)
-    spec_files = ['design_spec.md', '设计规范与内容大纲.md', 'design_specification.md', '设计规范.md']
-    for spec_file in spec_files:
-        if (project_path / spec_file).exists():
-            info['has_spec'] = True
-            info['spec_file'] = spec_file
-            break
+    # Check spec_lock.json (current standard)
+    spec_lock_path = project_path / 'spec_lock.json'
+    if spec_lock_path.exists():
+        info['has_spec'] = True
+        info['spec_file'] = 'spec_lock.json'
 
     # Check source documents
     legacy_source_file = project_path / '来源文档.md'
@@ -202,11 +200,10 @@ def validate_project_structure(project_path: str, verbose: bool = False) -> Tupl
                                                            {'project_path': str(project_path)})
         errors.append(msg)
 
-    # Check design specification file
-    spec_files = ['design_spec.md', '设计规范与内容大纲.md', 'design_specification.md', '设计规范.md']
-    has_spec = any((project_path / f).exists() for f in spec_files)
-    if not has_spec:
-        msg = "Missing design specification file (suggested filename: design_spec.md)"
+    # Check spec_lock.json
+    spec_lock_path = project_path / 'spec_lock.json'
+    if not spec_lock_path.exists():
+        msg = "Missing spec_lock.json"
         if use_helper and verbose:
             msg += "\n" + ErrorHelper.format_error_message('missing_spec')
         warnings.append(msg)
@@ -317,10 +314,9 @@ def find_all_projects(base_dir: str) -> List[Path]:
     projects = []
     for item in base_path.iterdir():
         if item.is_dir() and not item.name.startswith('.'):
-            # Check if it's a valid project directory (contains svg_output or design spec)
+            # Check if it's a valid project directory (contains svg_output or spec_lock.json)
             has_svg_output = (item / 'svg_output').exists()
-            has_spec = any((item / f).exists() for f in
-                           ['design_spec.md', '设计规范与内容大纲.md', 'design_specification.md', '设计规范.md'])
+            has_spec = (item / 'spec_lock.json').exists()
 
             if has_svg_output or has_spec:
                 projects.append(item)

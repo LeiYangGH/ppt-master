@@ -80,7 +80,7 @@ LLM 从三个维度评估图片：
 
 LLM 会自动从以下来源获取PPT方向信息（优先级从高到低）：
 1. **CLI参数**：`--ppt-style` 和 `--ppt-audience` 显式指定
-2. **design_spec.md**：从 `workspace/design_spec.md` 读取项目信息
+2. **spec_lock.json**：从 `workspace/spec_lock.json` 读取项目信息
 3. **项目目录名**：从目录名推断风格（如 `ppt169_高端咨询风_汽车认证五年战略规划`）
 4. **通用提示**：无上下文时使用通用PPT标准
 
@@ -89,7 +89,7 @@ LLM 会自动从以下来源获取PPT方向信息（优先级从高到低）：
 # 显式指定PPT风格
 python scripts/web_search.py "久石让 Joe Hisaishi" --review-images --ppt-style "高端咨询风" --ppt-audience "企业高管"
 
-# 自动从design_spec.md读取
+# 自动从spec_lock.json读取
 python scripts/web_search.py "久石让 Joe Hisaishi" --review-images
 ```
 
