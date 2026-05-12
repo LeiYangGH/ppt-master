@@ -97,8 +97,8 @@ def _extract_ppt_context(
             if tone_match:
                 context["tone"] = tone_match.group(1).strip()
 
-            # Extract color scheme hints
-            color_section = re.search(r"配色方案.*?儿童科普教育需要(.+?)。", content, re.DOTALL)
+            # Extract color scheme hints (generic pattern)
+            color_section = re.search(r"配色方案[^\n]*[:：][^\n]*([^\n。]+)", content)
             if color_section:
                 context["color_scheme_hint"] = color_section.group(1).strip()
 

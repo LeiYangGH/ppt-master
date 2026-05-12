@@ -175,20 +175,46 @@ workspace/sources/<topic_name>.md
 
 ### 3.3 下载与审阅流程
 
-#### 3.3.1 通过 `web_search.py` 自动下载（**默认路径**）
+#### 3.3.1 方式一：LLM自动审查（**推荐，简化流程**）
+
+使用 `--review-images` 模式，LLM 自动审查图片并保存到 `workspace/images/`：
+
+```bash
+python scripts/web_search.py "<主题>" --review-images
+```
+
+**流程**：
+1. 搜索并下载图片到内存（自动追加"图片 素材 插图 配图"关键词以过滤书籍等非图片内容）
+2. LLM 逐个审查图片的相关性、质量、PPT适用性
+3. 通过审查的图片自动保存到 `workspace/images/`，文件名为 LLM 生成的描述性英文名称
+4. 返回审查摘要（发现/下载/通过/拒绝数量及文件列表）
+
+**可选参数**：
+- `--ppt-style`：指定PPT风格（如"高端咨询风"、"科技风"），LLM会根据风格调整审核标准
+- `--ppt-audience`：指定目标受众（如"6-12岁儿童"、"企业高管"），LLM会根据受众调整审核标准
+- 如果未指定，LLM会自动从 `workspace/design_spec.md` 读取项目信息，或使用通用标准
+
+**优势**：
+- 跳过缩略图墙生成和手动采纳步骤
+- LLM 直接生成描述性文件名
+- 支持PPT上下文感知，审核更精准
+
+详细说明见 [`references/web-search.md`](../references/web-search.md)。
+
+#### 3.3.2 方式二：缩略图墙批量判定（**传统路径**）
 
 1. 确认工作区目录已识别（`PPT_PROJECT_DIR` 或 `--project-dir`），关键字用中文（顶部约束 #1）；
 2. 运行若干次 `web_search.py` 搜索，同一 URL / 同会话已采纳 URL 不会重复下载；
 3. 读返回 JSON 的 `montage_batch.montages` 字段拿到本次新增的缩略图墙；若 `downloads_quota_error` 非空则按其提示处置（详细字段见 [`references/web-search.md`](../references/web-search.md)）；
 4. **⛔ 读缩略图墙 + 采纳（阻断性）**：
    - 逐张读 `montage_batch_NN_*.jpg`，凭缩略图 + 文件名标签批量判定；对识别存疑的少数图，才需再开文件精查；
-   - **适合使用** → `python scripts/web_search.py --adopt <downloads/xxx> <images/描述名>` 一行命令完成移动+重命名（命名规则见 3.3.3）；
+   - **适合使用** → `python scripts/web_search.py --adopt <downloads/xxx> <images/描述名>` 一行命令完成移动+重命名（命名规则见 3.3.4）；
    - **不合适** → 不管即可，下次迭代如果触配额再运行 `--purge-downloads` 清理；
    - **无任何图片合适** → 换一组中文关键字重新搜索，直至满足需求。
 
    > 完成本步前禁止进入步骤 4 或后续设计 / SVG 生成；未采纳的哈希名文件不得出现在 `design_spec.md` 或 SVG 引用中（`finalize_svg.py` 会在后处理阶段硬门禁）。
 
-#### 3.3.2 手动补充下载（兜底）
+#### 3.3.3 手动补充下载（兜底）
 
 仅在自动下载失败、或从 `web_search.py` 以外的来源（官网 / 机构页面 / 国内百科等）取图时才需要。直接将文件以描述性名称放到 `workspace/images/` 即可，无需经过 downloads/ 暂存：
 
@@ -196,7 +222,7 @@ workspace/sources/<topic_name>.md
 curl -L -o "workspace/images/descriptive_name.jpg" "<image_url>"
 ```
 
-#### 3.3.3 文件命名规则（采纳后必然执行，防止图片混用）
+#### 3.3.4 文件命名规则（采纳后必然执行，防止图片混用）
 
 - **名称必须与图片实际内容一致**：凭缩略图墙的视觉内容归纳主体（人物 / 场景 / 对象 / 事件）与上下文（年份 / 地点 / 主题），组合为文件名；
 - 示例：`joe_hisaishi_concert_tokyo_2023.jpg`、`spirited_away_poster.jpg`、`thyroid_ultrasound_front_view.png`；
@@ -204,7 +230,7 @@ curl -L -o "workspace/images/descriptive_name.jpg" "<image_url>"
 - 全小写，空格用下划线；同主体多版本用数字后缀区分（`joe_hisaishi_portrait_01.jpg`、`joe_hisaishi_portrait_02.jpg`）；
 - 重命名后的文件名必须足以让后续设计阶段仅凭文件名就能判断其用途，不需再打开图片确认。
 
-### 3.4 全分辨率图片备注
+### 3.5 全分辨率图片备注
 
 - 通过 `web_search.py` 自动下载的图片已默认取原始 URL，无须再做缩略图→全图的 URL 改写；
 - 仅当手动从网页拷贝图片地址时，才需留意去掉 URL 中的 `thumb/`、`small`、`w=xxx` 等缩小后缀，避免拿到缩略版。
