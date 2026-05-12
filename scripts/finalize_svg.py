@@ -14,8 +14,14 @@ import sys
 import shutil
 from pathlib import Path
 
+# Add repo root to sys.path so imports like 'scripts.pathutil' work when script is run directly
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 # Import finalize helpers from the internal package.
-sys.path.insert(0, str(Path(__file__).parent))
+if str(Path(__file__).parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).parent))
 from svg_finalize.crop_images import process_svg_images as crop_images_in_svg
 from svg_finalize.embed_icons import process_svg_file as embed_icons_in_file
 from svg_finalize.embed_images import embed_images_in_svg

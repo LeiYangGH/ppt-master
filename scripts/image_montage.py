@@ -37,9 +37,9 @@ from typing import Optional
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 
 # --- Path bootstrap: allow reusing web_search's project resolver --------
-_SCRIPTS_DIR = Path(__file__).resolve().parent
-if str(_SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS_DIR))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 try:
     from web_search import resolve_project_images_dir  # type: ignore
