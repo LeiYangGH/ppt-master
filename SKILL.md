@@ -38,7 +38,8 @@
 | 脚本 | 用途 |
 |--------|---------|
 | `scripts/project_manager.py` | 工作区初始化 / 校验 / 管理（含状态文件初始化） |
-| `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询）。**搜索后自动下载到 `workspace/downloads/` 暂存区**并自动生成**增量缩略图墙**；通过 `--adopt` 晋升到 `workspace/images/`。⚠ 搜索关键字必须用中文。**完整 CLI / 状态文件 / 配额 / 返回 schema 见 `references/web-search.md`**。 |
+| `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询）。**使用 --review-images 启用 LLM 图片审查模式**，自动下载图片到内存，由 LLM 审查相关性和质量，通过的图片自动保存到 `workspace/images/`。可选 `--ppt-style` 和 `--ppt-audience` 参数指定PPT风格和目标受众，LLM会根据这些信息调整审核标准。⚠ 搜索关键字必须用中文。 |
+| `scripts/llm_process_image.py` | LLM 图片审查模块，使用 Pydantic-AI 进行图片识别和重命名。由 `web_search.py --review-images` 自动调用。 |
 | `scripts/analyze_images.py` | 图片分析（尺寸比例等）。由 `web_search.py` 自动管道调用，通常无需手动运行。 |
 | `scripts/image_montage.py` | 图片缩略图墙生成器（4×5 格 + 文件名标签）。由 `web_search.py` 自动管道**按下载批次增量**调用，通常无需手动运行。 |
 | `scripts/svg_repair.py` | SVG XML 自动修复（基于 sloppy-xml，修复 LLM 输出的不规范 XML） |
@@ -116,11 +117,9 @@
 
 如果用户提供了图片，**在输出设计规范之前**进行分析：`python scripts/analyze_images.py`
 
-⚠️ **图片处理**：`workspace/images/` 只存**已采纳、已重命名**的正式资产；`web_search.py` 的自动下载落在 `workspace/downloads/`，并同步生成增量缩略图墙。LLM 通过读缩略图墙批量判定，然后用 `python scripts/web_search.py --adopt <downloads/xxx> <images/描述名>` 一次性完成移动+重命名。详见 `references/web-search.md`。
+⚠️ **图片处理**：使用 `python scripts/web_search.py "搜索关键词" --review-images` 启用 LLM 图片审查模式。LLM 会自动审查图片的相关性和质量，通过的图片自动保存到 `workspace/images/` 并生成描述性英文文件名。
 
 ⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-团队合影.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
-
-⛔ **硬门禁**：`scripts/finalize_svg.py` 会在后处理阶段扫描 `workspace/images/`，如果发现 `img_<hash>` / `image_\d+` / `tmp_*` / `download*` 等哈希/占位命名的文件直接 block——必须全部采纳或删除后方可 finalize。
 
 **输出**：`workspace/design_spec.md`、`workspace/spec_lock.md`
 
