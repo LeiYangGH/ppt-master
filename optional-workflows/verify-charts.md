@@ -145,7 +145,7 @@ verify-charts: 15_unit_economics.svg | type=stacked-area | scale=N/A | manual-ve
 
 ## 验证后
 
-继续后处理（[SKILL.md 步骤5](../SKILL.md)），然后用户手动执行步骤6导出PPTX：
+继续后处理（[AGENTS.md 步骤5](../AGENTS.md)），然后用户手动执行步骤6导出PPTX：
 
 ```powershell
 python /scripts/notes_all_md_split.py workspace

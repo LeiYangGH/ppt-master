@@ -474,9 +474,9 @@ We welcome your project contributions! Please ensure:
 ## Related Resources
 
 - [Quick Start](../README.md)
-- [Workflow Tutorial](..//SKILL.md)
-- [Chart Templates](..//templates/charts/)
-- [Icon Library](..//templates/icons/) (11,600+ icons)
+- [Workflow Tutorial](../AGENTS.md)
+- [Chart Templates](../templates/charts/)
+- [Icon Library](../templates/icons/) (11,600+ icons)
 
 ---
 

@@ -283,7 +283,7 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 - 已创建 `references/strategist-json-output-guide.md`：Strategist 输出 JSON 指南
 
 ### 第五阶段：完全迁移到 JSON ✅
-- 已重写 `SKILL.md`：所有 spec_lock.md 引用改为 spec_lock.json，删除 design_spec.md 引用
+- 已重写 `AGENTS.md`：所有 spec_lock.md 引用改为 spec_lock.json，删除 design_spec.md 引用
 - 已重写 `references/executor.md`：所有引用改为 spec_lock.json
 - 已重写 `references/executor-base.md`：所有引用改为 spec_lock.json，删除 design_spec.md 回退
 - 已重写 `references/strategist.md`：输出改为 spec_lock.json，删除 design_spec.md 流程

@@ -5,7 +5,7 @@ Pre-built PPT page layout templates supporting multiple styles and use cases.
 - **Full Index**: [README.md](./README.md) (human browsing — includes categories, primary colors, detailed tone)
 - **Slim Index**: [layouts_index.json](./layouts_index.json) (lightweight lookup — `label` / `summary` / `keywords` only)
 
-> **Template selection is opt-in.** The main workflow defaults to free design and does NOT read `layouts_index.json` unless the user explicitly requests a template. See `SKILL.md` Step 3.
+> **Template selection is opt-in.** The main workflow defaults to free design and does NOT read `layouts_index.json` unless the user explicitly requests a template. See `AGENTS.md` Step 3.
 
 ---
 

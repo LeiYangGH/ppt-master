@@ -53,7 +53,7 @@
 
 - **新增 `references/web-search.md`**：集中收纳工具级说明——CLI 参数全集（search / `--adopt` / `--purge-downloads` / `--force-montage` / `--domain-stats` 等）、`workspace/downloads/` 布局与 `_state.jsonl` 字段、150/300MB 阈值语义、返回 JSON schema（含新增 `downloads_dir` / `new_files` / `montage_batch`）、典型调用片段。
 - **不收纳**：调研策略、中文搜索的阻断性约束——这些是流程约束而非工具约束，留在 `topic-research.md`。
-- `SKILL.md` 脚本表中 `web_search.py` 行压缩为一句话 + "详见 `references/web-search.md`"；图片章节相关表述同步改为 `workspace/downloads/` → `--adopt` 晋升到 `workspace/images/`。
+- `AGENTS.md` 脚本表中 `web_search.py` 行压缩为一句话 + "详见 `references/web-search.md`"；图片章节相关表述同步改为 `workspace/downloads/` → `--adopt` 晋升到 `workspace/images/`。
 - `optional-workflows/topic-research.md` 步骤 3.1–3.3 中的命令行用法、阈值、状态文件说明全部删除，改为链接 `references/web-search.md`；顶部阻断性约束（中文搜索、审阅后重命名）原地保留。
 - 新 LLM 工作流一句话：  
   > 搜索 → 读返回 JSON 与增量缩略图墙 → 对合适图片用 `--adopt` 一次性完成移动+重命名；不合适直接不管（由 `--purge-downloads` 或自然淘汰清理）。
