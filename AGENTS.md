@@ -49,6 +49,7 @@
 | `scripts/finalize_svg.py` | SVG 后处理（统一入口） |
 | `scripts/svg_to_pptx.py` | 导出为 PPTX |
 | `scripts/update_spec.py` | 将 `spec_lock.json` 中的颜色 / 字体变更同步到所有 SVG |
+| `scripts/workspace_validate.py` | 工作区结构完整性校验（spec_lock、SVG 数量、备注、svg_final 一致性） |
 
 
 ## 模板索引
@@ -172,6 +173,13 @@
 **第 5.2 步** —— SVG 后处理：`python scripts/finalize_svg.py`
 
 **成功标准**：svg_final 文件数与 svg_output 一致，notes 下每页一个独立 .md 文件。
+
+**第 5.3 步** —— 工作区结构校验：`python scripts/workspace_validate.py`
+- 校验 spec_lock 存在且合法
+- 校验 SVG 文件数与 spec 声明页数一致
+- 校验 notes 已生成且已拆分
+- 校验 svg_final 文件数与 svg_output 一致
+- error 必须修复后重查，warning 可修复则修复
 
 ---
 
