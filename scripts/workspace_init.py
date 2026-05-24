@@ -18,7 +18,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    from project_utils import (
+    from config import (
         CANVAS_FORMATS,
         normalize_canvas_format,
     )
@@ -26,7 +26,7 @@ except ImportError:
     tools_dir = Path(__file__).resolve().parent
     if str(tools_dir) not in sys.path:
         sys.path.insert(0, str(tools_dir))
-    from project_utils import (  # type: ignore
+    from config import (  # type: ignore
         CANVAS_FORMATS,
         normalize_canvas_format,
     )

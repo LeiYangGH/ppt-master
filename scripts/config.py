@@ -52,6 +52,13 @@ CANVAS_FORMATS = {
 }
 
 
+def normalize_canvas_format(format_key: str) -> str:
+    """Normalize canvas format key name."""
+    if not format_key:
+        return ''
+    return format_key.strip().lower()
+
+
 # ============================================================
 # Design Color Configuration
 # ============================================================

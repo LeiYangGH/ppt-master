@@ -21,7 +21,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    from project_utils import CANVAS_FORMATS
+    from config import CANVAS_FORMATS
 except ImportError:
     print("警告: 无法导入依赖模块")
     CANVAS_FORMATS = {}

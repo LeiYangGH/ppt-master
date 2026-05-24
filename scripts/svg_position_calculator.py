@@ -47,7 +47,7 @@ if sys.platform == 'win32':
 
 # Import canvas format configuration
 try:
-    from project_utils import CANVAS_FORMATS
+    from config import CANVAS_FORMATS
 except ImportError:
     # Use built-in definitions if import fails
     CANVAS_FORMATS = {

@@ -4,21 +4,149 @@ from __future__ import annotations
 
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
 # Import project utility modules
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:
-    from project_utils import get_project_info
     from config import CANVAS_FORMATS
 except ImportError:
     CANVAS_FORMATS = {
         'ppt169': {'name': 'PPT 16:9', 'dimensions': '1280×720', 'viewbox': '0 0 1280 720'},
     }
 
-    def get_project_info(path: str) -> dict:
-        return {'format': 'unknown', 'name': Path(path).name}
+
+# ── Project info helpers (migrated from project_utils.py) ─────────
+
+def _normalize_canvas_format(format_key: str) -> str:
+    """Normalize canvas format key name."""
+    if not format_key:
+        return ''
+    return format_key.strip().lower()
+
+
+def parse_project_name(dir_name: str) -> dict[str, str]:
+    """Parse project information from the project directory name.
+
+    Args:
+        dir_name: Project directory name
+
+    Returns:
+        Dictionary containing name, format, date
+    """
+    result = {
+        'name': dir_name,
+        'format': 'unknown',
+        'format_name': 'Unknown format',
+        'date': 'unknown',
+        'date_formatted': 'Unknown date',
+    }
+
+    dir_name_lower = dir_name.lower()
+
+    # Extract date (format: _YYYYMMDD)
+    date_match = re.search(r'_(\d{8})$', dir_name)
+    if date_match:
+        date_str = date_match.group(1)
+        result['date'] = date_str
+        try:
+            date_obj = datetime.strptime(date_str, '%Y%m%d')
+            result['date_formatted'] = date_obj.strftime('%Y-%m-%d')
+        except ValueError:
+            pass
+
+    # Prefer parsing standard format: name_format_YYYYMMDD
+    full_match = re.match(
+        r'^(?P<name>.+)_(?P<format>[a-z0-9_-]+)_(?P<date>\d{8})$',
+        dir_name_lower,
+    )
+    if full_match:
+        raw_format = full_match.group('format')
+        normalized_format = _normalize_canvas_format(raw_format)
+        if normalized_format in CANVAS_FORMATS:
+            result['format'] = normalized_format
+            result['format_name'] = CANVAS_FORMATS[normalized_format]['name']
+            result['name'] = dir_name[: len(full_match.group('name'))]
+            return result
+
+    # Fallback: only match trailing `_format`
+    sorted_formats = sorted(CANVAS_FORMATS.keys(), key=len, reverse=True)
+    for fmt_key in sorted_formats:
+        if re.search(rf'_{re.escape(fmt_key)}(?:_\d{{8}})?$', dir_name_lower):
+            result['format'] = fmt_key
+            result['format_name'] = CANVAS_FORMATS[fmt_key]['name']
+            break
+
+    # Extract project name
+    name = re.sub(r'_\d{8}$', '', dir_name)
+    if result['format'] != 'unknown':
+        name = re.sub(
+            rf'_{re.escape(result["format"])}$', '', name, flags=re.IGNORECASE
+        )
+    result['name'] = name
+
+    return result
+
+
+def get_project_info(project_path: str) -> dict:
+    """Get detailed project information.
+
+    Args:
+        project_path: Project directory path
+
+    Returns:
+        Project information dictionary
+    """
+    project_path = Path(project_path)
+    parsed = parse_project_name(project_path.name)
+
+    info: dict = {
+        'path': str(project_path),
+        'dir_name': project_path.name,
+        'name': parsed['name'],
+        'format': parsed['format'],
+        'format_name': parsed['format_name'],
+        'date': parsed['date'],
+        'date_formatted': parsed['date_formatted'],
+        'exists': project_path.exists(),
+        'svg_count': 0,
+        'has_spec': False,
+        'has_readme': False,
+        'has_source': False,
+        'source_count': 0,
+        'spec_file': None,
+        'svg_files': [],
+    }
+
+    if not project_path.exists():
+        return info
+
+    info['has_readme'] = (project_path / 'README.md').exists()
+
+    spec_lock_path = project_path / 'spec_lock.json'
+    if spec_lock_path.exists():
+        info['has_spec'] = True
+        info['spec_file'] = 'spec_lock.json'
+
+    sources_dir = project_path / 'sources'
+    info['has_source'] = sources_dir.exists()
+    if sources_dir.exists():
+        info['source_count'] = len(
+            [p for p in sources_dir.iterdir() if p.is_file()]
+        )
+
+    svg_output = project_path / 'svg_output'
+    if svg_output.exists():
+        svg_files = sorted(svg_output.glob('*.svg'))
+        info['svg_count'] = len(svg_files)
+        info['svg_files'] = [f.name for f in svg_files]
+
+    if info['format'] in CANVAS_FORMATS:
+        info['canvas_info'] = CANVAS_FORMATS[info['format']]
+
+    return info
 
 # EMU conversion constants
 EMU_PER_INCH = 914400
