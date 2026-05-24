@@ -172,20 +172,9 @@ def validate_project_structure(project_path: str, verbose: bool = False) -> Tupl
     errors = []
     warnings = []
 
-    # Try to import error helper
-    try:
-        from error_helper import ErrorHelper
-        use_helper = True
-    except ImportError:
-        use_helper = False
-
     # Check if directory exists
     if not project_path.exists():
-        msg = f"Project directory does not exist: {project_path}"
-        if use_helper and verbose:
-            msg += "\n" + ErrorHelper.format_error_message('missing_directory',
-                                                           {'project_path': str(project_path)})
-        errors.append(msg)
+        errors.append(f"Project directory does not exist: {project_path}")
         return False, errors, warnings
 
     if not project_path.is_dir():
@@ -194,57 +183,33 @@ def validate_project_structure(project_path: str, verbose: bool = False) -> Tupl
 
     # Check required files
     if not (project_path / 'README.md').exists():
-        msg = "Missing required file: README.md"
-        if use_helper and verbose:
-            msg += "\n" + ErrorHelper.format_error_message('missing_readme',
-                                                           {'project_path': str(project_path)})
-        errors.append(msg)
+        errors.append("Missing required file: README.md")
 
     # Check spec_lock.json
-    spec_lock_path = project_path / 'spec_lock.json'
-    if not spec_lock_path.exists():
-        msg = "Missing spec_lock.json"
-        if use_helper and verbose:
-            msg += "\n" + ErrorHelper.format_error_message('missing_spec')
-        warnings.append(msg)
+    if not (project_path / 'spec_lock.json').exists():
+        warnings.append("Missing spec_lock.json")
 
     # Check svg_output directory
     svg_output = project_path / 'svg_output'
     if not svg_output.exists():
-        msg = "Missing svg_output directory"
-        if use_helper and verbose:
-            msg += "\n" + \
-                ErrorHelper.format_error_message('missing_svg_output')
-        errors.append(msg)
+        errors.append("Missing svg_output directory")
     elif not svg_output.is_dir():
         errors.append("svg_output is not a directory")
     else:
         # Check for SVG files
         svg_files = list(svg_output.glob('*.svg'))
         if not svg_files:
-            msg = "svg_output directory is empty, no SVG files found"
-            if use_helper and verbose:
-                msg += "\n" + \
-                    ErrorHelper.format_error_message('empty_svg_output')
-            warnings.append(msg)
+            warnings.append("svg_output directory is empty, no SVG files found")
         else:
             # Validate SVG file naming (consistent with workspace_init.py)
             for svg_file in svg_files:
                 if not re.match(r'^(slide_\d+_\w+|P?\d+_.+)\.svg$', svg_file.name):
-                    msg = f"Non-standard SVG file naming: {svg_file.name}"
-                    if use_helper and verbose:
-                        msg += "\n" + ErrorHelper.format_error_message('invalid_svg_naming',
-                                                                       {'file_name': svg_file.name})
-                    warnings.append(msg)
+                    warnings.append(f"Non-standard SVG file naming: {svg_file.name}")
 
     # Check directory naming format
     dir_name = project_path.name
     if not re.search(r'_\d{8}$', dir_name):
-        msg = f"Directory name missing date suffix (_YYYYMMDD): {dir_name}"
-        if use_helper and verbose:
-            msg += "\n" + \
-                ErrorHelper.format_error_message('missing_date_suffix')
-        warnings.append(msg)
+        warnings.append(f"Directory name missing date suffix (_YYYYMMDD): {dir_name}")
 
     is_valid = len(errors) == 0
     return is_valid, errors, warnings

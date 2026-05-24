@@ -22,11 +22,9 @@ if str(REPO_ROOT) not in sys.path:
 
 try:
     from project_utils import CANVAS_FORMATS
-    from error_helper import ErrorHelper
 except ImportError:
     print("警告: 无法导入依赖模块")
     CANVAS_FORMATS = {}
-    ErrorHelper = None
 
 try:
     import json
