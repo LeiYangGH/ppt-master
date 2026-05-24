@@ -279,7 +279,7 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 ### 第四阶段：引入 Pydantic-AI 进行结构化生成 ✅
 - 已创建 `scripts/pydantic_ai_spec_generator.py`：Pydantic-AI 生成示例（备用方案，用于未来 agent 应用开发）
 - 已创建 `scripts/validate_spec.py`：验证 spec_lock.json 文件是否符合 schema
-- 已修改 `scripts/project_manager.py`：项目初始化时自动生成 spec_lock.json 模板
+- 已修改 `scripts/workspace_init.py`：项目初始化时自动生成 spec_lock.json 模板
 - 已创建 `references/strategist-json-output-guide.md`：Strategist 输出 JSON 指南
 
 ### 第五阶段：完全迁移到 JSON ✅
@@ -296,7 +296,7 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 - 已删除 `templates/spec_lock_reference.md`：不再需要
 
 ### 推荐工作流程 ✅
-1. 运行 `python scripts/project_manager.py` 初始化项目，自动生成 spec_lock.json 模板
+1. 运行 `python scripts/workspace_init.py` 初始化项目，自动生成 spec_lock.json 模板
 2. Strategist 读取模板，填写 `<...>` 占位符
 3. 运行 `python scripts/validate_spec.py workspace/spec_lock.json` 校验
 4. 如果校验失败，根据错误信息修正，直到通过
@@ -308,7 +308,7 @@ JSON 不支持注释，但可以通过结构化字段（如 `_rationale`、`_not
 - `scripts/pydantic_ai_spec_generator.py`：Pydantic-AI 生成示例（备用方案）
 - `scripts/svg_quality_checker.py`：只读取 spec_lock.json
 - `scripts/update_spec.py`：只读取 spec_lock.json
-- `scripts/project_manager.py`：项目初始化时自动生成 spec_lock.json 模板
+- `scripts/workspace_init.py`：项目初始化时自动生成 spec_lock.json 模板
 - `references/strategist-json-output-guide.md`：Strategist 输出 JSON 指南
 
 ---

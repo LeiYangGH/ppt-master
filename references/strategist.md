@@ -389,7 +389,7 @@
 Strategist 开始前，工作区必须已经存在。若不存在，应先执行：
 
 ```powershell
-python scripts/project_manager.py
+python scripts/workspace_init.py
 ```
 
 配置文件保存到 `workspace/spec_lock.json`。

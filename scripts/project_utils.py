@@ -228,7 +228,7 @@ def validate_project_structure(project_path: str, verbose: bool = False) -> Tupl
                     ErrorHelper.format_error_message('empty_svg_output')
             warnings.append(msg)
         else:
-            # Validate SVG file naming (consistent with project_manager.py)
+            # Validate SVG file naming (consistent with workspace_init.py)
             for svg_file in svg_files:
                 if not re.match(r'^(slide_\d+_\w+|P?\d+_.+)\.svg$', svg_file.name):
                     msg = f"Non-standard SVG file naming: {svg_file.name}"

@@ -158,7 +158,7 @@ python scripts/validate_spec.py workspace/spec_lock.json
 
 ## 实施步骤
 
-1. **第一步**：运行 `python scripts/project_manager.py` 初始化项目，自动生成模板
+1. **第一步**：运行 `python scripts/workspace_init.py` 初始化项目，自动生成模板
 2. **第二步**：在 Strategist 提示中添加模板填写要求
 3. **第三步**：Strategist 填写模板后运行 `validate_spec.py` 校验
 4. **第四步**：观察 LLM 填写质量，迭代优化提示词

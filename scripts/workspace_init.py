@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-"""PPT Master 工作区管理工具。
+"""PPT Master 工作区初始化工具。
 
 用法：
-    python scripts/project_manager.py
+    python scripts/workspace_init.py
 """
 
 from __future__ import annotations
@@ -20,10 +20,7 @@ if str(REPO_ROOT) not in sys.path:
 try:
     from project_utils import (
         CANVAS_FORMATS,
-        get_project_info as get_project_info_common,
         normalize_canvas_format,
-        validate_project_structure,
-        validate_svg_viewbox,
     )
 except ImportError:
     tools_dir = Path(__file__).resolve().parent
@@ -31,10 +28,7 @@ except ImportError:
         sys.path.insert(0, str(tools_dir))
     from project_utils import (  # type: ignore
         CANVAS_FORMATS,
-        get_project_info as get_project_info_common,
         normalize_canvas_format,
-        validate_project_structure,
-        validate_svg_viewbox,
     )
 
 try:
@@ -303,37 +297,6 @@ class ProjectManager:
                 f"| {now_str} | 工作区初始化 | 成功 |\n",
                 encoding="utf-8",
             )
-
-    def validate_project(self) -> tuple[bool, list[str], list[str]]:
-        workspace_path = self.workspace_dir
-        is_valid, errors, warnings = validate_project_structure(str(workspace_path))
-
-        if workspace_path.exists() and workspace_path.is_dir():
-            info = get_project_info_common(str(workspace_path))
-            if info.get("svg_files"):
-                svg_files = [workspace_path / "svg_output" / name for name in info["svg_files"]]
-                expected_format = info.get("format")
-                if expected_format == "unknown":
-                    expected_format = None
-                warnings.extend(validate_svg_viewbox(svg_files, expected_format))
-
-        return is_valid, errors, warnings
-
-    def get_project_info(self) -> dict[str, object]:
-        workspace_path = str(self.workspace_dir)
-        shared = get_project_info_common(workspace_path)
-        return {
-            "name": shared.get("name", "workspace"),
-            "path": shared.get("path", workspace_path),
-            "exists": shared.get("exists", False),
-            "svg_count": shared.get("svg_count", 0),
-            "has_spec": shared.get("has_spec", False),
-            "has_source": shared.get("has_source", False),
-            "source_count": shared.get("source_count", 0),
-            "canvas_format": shared.get("format_name", "Unknown"),
-            "create_date": shared.get("date_formatted", "Unknown"),
-        }
-
 
 def main() -> None:
     """Run the CLI entry point."""

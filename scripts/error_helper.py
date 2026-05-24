@@ -24,7 +24,7 @@ class ErrorHelper:
         'missing_spec': {
             'message': 'Missing spec_lock.json file',
             'solutions': [
-                'Run python scripts/project_manager.py to initialize project and generate spec_lock.json template',
+                'Run python scripts/workspace_init.py to initialize project and generate spec_lock.json template',
                 'Fill in the <...> placeholders in the template',
                 'Run python scripts/validate_spec.py workspace/spec_lock.json to validate'
             ],

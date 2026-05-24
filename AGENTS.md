@@ -37,7 +37,7 @@
 
 | 脚本 | 用途 |
 |--------|---------|
-| `scripts/project_manager.py` | 工作区初始化 / 校验 / 管理（含状态文件初始化） |
+| `scripts/workspace_init.py` | 工作区初始化（含状态文件和 spec_lock.json 模板） |
 | `scripts/web_search.py` | 网页 / 图片搜索（Tavily + 百度自动轮询）。**使用 --review-images 启用 LLM 图片审查模式**，自动下载图片到内存，由 LLM 审查相关性和质量，通过的图片自动保存到 `workspace/images/`。可选 `--ppt-style` 和 `--ppt-audience` 参数指定PPT风格和目标受众，LLM会根据这些信息调整审核标准。⚠ 搜索关键字必须用中文。 |
 | `scripts/llm_process_image.py` | LLM 图片审查模块，使用 Pydantic-AI 进行图片识别和重命名。由 `web_search.py --review-images` 自动调用。 |
 | `scripts/analyze_images.py` | 图片分析（尺寸比例等）。由 `web_search.py` 自动管道调用，通常无需手动运行。 |
@@ -72,7 +72,7 @@
 
 ### 第 1 步：用户准备工作
 
-1. **初始化工作区**：`python scripts/project_manager.py`
+1. **初始化工作区**：`python scripts/workspace_init.py`
 2. **放置素材**：将源文件放入 `workspace/sources/`
 
 **会话恢复**：若 `workspace/state.md` 存在且非 S0 阶段，从记录阶段继续。
@@ -119,7 +119,7 @@
 
 ⚠️ **图片处理**：使用 `python scripts/web_search.py "搜索关键词" --review-images` 启用 LLM 图片审查模式。LLM 会自动审查图片的相关性和质量，通过的图片自动保存到 `workspace/images/` 并生成描述性英文文件名。
 
-⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-团队合影.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
+⛔ **BLOCKING**：所有准备采纳到 SVG 的图片，必须重命名为 `<ppt号>-<简洁图片内容>` 的格式（例如 `P03-team-photo.jpg`）。完成重命名后，**必须等待人工核查确认图片内容与命名一致**，人工核查通过后才能继续输出设计规范。
 
 **输出**：`workspace/spec_lock.json`
 
@@ -184,18 +184,6 @@
 **可选动画参数**（如需自定义，直接调用 svg_to_pptx 包）：完整效果列表见 `references/animations.md`。
 
 **成功标准**：`workspace/exports/` 下存在带时间戳的 `.pptx` 文件且文件大小 > 0。
-
----
-
-## 角色切换协议
-
-在切换角色前，**必须先阅读**对应的参考文件。输出标记：
-
-```markdown
-## [角色切换: <角色名称>]
-📖 读取角色定义：references/<filename>.md
-📋 当前任务：<简要描述>
-```
 
 ---
 
