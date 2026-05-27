@@ -593,11 +593,11 @@ class SVGQualityChecker:
             )
 
     @staticmethod
-    def _normalize_size(value: str) -> str:
+    def _normalize_size(value) -> str:
         """Normalize a font-size value for comparison: lowercase, strip spaces,
         strip trailing 'px'. Other units (em / rem / %) are kept as-is so that
         e.g. '1.5em' vs '24' stay distinct."""
-        v = value.strip().lower()
+        v = str(value).strip().lower()
         if v.endswith('px'):
             v = v[:-2].strip()
         return v
