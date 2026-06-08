@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -10,6 +11,7 @@ from .drawingml_context import ConvertContext, ShapeResult
 from .drawingml_utils import (
     SVG_NS,
     _extract_inheritable_styles, resolve_url_id,
+    _xml_escape,
 )
 from .drawingml_styles import build_effect_xml
 from .drawingml_elements import (
@@ -34,7 +36,8 @@ _CHROME_ID_TOKENS = frozenset({
     'decoration', 'decorations', 'decor',
     'header', 'footer',
     'chrome', 'watermark',
-    'pagenumber', 'pagenum',
+    'pagenumber', 'pagenum', 'page-number',
+    'nav', 'logo', 'rule',
 })
 
 
@@ -53,33 +56,71 @@ def _is_chrome_id(elem_id: str | None) -> bool:
 # ---------------------------------------------------------------------------
 
 def parse_transform(transform_str: str) -> tuple[float, float, float, float, float]:
-    """Parse SVG transform string, extract translate, scale, and rotate.
+    """Parse SVG transform list into (dx, dy, sx, sy, angle_deg).
 
-    Returns:
-        (dx, dy, sx, sy, angle_deg) tuple.
+    Composes every translate/scale/rotate/matrix operation rather than picking
+    the first occurrence — needed for idioms like
+    ``translate(cx cy) scale(-1 -1) translate(-cx -cy)`` which encode a flip
+    around a non-origin pivot.
+
+    When the composed matrix has no shear and no rotation, the decomposition is
+    exact (sx/sy may be negative to represent flips). When rotation is present
+    without shear, sx/sy default to the column magnitudes and angle_deg is the
+    rotation.
     """
     if not transform_str:
         return 0.0, 0.0, 1.0, 1.0, 0.0
 
-    dx, dy = 0.0, 0.0
-    sx, sy = 1.0, 1.0
-    angle_deg = 0.0
+    # Compose the full affine matrix from all operations
+    a, b, c, d, e, f = 1.0, 0.0, 0.0, 1.0, 0.0, 0.0
 
-    m = re.search(r'translate\(\s*([-\d.]+)[\s,]+([-\d.]+)\s*\)', transform_str)
-    if m:
-        dx = float(m.group(1))
-        dy = float(m.group(2))
+    for op_match in re.finditer(r'(\w+)\s*\(([^)]*)\)', transform_str):
+        op_name = op_match.group(1)
+        args_str = op_match.group(2)
+        nums = [float(x) for x in re.split(r'[\s,]+', args_str.strip()) if x]
 
-    m = re.search(r'scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)', transform_str)
-    if m:
-        sx = float(m.group(1))
-        sy = float(m.group(2)) if m.group(2) else sx
+        if op_name == 'translate' and len(nums) >= 2:
+            ta, tb, tc, td, te, tf = 1.0, 0.0, 0.0, 1.0, nums[0], nums[1]
+        elif op_name == 'scale' and len(nums) >= 1:
+            sy_val = nums[1] if len(nums) > 1 else nums[0]
+            ta, tb, tc, td, te, tf = nums[0], 0.0, 0.0, sy_val, 0.0, 0.0
+        elif op_name == 'rotate' and len(nums) >= 1:
+            rad = math.radians(nums[0])
+            cos_r, sin_r = math.cos(rad), math.sin(rad)
+            if len(nums) >= 3:
+                cx, cy = nums[1], nums[2]
+                ta, tb, tc, td, te, tf = cos_r, sin_r, -sin_r, cos_r, cx - cx * cos_r + cy * sin_r, cy - cx * sin_r - cy * cos_r
+            else:
+                ta, tb, tc, td, te, tf = cos_r, sin_r, -sin_r, cos_r, 0.0, 0.0
+        elif op_name == 'matrix' and len(nums) >= 6:
+            ta, tb, tc, td, te, tf = nums[0], nums[1], nums[2], nums[3], nums[4], nums[5]
+        else:
+            continue
 
-    m = re.search(r'rotate\(\s*([-\d.]+)', transform_str)
-    if m:
-        angle_deg = float(m.group(1))
+        # Multiply: current = current × new
+        na = a * ta + c * tb
+        nb = b * ta + d * tb
+        nc = a * tc + c * td
+        nd = b * tc + d * td
+        ne = a * te + c * tf + e
+        nf = b * te + d * tf + f
+        a, b, c, d, e, f = na, nb, nc, nd, ne, nf
 
-    return dx, dy, sx, sy, angle_deg
+    # No shear / rotation: direct decomposition preserves the original signs
+    if abs(b) < 1e-9 and abs(c) < 1e-9:
+        sx = a if a != 0 else 1.0
+        sy = d if d != 0 else 1.0
+        return e, f, sx, sy, 0.0
+
+    sx = math.hypot(a, b)
+    sy = math.hypot(c, d)
+    if sx == 0:
+        sx = 1.0
+    if sy == 0:
+        sy = 1.0
+
+    angle_deg = math.degrees(math.atan2(b, a))
+    return e, f, sx, sy, angle_deg
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +205,7 @@ def convert_g(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
 
     return ShapeResult(xml=f'''<p:grpSp>
 <p:nvGrpSpPr>
-<p:cNvPr id="{group_id}" name="Group {group_id}"/>
+<p:cNvPr id="{group_id}" name="{_xml_escape(elem_id) if elem_id else f"Group {group_id}"}"/>
 <p:cNvGrpSpPr/>
 <p:nvPr/>
 </p:nvGrpSpPr>

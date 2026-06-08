@@ -35,6 +35,22 @@ except ImportError:
 
 
 HEX_VALUE_RE = re.compile(r"#[0-9A-Fa-f]{3,8}")
+SVG_NS = "http://www.w3.org/2000/svg"
+
+# Valid OOXML ST_PresetPatternVal values (closed enum).
+_VALID_PPTX_PATTERNS = frozenset({
+    'smGrid', 'lgGrid', 'dotGrid',
+    'ltUpDiag', 'ltDnDiag', 'dkUpDiag', 'dkDnDiag',
+    'wdUpDiag', 'wdDnDiag', 'dashUpDiag', 'dashDnDiag', 'diagCross',
+    'horz', 'vert', 'ltHorz', 'ltVert', 'dkHorz', 'dkVert',
+    'narHorz', 'narVert', 'dashHorz', 'dashVert', 'cross',
+    'pct5', 'pct10', 'pct20', 'pct25', 'pct30', 'pct40',
+    'pct50', 'pct60', 'pct70', 'pct75', 'pct80', 'pct90',
+    'smCheck', 'lgCheck', 'smConfetti', 'lgConfetti',
+    'horzBrick', 'diagBrick', 'weave', 'plaid', 'trellis',
+    'zigZag', 'wave', 'sphere', 'divot', 'shingle',
+    'solidDmnd', 'openDmnd', 'dotDmnd',
+})
 
 # Ramp envelope for font-size drift detection.
 # From design_spec_reference.md §IV — Font Size Hierarchy: the ramp spans
@@ -126,7 +142,10 @@ class SVGQualityChecker:
                 # 6. Check image references (file existence and resolution)
                 self._check_image_references(content, svg_path, result)
 
-                # 7. Check spec_lock drift (colors / font-family / font-size)
+                # 7. Check pattern fills for PPTX compatibility
+                self._check_pattern_fills(content, result)
+
+                # 8. Check spec_lock drift (colors / font-family / font-size)
                 self._check_spec_lock_drift(content, svg_path, result)
 
             # Determine pass/fail
@@ -394,6 +413,35 @@ class SVGQualityChecker:
             result['warnings'].append(
                 f"Detected {len(text_matches)} potentially overly long single-line text(s) (consider using tspan for wrapping)"
             )
+
+    def _check_pattern_fills(self, content: str, result: Dict):
+        """Check <pattern> fills for PPTX compatibility.
+
+        Catches two failure modes:
+        1. Missing data-pptx-pattern → silent fallback to ltUpDiag (diagonal stripes)
+        2. Invalid prst value → PPTX fails OOXML schema validation
+        """
+        try:
+            root = ET.fromstring(content)
+        except ET.ParseError:
+            return  # Already caught by _check_xml_well_formed
+
+        for elem in root.iter(f'{{{SVG_NS}}}pattern'):
+            prst = elem.get('data-pptx-pattern')
+            if prst is None:
+                result['warnings'].append(
+                    f'<pattern id="{elem.get("id", "?")}"> has no '
+                    f'data-pptx-pattern annotation — will fall back to '
+                    f'ltUpDiag (diagonal stripes). Add data-pptx-pattern="..." '
+                    f'with a valid OOXML preset name.'
+                )
+            elif prst not in _VALID_PPTX_PATTERNS:
+                result['errors'].append(
+                    f'<pattern id="{elem.get("id", "?")}"> has invalid '
+                    f'data-pptx-pattern="{prst}" — not in OOXML '
+                    f'ST_PresetPatternVal enum. PowerPoint will report '
+                    f'"needs to be repaired".'
+                )
 
     def _check_image_references(self, content: str, svg_path: Path, result: Dict):
         """Check image file existence and resolution vs display size."""

@@ -58,8 +58,88 @@ def _wrap_shape(
 # rect
 # ---------------------------------------------------------------------------
 
+# Cubic-Bézier control distance for approximating a quarter circle / ellipse.
+# Distance from corner to control point along the tangent, expressed as a
+# fraction of the radius. Standard "magic number" for a 90° arc (max error
+# ~0.027% of the radius).
+_BEZIER_QUARTER_K = 0.5522847498
+
+
+def _build_round_rect_custgeom(w: float, h: float, rx: float, ry: float) -> str:
+    """Build a DrawingML ``custGeom`` for a rectangle with elliptical corners.
+
+    Used when ``<rect>`` has rx ≠ ry, which DrawingML's preset ``roundRect``
+    cannot express. Each 90° elliptical arc is approximated by one cubic Bézier
+    — within 0.03% of the true ellipse, far below any visible threshold at
+    slide resolution.
+    """
+    rx = min(max(rx, 0.0), w / 2)
+    ry = min(max(ry, 0.0), h / 2)
+
+    width_emu = px_to_emu(w)
+    height_emu = px_to_emu(h)
+    rx_emu = px_to_emu(rx)
+    ry_emu = px_to_emu(ry)
+
+    cx_off = int(round(rx_emu * _BEZIER_QUARTER_K))
+    cy_off = int(round(ry_emu * _BEZIER_QUARTER_K))
+
+    def pt(x: int, y: int) -> str:
+        return f'<a:pt x="{x}" y="{y}"/>'
+
+    def cubic(c1: tuple[int, int], c2: tuple[int, int], end: tuple[int, int]) -> str:
+        return (
+            f'<a:cubicBezTo>{pt(*c1)}{pt(*c2)}{pt(*end)}</a:cubicBezTo>'
+        )
+
+    parts = [
+        f'<a:moveTo>{pt(rx_emu, 0)}</a:moveTo>',
+        f'<a:lnTo>{pt(width_emu - rx_emu, 0)}</a:lnTo>',
+        cubic(
+            (width_emu - rx_emu + cx_off, 0),
+            (width_emu, ry_emu - cy_off),
+            (width_emu, ry_emu),
+        ),
+        f'<a:lnTo>{pt(width_emu, height_emu - ry_emu)}</a:lnTo>',
+        cubic(
+            (width_emu, height_emu - ry_emu + cy_off),
+            (width_emu - rx_emu + cx_off, height_emu),
+            (width_emu - rx_emu, height_emu),
+        ),
+        f'<a:lnTo>{pt(rx_emu, height_emu)}</a:lnTo>',
+        cubic(
+            (rx_emu - cx_off, height_emu),
+            (0, height_emu - ry_emu + cy_off),
+            (0, height_emu - ry_emu),
+        ),
+        f'<a:lnTo>{pt(0, ry_emu)}</a:lnTo>',
+        cubic(
+            (0, ry_emu - cy_off),
+            (rx_emu - cx_off, 0),
+            (rx_emu, 0),
+        ),
+        '<a:close/>',
+    ]
+
+    path_xml = '\n'.join(parts)
+    return (
+        '<a:custGeom>'
+        '<a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/>'
+        '<a:rect l="l" t="t" r="r" b="b"/>'
+        f'<a:pathLst><a:path w="{width_emu}" h="{height_emu}">'
+        f'\n{path_xml}\n'
+        '</a:path></a:pathLst>'
+        '</a:custGeom>'
+    )
+
+
 def convert_rect(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
-    """Convert SVG <rect> to DrawingML shape."""
+    """Convert SVG <rect> to DrawingML shape.
+
+    Symmetric rounded corners (rx == ry) are emitted as ``prstGeom roundRect``
+    so PowerPoint treats them as a native rounded-rectangle shape. Elliptical
+    corners (rx != ry) fall back to custGeom with cubic Bézier approximation.
+    """
     x = ctx_x(_f(elem.get('x')), ctx)
     y = ctx_y(_f(elem.get('y')), ctx)
     w = ctx_w(_f(elem.get('width')), ctx)
@@ -67,6 +147,19 @@ def convert_rect(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
 
     if w <= 0 or h <= 0:
         return None
+
+    # SVG spec: when only one of rx/ry is specified, the other inherits its
+    # value.
+    rx_attr = elem.get('rx')
+    ry_attr = elem.get('ry')
+    rx_raw = _f(rx_attr) if rx_attr is not None else 0.0
+    ry_raw = _f(ry_attr) if ry_attr is not None else 0.0
+    if rx_attr is not None and ry_attr is None:
+        ry_raw = rx_raw
+    elif ry_attr is not None and rx_attr is None:
+        rx_raw = ry_raw
+    rx = rx_raw * ctx.scale_x
+    ry = ry_raw * ctx.scale_y
 
     fill_op = get_fill_opacity(elem, ctx)
     stroke_op = get_stroke_opacity(elem, ctx)
@@ -85,16 +178,31 @@ def convert_rect(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
         if r_match:
             rot = int(float(r_match.group(1)) * ANGLE_UNIT)
 
-    geom = '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
+    if rx > 0 and abs(rx - ry) < 0.5:
+        # Symmetric corners → native PowerPoint rounded rectangle.
+        short_side = min(w, h)
+        radius = min(rx, short_side / 2)
+        adj = max(0, min(50000, int(round(radius / short_side * 100000))))
+        geom = (
+            '<a:prstGeom prst="roundRect">'
+            f'<a:avLst><a:gd name="adj" fmla="val {adj}"/></a:avLst>'
+            '</a:prstGeom>'
+        )
+    elif rx > 0 or ry > 0:
+        # Asymmetric corners → custGeom with cubic Bézier approximation.
+        geom = _build_round_rect_custgeom(w, h, rx, ry)
+    else:
+        geom = '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>'
 
     shape_id = ctx.next_id()
     off_x = px_to_emu(x)
     off_y = px_to_emu(y)
     ext_cx = px_to_emu(w)
     ext_cy = px_to_emu(h)
+    shape_name = elem.get('id') or f'Rectangle {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Rectangle {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, ext_cx, ext_cy,
             geom, fill, stroke, effect, rot=rot,
         ),
@@ -260,9 +368,10 @@ def convert_circle(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
             effect = build_effect_xml(ctx.defs[filt_id])
 
         shape_id = ctx.next_id()
+        shape_name = elem.get('id') or f'Arc {shape_id}'
         return ShapeResult(
             xml=_wrap_shape(
-                shape_id, f'Arc {shape_id}',
+                shape_id, shape_name,
                 min_x, min_y, w_emu, h_emu,
                 geom, fill, stroke_xml, effect,
             ),
@@ -297,9 +406,10 @@ def convert_circle(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
     off_y = px_to_emu(y)
     ext_cx = px_to_emu(w)
     ext_cy = px_to_emu(h)
+    shape_name = elem.get('id') or f'Ellipse {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Ellipse {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, ext_cx, ext_cy,
             geom, fill, stroke, effect,
         ),
@@ -382,10 +492,11 @@ def convert_line(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
             flip_attr = ' flipV="1"'
 
         rot_attr = f' rot="{rot}"' if rot else ''
+        line_name = elem.get('id') or f'Line {shape_id}'
         xml = (
             f'<p:sp>'
             f'<p:nvSpPr>'
-            f'<p:cNvPr id="{shape_id}" name="{_xml_escape(f"Line {shape_id}")}"/>'
+            f'<p:cNvPr id="{shape_id}" name="{_xml_escape(line_name)}"/>'
             f'<p:cNvSpPr/><p:nvPr/>'
             f'</p:nvSpPr>'
             f'<p:spPr>'
@@ -423,8 +534,9 @@ def convert_line(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
             f'</a:path></a:pathLst>'
             f'</a:custGeom>'
         )
+        line_name = elem.get('id') or f'Line {shape_id}'
         xml = _wrap_shape(
-            shape_id, f'Line {shape_id}',
+            shape_id, line_name,
             off_x, off_y, w_emu, h_emu,
             geom, '<a:noFill/>', stroke, rot=rot,
         )
@@ -493,9 +605,10 @@ def convert_path(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
     shape_id = ctx.next_id()
     off_x = px_to_emu(min_x)
     off_y = px_to_emu(min_y)
+    shape_name = elem.get('id') or f'Freeform {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Freeform {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, w_emu, h_emu,
             geom, fill, stroke, effect, rot=rot,
         ),
@@ -560,9 +673,10 @@ def convert_polygon(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None
     shape_id = ctx.next_id()
     off_x = px_to_emu(min_x)
     off_y = px_to_emu(min_y)
+    shape_name = elem.get('id') or f'Polygon {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Polygon {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, w_emu, h_emu,
             geom, fill, stroke, rot=rot,
         ),
@@ -614,9 +728,10 @@ def convert_polyline(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | Non
     shape_id = ctx.next_id()
     off_x = px_to_emu(min_x)
     off_y = px_to_emu(min_y)
+    shape_name = elem.get('id') or f'Polyline {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Polyline {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, w_emu, h_emu,
             geom, '<a:noFill/>', stroke, rot=rot,
         ),
@@ -649,6 +764,15 @@ def _override_run_attrs(
         c = parse_hex_color(child_fill)
         if c:
             run_attrs['fill'] = c
+    if tspan.get('stroke'):
+        run_attrs['stroke_raw'] = tspan.get('stroke')
+    if tspan.get('stroke-width'):
+        run_attrs['stroke_width'] = _f(tspan.get('stroke-width'), run_attrs.get('stroke_width', 1.0))
+    if tspan.get('stroke-opacity'):
+        try:
+            run_attrs['stroke_opacity'] = float(tspan.get('stroke-opacity', '1'))
+        except ValueError:
+            pass
     if tspan.get('font-size'):
         run_attrs['font_size'] = _f(tspan.get('font-size'), run_attrs['font_size'])
     if tspan.get('font-family'):
@@ -717,6 +841,49 @@ def _build_text_runs(
     return runs
 
 
+def _build_text_fill_xml(
+    fill: str,
+    fill_raw: str,
+    opacity: float | None,
+    ctx: ConvertContext | None,
+) -> str:
+    """Build DrawingML fill XML for a text run."""
+    if fill_raw == 'none':
+        return '<a:noFill/>'
+
+    grad_id = resolve_url_id(fill_raw)
+    if grad_id and ctx and grad_id in ctx.defs:
+        return build_gradient_fill(ctx.defs[grad_id], opacity)
+
+    alpha_xml = ''
+    if opacity is not None and opacity < 1.0:
+        alpha_xml = f'<a:alphaMod val="{int(opacity * 100000)}"/>'
+    return f'<a:solidFill><a:srgbClr val="{fill}">{alpha_xml}</a:srgbClr></a:solidFill>'
+
+
+def _build_text_outline_xml(run: dict[str, Any]) -> str:
+    """Build DrawingML outline XML for a text run from SVG stroke attributes."""
+    stroke_raw = run.get('stroke_raw')
+    if not stroke_raw or stroke_raw == 'none':
+        return ''
+
+    color = parse_hex_color(stroke_raw)
+    if not color:
+        return ''
+
+    stroke_width = _f(str(run.get('stroke_width', 1.0)), 1.0)
+    stroke_opacity = run.get('stroke_opacity')
+    alpha_xml = ''
+    if stroke_opacity is not None and stroke_opacity < 1.0:
+        alpha_xml = f'<a:alphaMod val="{int(stroke_opacity * 100000)}"/>'
+
+    return (
+        f'<a:ln w="{px_to_emu(stroke_width)}">'
+        f'<a:solidFill><a:srgbClr val="{color}">{alpha_xml}</a:srgbClr></a:solidFill>'
+        '</a:ln>'
+    )
+
+
 def _build_run_xml(
     run: dict[str, Any],
     default_fonts: dict[str, str],
@@ -743,25 +910,21 @@ def _build_run_xml(
 
     fonts = parse_font_family(ff) if ff else default_fonts
 
-    # Build fill XML - gradient or solid
-    grad_id = resolve_url_id(fill_raw)
-    if grad_id and ctx and grad_id in ctx.defs:
-        fill_xml = build_gradient_fill(ctx.defs[grad_id], opacity)
-    else:
-        alpha_xml = ''
-        if opacity is not None and opacity < 1.0:
-            alpha_xml = f'<a:alpha val="{int(opacity * 100000)}"/>'
-        fill_xml = f'<a:solidFill><a:srgbClr val="{fill}">{alpha_xml}</a:srgbClr></a:solidFill>'
+    fill_xml = _build_text_fill_xml(fill, fill_raw, opacity, ctx)
+    outline_xml = _build_text_outline_xml(run)
+
+    space_attr = ' xml:space="preserve"' if text != text.strip() or '  ' in text else ''
 
     return f'''<a:r>
 <a:rPr lang="zh-CN" sz="{sz}"{b_attr}{i_attr}{u_attr}{strike_attr} dirty="0">
+{outline_xml}
 {fill_xml}
 {effect_xml}
 <a:latin typeface="{_xml_escape(fonts['latin'])}"/>
 <a:ea typeface="{_xml_escape(fonts['ea'])}"/>
 <a:cs typeface="{_xml_escape(fonts['latin'])}"/>
 </a:rPr>
-<a:t>{_xml_escape(text)}</a:t>
+<a:t{space_attr}>{_xml_escape(text)}</a:t>
 </a:r>'''
 
 
@@ -790,6 +953,9 @@ def convert_text(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
         'font_style': font_style,
         'text_decoration': text_decoration,
         'opacity': opacity,
+        'stroke_raw': _get_attr(elem, 'stroke', ctx) or '',
+        'stroke_width': _f(_get_attr(elem, 'stroke-width', ctx), 1.0),
+        'stroke_opacity': get_stroke_opacity(elem, ctx),
     }
     runs = _build_text_runs(elem, parent_attrs)
 
@@ -873,6 +1039,7 @@ def convert_text(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
 
     shape_id = ctx.next_id()
     rot_attr = f' rot="{text_rot}"' if text_rot else ''
+    text_name = elem.get('id') or f'TextBox {shape_id}'
 
     runs_xml = '\n'.join(_build_run_xml(r, fonts, ctx, text_effect_xml) for r in runs)
     off_x = px_to_emu(box_x)
@@ -882,7 +1049,7 @@ def convert_text(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
 
     return ShapeResult(xml=f'''<p:sp>
 <p:nvSpPr>
-<p:cNvPr id="{shape_id}" name="TextBox {shape_id}"/>
+<p:cNvPr id="{shape_id}" name="{_xml_escape(text_name)}"/>
 <p:cNvSpPr txBox="1"/><p:nvPr/>
 </p:nvSpPr>
 <p:spPr>
@@ -1152,10 +1319,11 @@ def convert_image(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
     off_y = px_to_emu(y)
     ext_cx = px_to_emu(w)
     ext_cy = px_to_emu(h)
+    img_name = elem.get('id') or f'Image {shape_id}'
 
     return ShapeResult(xml=f'''<p:pic>
 <p:nvPicPr>
-<p:cNvPr id="{shape_id}" name="Image {shape_id}"/>
+<p:cNvPr id="{shape_id}" name="{_xml_escape(img_name)}"/>
 <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>
 <p:nvPr/>
 </p:nvPicPr>
@@ -1209,9 +1377,10 @@ def convert_ellipse(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None
     off_y = px_to_emu(y)
     ext_cx = px_to_emu(w)
     ext_cy = px_to_emu(h)
+    shape_name = elem.get('id') or f'Ellipse {shape_id}'
     return ShapeResult(
         xml=_wrap_shape(
-            shape_id, f'Ellipse {shape_id}',
+            shape_id, shape_name,
             off_x, off_y, ext_cx, ext_cy,
             geom, fill, stroke, rot=rot,
         ),

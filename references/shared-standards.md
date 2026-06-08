@@ -39,6 +39,8 @@ SVG 是严格的 XML。所有文本和属性值都必须遵守以下两条规则
 >
 > **`<image>` 上的 `clipPath` 在满足条件时允许使用**——约束见 §1.2。转换器会把符合条件的裁切形状转为原生 DrawingML 图片几何（`<a:prstGeom>` 或 `<a:custGeom>`）。
 >
+> **`<pattern>` 填充在满足条件时允许使用**——约束见 §7 *Pattern Fill*。转换器会读取 `data-pptx-pattern` 注解并输出对应的 OOXML 预设图案。缺失或无效的预设值会产生对角条纹（警告）或 PPTX 损坏（错误）。
+>
 > **替代 `<mask>` 效果的方法**——DrawingML 不支持逐像素 alpha。请按效果类型改写：
 > - 图片渐变蒙层（暗角 / 渐隐 / 染色）→ 叠加 `<rect>` + `<linearGradient>` / `<radialGradient>`（见 §6 图片覆盖层）
 > - 非矩形图片裁切（圆形 / 圆角 / 六边形）→ 在 `<image>` 上使用 `clipPath`（见 §1.2）
@@ -705,6 +707,44 @@ px=-0.737, py=0.676
 ```
 
 ⚠️ 不要在斜线上直接套用“固定朝右 / 朝下”的三角箭头，否则箭头方向一定会错。
+
+### Pattern Fill —— `<pattern>` 填充（带 PPTX 预设注解）
+
+`<pattern>` 填充会转换为原生 PPTX `<a:pattFill prst="...">` —— 但只能使用 PPTX 内置的预设图案。转换器**不会**渲染 `<pattern>` 内部的手绘 `<path>` 几何；而是读取两个注解并输出对应的 DrawingML 预设。
+
+**注解**：
+
+| 属性 | 用途 | 缺失时 |
+|---|---|---|
+| `data-pptx-pattern="<preset>"` | 指定 PPTX 预设名称（见下方枚举） | 回退为 `ltUpDiag`（对角条纹，不是你的几何） |
+| `data-pptx-fg="<hex>"` | 前景色（图案线条颜色），可选快捷注解 | 从子 `<path>`/`<line>` 的 `stroke` 推断 |
+| `data-pptx-bg="<hex>"` | 背景色（图案瓦片背景），可选快捷注解 | 从子 `<rect>` 的 `fill` 推断；都缺失时回退为 `#FFFFFF` |
+
+**颜色优先级**：`data-pptx-fg`/`data-pptx-bg` 注解 > 子元素推断。PPTX→SVG 往返转换会自动写入这两个注解以保证保真度；手写 SVG 可以省略，转换器会从子元素中提取颜色。
+
+```xml
+<defs>
+  <pattern id="bpGrid" x="0" y="0" width="40" height="40"
+           patternUnits="userSpaceOnUse" data-pptx-pattern="lgGrid">
+    <rect width="40" height="40" fill="#0E2A47"/>
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2D4A6B" stroke-width="0.6"/>
+  </pattern>
+</defs>
+<rect width="1280" height="720" fill="url(#bpGrid)"/>
+```
+
+**有效的 `data-pptx-pattern` 值**（OOXML `ST_PresetPatternVal` —— 封闭枚举，超出范围的值会导致 PowerPoint 报告"需要修复"）：
+
+| 类别 | 值 |
+|---|---|
+| 网格 | `smGrid` · `lgGrid` · `dotGrid` *（没有 `ltGrid` —— 常见拼写错误）* |
+| 对角线 | `ltUpDiag` · `ltDnDiag` · `dkUpDiag` · `dkDnDiag` · `wdUpDiag` · `wdDnDiag` · `dashUpDiag` · `dashDnDiag` · `diagCross` |
+| 水平 / 垂直线 | `horz` · `vert` · `ltHorz` · `ltVert` · `dkHorz` · `dkVert` · `narHorz` · `narVert` · `dashHorz` · `dashVert` · `cross` |
+| 百分比填充 | `pct5` · `pct10` · `pct20` · `pct25` · `pct30` · `pct40` · `pct50` · `pct60` · `pct70` · `pct75` · `pct80` · `pct90` |
+| 棋盘 / 纸屑 | `smCheck` · `lgCheck` · `smConfetti` · `lgConfetti` |
+| 装饰 | `horzBrick` · `diagBrick` · `weave` · `plaid` · `trellis` · `zigZag` · `wave` · `sphere` · `divot` · `shingle` · `solidDmnd` · `openDmnd` · `dotDmnd` |
+
+> `svg_quality_checker.py` 会在缺少 `data-pptx-pattern` 时发出警告，在值超出枚举时发出错误。请在导出前捕获这些问题 —— PowerPoint 的修复对话框不会告诉你哪个图案出了问题。
 
 ---
 

@@ -39,6 +39,17 @@ EA_FONTS = {
     'WenQuanYi Micro Hei', 'WenQuanYi Zen Hei',
     'YouYuan', 'LiSu', 'HuaWenKaiTi',
     'Songti SC', 'Songti TC',
+    # Japanese fonts
+    'Yu Gothic', 'Yu Mincho', 'Meiryo', 'MS Gothic', 'MS Mincho',
+    'Hiragino Kaku Gothic ProN', 'Hiragino Maru Gothic ProN',
+    'Hiragino Mincho ProN', 'Klee', 'Tsukushi B Round Gothic',
+    'Tsukushi B Maru Gothic', 'Noto Sans JP', 'Noto Serif JP',
+    'Source Han Sans JP', 'Source Han Serif JP',
+    # Korean fonts
+    'Malgun Gothic', 'Gulim', 'Dotum', 'Batang', 'Gungsuh',
+    'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Serif KR',
+    'Source Han Sans KR', 'Source Han Serif KR',
+    'NanumGothic', 'NanumMyeongjo', 'NanumBarunGothic',
 }
 SYSTEM_FONTS = {'system-ui', '-apple-system', 'BlinkMacSystemFont'}
 
@@ -289,6 +300,10 @@ def estimate_text_width(text: str, font_size: float, font_weight: str = '400') -
             width += font_size
         elif ch == ' ':
             width += font_size * 0.3
+        elif ch.isdigit():
+            # Digits are tabular (monospaced) in most fonts — use a consistent
+            # width so number-heavy text boxes don't mis-align.
+            width += font_size * 0.6
         elif ch in 'mMwWOQ':
             width += font_size * 0.75
         elif ch in 'iIlj1!|':
