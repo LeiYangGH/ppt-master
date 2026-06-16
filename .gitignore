@@ -179,3 +179,4 @@ projects/*
 workspace/
 # .opencode/opencode.json
 pydantic-ai
+.opencode
